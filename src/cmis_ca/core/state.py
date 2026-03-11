@@ -15,6 +15,13 @@ class AgentState:
     velocity: Vector2 = field(default_factory=Vector2)
     preferred_velocity: Vector2 = field(default_factory=Vector2)
 
+    def with_preferred_velocity(self, preferred_velocity: Vector2) -> "AgentState":
+        return AgentState(
+            position=self.position,
+            velocity=self.velocity,
+            preferred_velocity=preferred_velocity,
+        )
+
 
 @dataclass(frozen=True)
 class AgentCommand:
@@ -30,3 +37,7 @@ class SimulationResult:
     algorithm: str
     final_states: tuple[AgentState, ...]
     history: tuple[tuple[AgentState, ...], ...]
+
+    @property
+    def num_steps(self) -> int:
+        return max(0, len(self.history) - 1)

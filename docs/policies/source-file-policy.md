@@ -31,4 +31,9 @@ Summary of changes: translated comments, renamed APIs, restructured logic.
 ## 新規作成ファイル
 
 研究室で新規に作成したファイルは、このリポジトリ全体のライセンス方針に従います。  
-詳細は [LICENSE](../LICENSE) を参照してください。
+詳細は [LICENSE](../../LICENSE) を参照してください。
+
+## 文書更新との関係
+
+由来コードの取り込みや改変を行った場合は、該当ファイルのヘッダだけでなく、必要に応じて仕様書やアルゴリズム文書も同じ change で更新する。  
+運用の全体方針は [documentation-sync-policy.md](documentation-sync-policy.md) を参照してください。

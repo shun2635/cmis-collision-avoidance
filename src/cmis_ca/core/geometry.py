@@ -25,11 +25,22 @@ class Vector2:
     def __rmul__(self, scalar: float) -> "Vector2":
         return self * scalar
 
+    def __truediv__(self, scalar: float) -> "Vector2":
+        if scalar == 0.0:
+            raise ZeroDivisionError("cannot divide a vector by zero")
+        return Vector2(self.x / scalar, self.y / scalar)
+
+    def __neg__(self) -> "Vector2":
+        return Vector2(-self.x, -self.y)
+
     def dot(self, other: "Vector2") -> float:
         return self.x * other.x + self.y * other.y
 
     def det(self, other: "Vector2") -> float:
         return self.x * other.y - self.y * other.x
+
+    def abs_sq(self) -> float:
+        return self.x * self.x + self.y * self.y
 
     def norm(self) -> float:
         return math.hypot(self.x, self.y)
@@ -50,3 +61,9 @@ class Vector2:
 
         scale = max_magnitude / length
         return Vector2(self.x * scale, self.y * scale)
+
+    def distance_to(self, other: "Vector2") -> float:
+        return (self - other).norm()
+
+    def as_tuple(self) -> tuple[float, float]:
+        return (self.x, self.y)

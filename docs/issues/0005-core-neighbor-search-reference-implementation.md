@@ -3,7 +3,7 @@
 - ステータス: open
 - 優先度: high
 - 関連文書:
-  - [docs/repository-architecture.md](../repository-architecture.md)
+  - [docs/architecture/repository-structure.md](../architecture/repository-structure.md)
   - [docs/algorithms/orca.md](../algorithms/orca.md)
   - [src/cmis_ca/core/neighbor_search.py](../../src/cmis_ca/core/neighbor_search.py)
   - [src/cmis_ca/core/world.py](../../src/cmis_ca/core/world.py)

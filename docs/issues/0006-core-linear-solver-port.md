@@ -4,7 +4,7 @@
 - 優先度: high
 - 関連文書:
   - [docs/algorithms/orca.md](../algorithms/orca.md)
-  - [docs/source-file-policy.md](../source-file-policy.md)
+  - [docs/policies/source-file-policy.md](../policies/source-file-policy.md)
   - [src/cmis_ca/core/solver.py](../../src/cmis_ca/core/solver.py)
   - [src/cmis_ca/core/constraints.py](../../src/cmis_ca/core/constraints.py)
   - [external/RVO2/src/Agent.cc](../../external/RVO2/src/Agent.cc)

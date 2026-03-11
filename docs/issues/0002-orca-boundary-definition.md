@@ -3,9 +3,9 @@
 - ステータス: completed
 - 優先度: high
 - 関連文書:
-  - [docs/repository-architecture.md](../repository-architecture.md)
-  - [docs/design-overview.md](../design-overview.md)
-  - [docs/api-draft.md](../api-draft.md)
+  - [docs/architecture/repository-structure.md](../architecture/repository-structure.md)
+  - [docs/architecture/overview.md](../architecture/overview.md)
+  - [docs/architecture/api.md](../architecture/api.md)
   - [docs/algorithms/README.md](../algorithms/README.md)
   - [docs/issues/0001-python-bootstrap.md](0001-python-bootstrap.md)
 
@@ -27,7 +27,7 @@
 - ORCA の計算フローを研究室向けに整理する
 - ORCA の各構成要素について、`core/` に置くか `algorithms/orca/` に置くかを決める
 - 将来の proxemic / CNav 追加を見据えた共通化判断基準を ORCA 観点で明文化する
-- 必要に応じて `docs/repository-architecture.md` と `docs/api-draft.md` の整合を取る
+- 必要に応じて `docs/architecture/repository-structure.md` と `docs/architecture/api.md` の整合を取る
 
 ## 非スコープ
 
@@ -47,8 +47,8 @@
 ## 想定成果物
 
 - `docs/algorithms/orca.md`
-- 必要に応じた `docs/repository-architecture.md` の追記
-- 必要に応じた `docs/api-draft.md` の追記
+- 必要に応じた `docs/architecture/repository-structure.md` の追記
+- 必要に応じた `docs/architecture/api.md` の追記
 
 ## 作業メモ
 

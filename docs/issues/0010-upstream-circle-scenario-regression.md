@@ -3,7 +3,7 @@
 - ステータス: open
 - 優先度: medium
 - 関連文書:
-  - [docs/design-overview.md](../design-overview.md)
+  - [docs/architecture/overview.md](../architecture/overview.md)
   - [README.md](../../README.md)
   - [external/RVO2/examples/Circle.cc](../../external/RVO2/examples/Circle.cc)
   - [docs/algorithms/orca.md](../algorithms/orca.md)

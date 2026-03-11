@@ -3,8 +3,8 @@
 - ステータス: open
 - 優先度: medium
 - 関連文書:
-  - [docs/repository-architecture.md](../repository-architecture.md)
-  - [docs/api-draft.md](../api-draft.md)
+  - [docs/architecture/repository-structure.md](../architecture/repository-structure.md)
+  - [docs/architecture/api.md](../architecture/api.md)
   - [README.md](../../README.md)
   - [src/cmis_ca/core/world.py](../../src/cmis_ca/core/world.py)
   - [src/cmis_ca/cli/main.py](../../src/cmis_ca/cli/main.py)

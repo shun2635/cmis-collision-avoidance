@@ -14,10 +14,11 @@
 
 1. `external/RVO2` は参照専用とし、研究室独自の修正は原則として加えない
 2. 実装より先に設計文書を整備する
-3. 研究室独自実装は Python パッケージ `src/cmis_ca/` に集約する
-4. 共通コアとアルゴリズム固有実装を分離する
-5. public API と CLI は、アルゴリズム切替を前提に設計する
-6. 最終的には upstream 比較で妥当性を検証する
+3. 実装を変更したら、同じ change で関連 docs と仕様書を更新する
+4. 研究室独自実装は Python パッケージ `src/cmis_ca/` に集約する
+5. 共通コアとアルゴリズム固有実装を分離する
+6. public API と CLI は、アルゴリズム切替を前提に設計する
+7. 最終的には upstream 比較で妥当性を検証する
 
 ## 実装フェーズ
 
@@ -63,7 +64,7 @@
 ## ディレクトリ方針
 
 ```text
-docs/               設計、API、運用方針
+docs/               設計、仕様、運用方針
 external/RVO2/      upstream 参照コード
 scenarios/          共通シナリオ
 configs/            共通設定、アルゴリズム別設定
@@ -71,7 +72,8 @@ src/cmis_ca/        Python 実装本体
 tests/              自動テスト
 ```
 
-詳細は [docs/repository-architecture.md](repository-architecture.md) を参照する。
+詳細は [repository-structure.md](repository-structure.md) を参照する。  
+実装済みの現行仕様は [../specifications/python-skeleton-detailed-design.md](../specifications/python-skeleton-detailed-design.md) を参照する。
 
 ## upstream との関係
 
@@ -80,7 +82,10 @@ tests/              自動テスト
 - 研究室実装は ORCA のみを前提とせず、多アルゴリズム比較基盤として構成する
 - upstream 由来コードを持ち込む場合は、出典と改変事実を記録する
 
-## 現時点のスケルトンについて
+## 現時点の実装について
 
-現時点のスケルトンは暫定的なものであり、今後は Python ベースの多アルゴリズム構造へ整理し直す。  
-具体案は [docs/repository-architecture.md](repository-architecture.md) を参照する。
+現時点の正規実装は Python 側の `src/cmis_ca/` である。  
+`core/` と `algorithms/orca/` の責務分離、Poetry 環境、最小 CLI、スモークテスト、共通コアの基準型を先行して整備している。
+
+一方で、外部シナリオ読込、ORCA 制約生成、共通ソルバの本実装は未完了であり、現在の実装は skeleton 段階にある。  
+この未完了部分も含めた現状仕様は [../specifications/python-skeleton-detailed-design.md](../specifications/python-skeleton-detailed-design.md) で管理する。

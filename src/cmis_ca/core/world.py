@@ -16,6 +16,18 @@ class ObstacleSegment:
     start: Vector2 = field(default_factory=Vector2)
     end: Vector2 = field(default_factory=Vector2)
 
+    def __post_init__(self) -> None:
+        if self.start == self.end:
+            raise ValueError("obstacle segment must have non-zero length")
+
+    @property
+    def direction(self) -> Vector2:
+        return (self.end - self.start).normalized()
+
+    @property
+    def length(self) -> float:
+        return self.start.distance_to(self.end)
+
 
 @dataclass(frozen=True)
 class Scenario:
@@ -32,6 +44,8 @@ class Scenario:
             raise ValueError("time_step must be positive")
         if self.steps < 0:
             raise ValueError("steps must be non-negative")
+        if not self.agents:
+            raise ValueError("scenario must contain at least one agent")
 
 
 @dataclass(frozen=True)
@@ -52,3 +66,10 @@ class WorldSnapshot:
     time_step: float
     agents: tuple[SnapshotAgent, ...]
     obstacles: tuple[ObstacleSegment, ...] = ()
+
+    def __post_init__(self) -> None:
+        if self.time_step <= 0.0:
+            raise ValueError("time_step must be positive")
+        indices = [agent.index for agent in self.agents]
+        if len(indices) != len(set(indices)):
+            raise ValueError("snapshot agent indices must be unique")

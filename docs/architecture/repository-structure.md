@@ -12,6 +12,7 @@
 3. proxemic や CNav も同じインターフェースで差し替えられるようにする
 4. CLI では `--algorithm` だけで実行対象を切り替えられるようにする
 5. シナリオ、設定、評価、可視化はアルゴリズム横断で共通化する
+6. 実装変更時は、関連 docs と仕様書を同じ change で更新する
 
 ## 推奨パッケージ名
 
@@ -26,10 +27,16 @@
 ```text
 .
 ├── docs/
-│   ├── design-overview.md
-│   ├── repository-architecture.md
-│   ├── api-draft.md
-│   ├── source-file-policy.md
+│   ├── architecture/
+│   │   ├── overview.md
+│   │   ├── repository-structure.md
+│   │   └── api.md
+│   ├── policies/
+│   │   ├── documentation-sync-policy.md
+│   │   └── source-file-policy.md
+│   ├── specifications/
+│   │   ├── README.md
+│   │   └── python-skeleton-detailed-design.md
 │   ├── issues/
 │   └── algorithms/
 │       ├── orca.md
@@ -187,11 +194,16 @@ class CollisionAvoidanceAlgorithm(Protocol):
 
 ## ドキュメント方針
 
-- `docs/design-overview.md`: 全体方針
-- `docs/repository-architecture.md`: ディレクトリ構造と責務分担
-- `docs/api-draft.md`: Python API / CLI の公開面
+- `docs/architecture/overview.md`: 全体方針
+- `docs/architecture/repository-structure.md`: ディレクトリ構造と責務分担
+- `docs/architecture/api.md`: Python API / CLI の公開面
+- `docs/specifications/*.md`: 実装済み内容の固定
+- `docs/policies/documentation-sync-policy.md`: 実装と docs の同期ルール
 - `docs/algorithms/*.md`: 各アルゴリズムの理論、差分、実装メモ
 - `docs/issues/*.md`: 作業単位の管理
+
+実装を変更したら、同じ change で対応する `docs/specifications/*.md` と関連文書を更新する。  
+設計より実装が先に進んだ状態を放置しないことを、このリポジトリの運用原則とする。
 
 ## 現在の issue との関係
 

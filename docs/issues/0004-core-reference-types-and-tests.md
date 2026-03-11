@@ -1,11 +1,11 @@
 # Issue 0004: 共通コアの基準型と基本テストを固める
 
-- ステータス: open
+- ステータス: completed
 - 優先度: high
 - 関連文書:
-  - [docs/repository-architecture.md](../repository-architecture.md)
+  - [docs/architecture/repository-structure.md](../architecture/repository-structure.md)
   - [docs/algorithms/orca.md](../algorithms/orca.md)
-  - [docs/api-draft.md](../api-draft.md)
+  - [docs/architecture/api.md](../architecture/api.md)
   - [src/cmis_ca/core/geometry.py](../../src/cmis_ca/core/geometry.py)
   - [src/cmis_ca/core/state.py](../../src/cmis_ca/core/state.py)
   - [src/cmis_ca/core/world.py](../../src/cmis_ca/core/world.py)

@@ -8,4 +8,5 @@
 - `proxemic.md`
 - `cnav.md`
 
-共通構造や責務分担は [docs/repository-architecture.md](../repository-architecture.md) を参照してください。
+共通構造や責務分担は [../architecture/repository-structure.md](../architecture/repository-structure.md) を参照してください。  
+実装済みの現状仕様は [../specifications/python-skeleton-detailed-design.md](../specifications/python-skeleton-detailed-design.md) を参照してください。
