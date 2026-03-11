@@ -1,31 +1,25 @@
 [build-system]
-requires = ["setuptools>=68"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core>=1.9.0"]
+build-backend = "poetry.core.masonry.api"
 
-[project]
+[tool.poetry]
 name = "cmis-collision-avoidance"
 version = "0.1.0"
 description = "Laboratory-oriented collision avoidance research codebase."
+authors = ["CMIS Laboratory"]
 readme = "README.md"
-license = { file = "LICENSE" }
-requires-python = ">=3.9"
-authors = [{ name = "CMIS Laboratory" }]
-dependencies = []
+license = "Apache-2.0"
+packages = [{ include = "cmis_ca", from = "src" }]
 
-[project.optional-dependencies]
-dev = [
-  "pytest>=7.4",
-  "ruff>=0.6",
-]
+[tool.poetry.dependencies]
+python = ">=3.9,<4.0"
 
-[project.scripts]
+[tool.poetry.group.dev.dependencies]
+pytest = ">=7.4"
+ruff = ">=0.6"
+
+[tool.poetry.scripts]
 cmis-ca = "cmis_ca.cli.main:main"
-
-[tool.setuptools]
-package-dir = { "" = "src" }
-
-[tool.setuptools.packages.find]
-where = ["src"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

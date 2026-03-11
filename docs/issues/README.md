@@ -26,3 +26,4 @@
 
 - [0001-python-bootstrap.md](0001-python-bootstrap.md)
 - [0002-orca-boundary-definition.md](0002-orca-boundary-definition.md)
+- [0003-poetry-environment-migration.md](0003-poetry-environment-migration.md)
