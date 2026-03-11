@@ -1,6 +1,6 @@
 # Issue 0006: 共通コアの 2D 線形ソルバを移植する
 
-- ステータス: open
+- ステータス: completed
 - 優先度: high
 - 関連文書:
   - [docs/algorithms/orca.md](../algorithms/orca.md)
@@ -51,7 +51,10 @@ upstream では `linearProgram1` `linearProgram2` `linearProgram3` が `Agent.cc
 - 直接コピーではなく、責務を再整理してから移植する
 - upstream 由来のロジックを近く参照した場合は改変事実の記録方針に従う
 - 将来の proxemic や CNav が別目的関数で利用できる形を保つ
+- `solve_linear_constraints()` を中立 API とし、`choose_preferred_velocity()` はその薄い wrapper にする
+- `solver.py` には upstream 参照と改変事実をヘッダコメントで残す
+- 現段階では ORCA 制約生成が空配列のため、シミュレーション全体の挙動は従来の smoke case と同じ
 
 ## 依存関係
 
-- [0004-core-reference-types-and-tests.md](0004-core-reference-types-and-tests.md): pending
+- [0004-core-reference-types-and-tests.md](0004-core-reference-types-and-tests.md): completed

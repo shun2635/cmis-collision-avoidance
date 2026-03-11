@@ -23,7 +23,7 @@
 - 利用可能なアルゴリズムは `orca` のみ
 - 外部シナリオファイル読込は未実装
 - ORCA 制約生成は placeholder
-- 共通ソルバは placeholder
+- 共通ソルバは `LineConstraint + speed limit` に対する基準実装まで完了
 - C++ 側のコードは履歴的な足場または比較用として残置
 
 ## 3. コンポーネント構成と役割
@@ -51,7 +51,7 @@
 | `world.py` | `Scenario` `ObstacleSegment` `SnapshotAgent` `WorldSnapshot` の定義 |
 | `neighbor_search.py` | `NeighborSearch` protocol、距離付き近傍結果、`NaiveNeighborSearch` |
 | `constraints.py` | 中立な半平面制約 `LineConstraint` |
-| `solver.py` | 制約付き速度選択の共通窓口 |
+| `solver.py` | 制約付き速度選択の共通ソルバ |
 | `simulation.py` | アルゴリズムに依存しないステップ更新ループ |
 
 ### 3.2 `algorithms/orca/` の責務
@@ -72,9 +72,16 @@
 - 障害物近傍は点と線分の最短距離が `neighbor_dist` 以内のものだけを、距離順で返す
 - `neighbor_dist < 0` または `max_neighbors < 0` は `ValueError` とする
 
-### 3.4 既存構成上の制約
+### 3.4 `solver.py` の現行仕様
 
-- `core/solver.py` は現在 `preferred_velocity` を最大速度で clamp するだけで、制約を評価していない
+- `solve_linear_constraints()` は半平面制約列と速度上限円に対する 2D ソルバである
+- `choose_preferred_velocity()` は「希望速度に最も近い点」を選ぶ wrapper である
+- upstream `RVO2` の `linearProgram1/2/3` を中立 API へ再構成した実装である
+- `protected_constraint_count` により、先頭 N 本の制約を固定した fallback projection を扱える
+- `max_speed < 0` や不正な `protected_constraint_count` は `ValueError` とする
+
+### 3.5 既存構成上の制約
+
 - `algorithms/orca/constraints.py` は現在空制約列を返す
 - `cli/main.py` の `--scenario` は予約済みだが、指定するとエラーで終了する
 - `algorithms/registry.py` に登録されているアルゴリズムは `orca` のみ
@@ -209,8 +216,9 @@ poetry run pytest
 3. どちらも距離順に整列し、エージェント近傍のみ `max_neighbors` で制限する
 4. `build_obstacle_constraints()` は現在空配列を返す
 5. `build_agent_constraints()` も現在空配列を返す
-6. `choose_preferred_velocity()` は制約を無視し、希望速度を `max_speed` で clamp する
-7. `Simulator.step()` が `position += velocity * time_step` で更新する
+6. `choose_preferred_velocity()` は、与えられた半平面制約列と速度上限円の中で希望速度に最も近い点を選ぶ
+7. 現時点では制約列が空のため、結果として希望速度を `max_speed` 以内で採用する
+8. `Simulator.step()` が `position += velocity * time_step` で更新する
 
 したがって、現時点の ORCA skeleton は「ORCA の責務境界を保ったまま、希望速度追従だけを行う最小ループ」である。
 
@@ -237,6 +245,7 @@ poetry run pytest
 | --- | --- |
 | `tests/core/test_geometry.py` | `Vector2` の演算、正規化、距離、例外 |
 | `tests/core/test_neighbor_search.py` | 距離順、`max_neighbors`、障害物近傍、入力検証 |
+| `tests/core/test_solver.py` | 半平面制約なし、単一制約、複数制約、方向最適化、入力検証 |
 | `tests/core/test_state.py` | `AgentState` `AgentCommand` `SimulationResult` |
 | `tests/core/test_world.py` | `Scenario` `ObstacleSegment` `WorldSnapshot` `LineConstraint` |
 | `tests/test_simulator_smoke.py` | ORCA skeleton の 1 エージェント前進確認 |
@@ -261,7 +270,6 @@ poetry run pytest
 
 - 外部シナリオローダ
 - ORCA 制約生成の本実装
-- 半平面 + 円制約を扱う共通 2D ソルバ
 - 複数アルゴリズム登録
 - 結果保存、可視化、メトリクス計算
 - upstream 比較用の回帰基盤
