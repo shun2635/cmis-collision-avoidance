@@ -1,4 +1,4 @@
-"""Initial ORCA algorithm skeleton."""
+"""ORCA algorithm implementation."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from cmis_ca.algorithms.orca.constraints import (
 )
 from cmis_ca.algorithms.orca.parameters import ORCAParameters
 from cmis_ca.core.neighbor_search import NaiveNeighborSearch
-from cmis_ca.core.solver import choose_preferred_velocity
+from cmis_ca.core.solver import solve_linear_constraints
 from cmis_ca.core.state import AgentCommand
 from cmis_ca.core.world import WorldSnapshot
 
@@ -36,29 +36,27 @@ class ORCAAlgorithm:
                 neighbor_dist=self.parameters.neighbor_dist,
                 max_neighbors=self.parameters.max_neighbors,
             )
-            constraints = []
-            constraints.extend(
-                build_obstacle_constraints(
-                    snapshot=snapshot,
-                    agent_index=agent.index,
-                    neighbors=neighbors,
-                    parameters=self.parameters,
-                )
+            obstacle_constraints = build_obstacle_constraints(
+                snapshot=snapshot,
+                agent_index=agent.index,
+                neighbors=neighbors,
+                parameters=self.parameters,
             )
-            constraints.extend(
-                build_agent_constraints(
-                    snapshot=snapshot,
-                    agent_index=agent.index,
-                    neighbors=neighbors,
-                    parameters=self.parameters,
-                )
+            agent_constraints = build_agent_constraints(
+                snapshot=snapshot,
+                agent_index=agent.index,
+                neighbors=neighbors,
+                parameters=self.parameters,
             )
+            constraints = [*obstacle_constraints, *agent_constraints]
             commands.append(
                 AgentCommand(
-                    velocity=choose_preferred_velocity(
+                    velocity=solve_linear_constraints(
                         constraints=constraints,
-                        preferred_velocity=agent.state.preferred_velocity,
+                        optimization_velocity=agent.state.preferred_velocity,
                         max_speed=agent.profile.max_speed,
+                        direction_opt=False,
+                        protected_constraint_count=len(obstacle_constraints),
                     )
                 )
             )

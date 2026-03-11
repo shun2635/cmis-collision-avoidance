@@ -53,4 +53,4 @@
 
 ## 依存関係
 
-- [0008-orca-step-integration.md](0008-orca-step-integration.md): pending
+- [0008-orca-step-integration.md](0008-orca-step-integration.md): completed

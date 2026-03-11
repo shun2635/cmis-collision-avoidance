@@ -88,11 +88,16 @@
 - 障害物制約は静的障害物として agent 側が全責任を負う
 - どちらも `LineConstraint` を返し、ORCA 固有の意味付けは `algorithms/orca/` に閉じ込める
 
-### 3.6 既存構成上の制約
+### 3.6 `ORCAAlgorithm.step()` の現行仕様
+
+- `NaiveNeighborSearch`、ORCA 制約生成、共通 solver をまとめて 1 ステップへ統合している
+- obstacle 制約は先頭へまとめ、solver の `protected_constraint_count` に渡す
+- `AgentCommand` へ変換された速度指令を返す
+
+### 3.7 既存構成上の制約
 
 - `cli/main.py` の `--scenario` は予約済みだが、指定するとエラーで終了する
 - `algorithms/registry.py` に登録されているアルゴリズムは `orca` のみ
-- `ORCAAlgorithm.step()` は現在 `choose_preferred_velocity()` を直接呼んでおり、obstacle line を protected constraint として扱う solver fallback の統合は未反映
 
 ## 4. 入力仕様、出力仕様、DB スキーマ対応
 
@@ -224,11 +229,11 @@ poetry run pytest
 3. どちらも距離順に整列し、エージェント近傍のみ `max_neighbors` で制限する
 4. `build_obstacle_constraints()` が静的障害物線分から ORCA 制約を生成する
 5. `build_agent_constraints()` が近傍エージェントから reciprocal avoidance 制約を生成する
-6. `choose_preferred_velocity()` は、与えられた半平面制約列と速度上限円の中で希望速度に最も近い点を選ぶ
+6. `solve_linear_constraints()` が obstacle 制約数を `protected_constraint_count` として受け取り、速度上限円付きの制約付き速度選択を行う
 7. 現時点の smoke シナリオは 1 エージェントなので、実行時には制約列が空のまま進む
 8. `Simulator.step()` が `position += velocity * time_step` で更新する
 
-したがって、現時点の ORCA skeleton は「ORCA の責務境界を保ったまま、希望速度追従だけを行う最小ループ」である。
+したがって、現時点の ORCA 実装は「責務分離を保ったまま、近傍探索・制約生成・共通 solver まで統合した最小構成」である。
 
 ### 6.3 内蔵デモシナリオ
 
@@ -251,6 +256,7 @@ poetry run pytest
 
 | テストファイル | 対象 |
 | --- | --- |
+| `tests/algorithms/test_orca.py` | ORCA step の単独・head-on・障害物ケース |
 | `tests/algorithms/test_orca_constraints.py` | agent-agent / obstacle 制約の非衝突・衝突ケース |
 | `tests/core/test_geometry.py` | `Vector2` の演算、正規化、距離、例外 |
 | `tests/core/test_neighbor_search.py` | 距離順、`max_neighbors`、障害物近傍、入力検証 |

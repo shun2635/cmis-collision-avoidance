@@ -1,6 +1,6 @@
 # Issue 0008: ORCA の 1 ステップ処理を統合する
 
-- ステータス: open
+- ステータス: completed
 - 優先度: high
 - 関連文書:
   - [docs/algorithms/orca.md](../algorithms/orca.md)
@@ -47,7 +47,9 @@ ORCA の責務境界、共通ソルバ、近傍探索、制約生成が揃って
 - 最初は小さなシナリオでよい
 - `Simulator` 本体へ ORCA 固有分岐を入れない
 - デバッグしやすいよう、必要なら ORCA 制約数などの補助情報を後で返せる設計を検討する
+- obstacle 由来制約は solver の `protected_constraint_count` として先頭にまとめて渡す
+- 統合テストでは、単独エージェント、head-on 2 エージェント、静的障害物の3系統を固定する
 
 ## 依存関係
 
-- [0007-orca-constraint-generation.md](0007-orca-constraint-generation.md): pending
+- [0007-orca-constraint-generation.md](0007-orca-constraint-generation.md): completed
