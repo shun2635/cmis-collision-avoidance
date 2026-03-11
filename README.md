@@ -1,6 +1,7 @@
 # CMIS Collision Avoidance
 
-研究室向けの ORCA (Optimal Reciprocal Collision Avoidance) 派生プロジェクトです。  
+研究室向けの collision avoidance 研究用リポジトリです。  
+ORCA (Optimal Reciprocal Collision Avoidance) を軸に、将来的には proxemic や CNav などの関連アルゴリズムも同一基盤上で扱えるように設計します。  
 upstream である `snape/RVO2` を参照しつつ、研究室内で読みやすく保守しやすい構成と日本語ドキュメントを備えた再実装を進めます。
 
 ## このリポジトリの位置付け
@@ -17,32 +18,31 @@ upstream である `snape/RVO2` を参照しつつ、研究室内で読みやす
 
 ## 目的
 
-- ORCA の実装を研究室内で理解しやすい形に再構成する
+- ORCA を中心とした collision avoidance アルゴリズム群を研究室内で理解しやすい形に再構成する
 - 日本語の設計文書と API 文書を先に整備する
-- upstream を参照しながら、研究室向けの最小実装を段階的に構築する
+- upstream を参照しながら、共通コアを持つ研究室向け実装を段階的に構築する
 - 将来的に upstream との比較で妥当性を確認する
 
 ## 現在の状態
 
-この初期構成では、以下を先行して整備しています。
+この段階では、以下を先行して整備しています。
 
 - ライセンスと third-party notice の整理
 - 設計文書と API 草案
-- 研究室独自実装のための `src/` `include/` `tests/` の骨組み
-- CMake ベースの最小ビルド構成
+- 将来の多アルゴリズム対応を見据えた設計文書
+- 暫定的な実装スケルトン
 
-現時点の `src/` 実装は ORCA の完成版ではなく、後続の再実装に向けた最小スケルトンです。
+現時点の実装は完成版ではなく、後続の Python ベース再構成に向けた準備段階です。
 
-## リポジトリ構成
+## 想定リポジトリ構成
 
 ```text
 .
-├── external/RVO2/          # upstream 参照用コード
 ├── docs/                   # 設計文書、API 草案、運用方針
-├── include/cmis/orca/      # 研究室向け公開ヘッダ
+├── external/RVO2/          # upstream 参照用コード
 ├── src/                    # 研究室独自実装
-├── examples/               # 最小利用例
-└── tests/                  # スモークテスト
+├── scenarios/              # シナリオ定義
+└── tests/                  # 自動テスト
 ```
 
 ## 実装方針
@@ -50,22 +50,28 @@ upstream である `snape/RVO2` を参照しつつ、研究室内で読みやす
 1. 新規 repo として管理する
 2. upstream は `external/` に参照用として保持する
 3. 先に設計文書を書く
-4. 研究室向け API を設計する
-5. 最小 ORCA を再実装する
-6. upstream 比較で妥当性を確認する
+4. 共通コアとアルゴリズム差分を分離した構造を採用する
+5. 1 コマンドでアルゴリズムを切り替えられる CLI を用意する
+6. まず ORCA を再実装し、その後に proxemic や CNav を追加する
+7. upstream 比較で妥当性を確認する
 
 設計の詳細は [docs/design-overview.md](docs/design-overview.md) を参照してください。
 
+リポジトリ構造の詳細は [docs/repository-architecture.md](docs/repository-architecture.md) を参照してください。
+
 ## ビルド
 
+将来の実装は Python ベースを想定しており、CLI から以下のように切り替える設計を想定しています。
+
 ```bash
-cmake -S . -B build
-cmake --build build
-ctest --test-dir build
+cmis-ca run --algorithm orca --scenario scenarios/circle.yaml
+cmis-ca run --algorithm proxemic --scenario scenarios/circle.yaml
+cmis-ca run --algorithm cnav --scenario scenarios/circle.yaml
 ```
 
 ## 文書
 
 - 設計概要: [docs/design-overview.md](docs/design-overview.md)
+- リポジトリ構造: [docs/repository-architecture.md](docs/repository-architecture.md)
 - API 草案: [docs/api-draft.md](docs/api-draft.md)
 - 由来コードの取り扱い方針: [docs/source-file-policy.md](docs/source-file-policy.md)
