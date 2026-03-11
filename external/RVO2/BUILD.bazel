@@ -1,0 +1,220 @@
+# -*- mode: bazel; -*-
+# vi: set ft=bazel:
+
+#
+# BUILD.bazel
+# RVO2 Library
+#
+# SPDX-FileCopyrightText: 2008 University of North Carolina at Chapel Hill
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Please send all bug reports to <geom@cs.unc.edu>.
+#
+# The authors may be contacted via:
+#
+# Jur van den Berg, Stephen J. Guy, Jamie Snape, Ming C. Lin, Dinesh Manocha
+# Dept. of Computer Science
+# 201 S. Columbia St.
+# Frederick P. Brooks, Jr. Computer Science Bldg.
+# Chapel Hill, N.C. 27599-3175
+# United States of America
+#
+# <https://gamma.cs.unc.edu/RVO2/>
+#
+
+load("@rules_cc//cc:defs.bzl", "cc_shared_library")
+load("@rules_license//rules:license.bzl", "license")
+load("@rules_license//rules:package_info.bzl", "package_info")
+load("@rules_pkg//pkg:mappings.bzl", "pkg_attributes", "pkg_files")
+load("@rules_pkg//pkg:pkg.bzl", "pkg_deb", "pkg_tar")
+
+package(default_package_metadata = [
+    ":license",
+    ":package_info",
+])
+
+license(
+    name = "license",
+    copyright_notice = "2008 University of North Carolina at Chapel Hill",
+    license_kinds = ["@rules_license//licenses/spdx:Apache-2.0"],
+    license_text = "LICENSE",
+    visibility = ["//:__subpackages__"],
+)
+
+package_info(
+    name = "package_info",
+    package_name = "RVO2 Library",
+    package_url = "https://gamma.cs.unc.edu/RVO2/",
+    package_version = "2.0.3",
+    visibility = ["//:__subpackages__"],
+)
+
+exports_files(
+    ["LICENSE"],
+    visibility = ["//visibility:public"],
+)
+
+pkg_files(
+    name = "doc",
+    srcs = ["LICENSE"],
+    attributes = pkg_attributes(mode = "0644"),
+    prefix = "usr/share/doc/RVO",
+)
+
+cc_shared_library(
+    name = "RVO",
+    deps = ["//src:RVO"],
+)
+
+pkg_files(
+    name = "lib",
+    srcs = [":RVO"],
+    attributes = pkg_attributes(mode = "0644"),
+    prefix = "usr/lib",
+)
+
+genrule(
+    name = "rvo_cps",
+    outs = ["RVO.cps"],
+    cmd = """
+cat << 'EOF' > $@
+{
+  "compat_version": "1",
+  "components":
+  {
+    "RVO":
+    {
+      "includes": ["@prefix@/include/RVO"],
+      "type": "dylib"
+    }
+  },
+  "cps_path": "@prefix@/lib/cps/RVO",
+  "cps_version": "0.13.0",
+  "default_components": ["RVO"],
+  "description": "Optimal Reciprocal Collision Avoidance",
+  "license": "Apache-2.0",
+  "name": "RVO",
+  "version": "2.0.3",
+  "version_schema": "simple",
+  "website": "https://gamma.cs.unc.edu/RVO2/"
+}
+EOF
+""",
+)
+
+pkg_files(
+    name = "cps",
+    srcs = ["RVO.cps"],
+    attributes = pkg_attributes(mode = "0644"),
+    prefix = "usr/lib/cps/RVO",
+)
+
+# REUSE-IgnoreStart
+genrule(
+    name = "rvo_pc",
+    outs = ["RVO.pc"],
+    cmd = """
+cat << 'EOF' > $@
+#
+# RVO.pc
+# RVO2 Library
+#
+# SPDX-FileCopyrightText: 2008 University of North Carolina at Chapel Hill
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Please send all bug reports to <geom@cs.unc.edu>.
+#
+# The authors may be contacted via:
+#
+# Jur van den Berg, Stephen J. Guy, Jamie Snape, Ming C. Lin, Dinesh Manocha
+# Dept. of Computer Science
+# 201 S. Columbia St.
+# Frederick P. Brooks, Jr. Computer Science Bldg.
+# Chapel Hill, N.C. 27599-3175
+# United States of America
+#
+# <https://gamma.cs.unc.edu/RVO2/>
+#
+
+prefix=/usr
+exec_prefix=$${prefix}
+libdir=$${exec_prefix}/lib
+includedir=$${prefix}/include/RVO
+
+Name: RVO2 Library
+Description: Optimal Reciprocal Collision Avoidance
+URL: https://gamma.cs.unc.edu/RVO2/
+Version: 2.0.3
+Libs: -L$${libdir} -lRVO
+Cflags: -I$${includedir}
+EOF
+""",
+)
+# REUSE-IgnoreEnd
+
+pkg_files(
+    name = "pkgconfig",
+    srcs = ["RVO.pc"],
+    attributes = pkg_attributes(mode = "0644"),
+    prefix = "usr/lib/pkgconfig",
+)
+
+pkg_tar(
+    name = "tar",
+    srcs = [
+        ":cps",
+        ":doc",
+        ":lib",
+        ":pkgconfig",
+        "//src:include",
+    ],
+    extension = "tar.gz",
+)
+
+pkg_deb(
+    name = "deb",
+    architecture = select({
+        "@platforms//cpu:arm": "amd64",
+        "@platforms//os:macos": "arm64",
+        "//conditions:default": "all",
+    }),
+    data = ":tar",
+    depends = [
+        "libc6",
+        "libgcc-s1",
+        "libstdc++6",
+    ],
+    description = "Optimal Reciprocal Collision Avoidance",
+    homepage = "https://gamma.cs.unc.edu/RVO2/",
+    license = "Apache-2",
+    maintainer = "Jamie Snape",
+    package = "RVO",
+    priority = "optional",
+    section = "contrib/libdevel",
+    triggers = "triggers",
+    version = "2.0.3",
+)
