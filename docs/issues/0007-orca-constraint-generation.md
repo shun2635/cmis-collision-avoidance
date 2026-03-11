@@ -1,6 +1,6 @@
 # Issue 0007: ORCA 制約生成を実装する
 
-- ステータス: open
+- ステータス: completed
 - 優先度: high
 - 関連文書:
   - [docs/algorithms/orca.md](../algorithms/orca.md)
@@ -36,6 +36,7 @@ ORCA の 1 ステップに必要な制約生成を Python 側へ移植し、`con
 - `build_agent_constraints()` が本実装になっている
 - 非衝突ケースと衝突ケースの基本テストがある
 - ORCA 固有ロジックが `core/` に漏れていない
+- 現在の `ObstacleSegment` モデルに対する障害物制約の近似方法が docs に記録されている
 
 ## 想定成果物
 
@@ -47,8 +48,10 @@ ORCA の 1 ステップに必要な制約生成を Python 側へ移植し、`con
 - upstream の場合分けは研究室向けに責務で再整理する
 - 制約型そのものは `core/constraints.py` を使う
 - 実装途中で大きく膨らむなら、障害物制約とエージェント制約を別 issue に再分割してよい
+- エージェント間制約は upstream の reciprocal avoidance をベースに移植する
+- 障害物制約は、現状の `ObstacleSegment` では upstream の linked obstacle graph を持たないため、線分最近点への closest-point 近似で扱う
 
 ## 依存関係
 
-- [0005-core-neighbor-search-reference-implementation.md](0005-core-neighbor-search-reference-implementation.md): pending
-- [0006-core-linear-solver-port.md](0006-core-linear-solver-port.md): pending
+- [0005-core-neighbor-search-reference-implementation.md](0005-core-neighbor-search-reference-implementation.md): completed
+- [0006-core-linear-solver-port.md](0006-core-linear-solver-port.md): completed

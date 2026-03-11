@@ -14,7 +14,7 @@ from cmis_ca.core.world import WorldSnapshot
 
 
 class ORCAAlgorithm:
-    """Minimal ORCA placeholder that preserves the future module boundaries."""
+    """Current ORCA implementation built on the staged repository structure."""
 
     name = "orca"
 

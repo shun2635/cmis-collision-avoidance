@@ -22,7 +22,7 @@
 - 実装本体は `src/cmis_ca/`
 - 利用可能なアルゴリズムは `orca` のみ
 - 外部シナリオファイル読込は未実装
-- ORCA 制約生成は placeholder
+- ORCA 制約生成は基準実装まで完了
 - 共通ソルバは `LineConstraint + speed limit` に対する基準実装まで完了
 - C++ 側のコードは履歴的な足場または比較用として残置
 
@@ -59,7 +59,7 @@
 | モジュール | 役割 |
 | --- | --- |
 | `parameters.py` | `ORCAParameters` の定義 |
-| `constraints.py` | 障害物由来制約とエージェント間制約の生成窓口 |
+| `constraints.py` | 障害物由来制約とエージェント間制約の生成 |
 | `algorithm.py` | 近傍探索、制約生成、ソルバ呼び出しをまとめた ORCA 1 ステップ |
 
 ### 3.3 `neighbor_search.py` の現行仕様
@@ -80,11 +80,19 @@
 - `protected_constraint_count` により、先頭 N 本の制約を固定した fallback projection を扱える
 - `max_speed < 0` や不正な `protected_constraint_count` は `ValueError` とする
 
-### 3.5 既存構成上の制約
+### 3.5 `algorithms/orca/constraints.py` の現行仕様
 
-- `algorithms/orca/constraints.py` は現在空制約列を返す
+- `build_agent_constraints()` は upstream の agent-agent ORCA line 生成をベースに、エージェント間の reciprocal avoidance 制約を作る
+- `build_obstacle_constraints()` は現行 `ObstacleSegment` モデルに合わせて、線分最近点を使う closest-point 近似で静的障害物制約を作る
+- エージェント間制約は回避責任を `0.5` ずつ分担する
+- 障害物制約は静的障害物として agent 側が全責任を負う
+- どちらも `LineConstraint` を返し、ORCA 固有の意味付けは `algorithms/orca/` に閉じ込める
+
+### 3.6 既存構成上の制約
+
 - `cli/main.py` の `--scenario` は予約済みだが、指定するとエラーで終了する
 - `algorithms/registry.py` に登録されているアルゴリズムは `orca` のみ
+- `ORCAAlgorithm.step()` は現在 `choose_preferred_velocity()` を直接呼んでおり、obstacle line を protected constraint として扱う solver fallback の統合は未反映
 
 ## 4. 入力仕様、出力仕様、DB スキーマ対応
 
@@ -214,10 +222,10 @@ poetry run pytest
 1. `NaiveNeighborSearch` が距離ベースで近傍エージェントを列挙する
 2. 同時に、点と線分の最短距離に基づいて `neighbor_dist` 以内の障害物線分を列挙する
 3. どちらも距離順に整列し、エージェント近傍のみ `max_neighbors` で制限する
-4. `build_obstacle_constraints()` は現在空配列を返す
-5. `build_agent_constraints()` も現在空配列を返す
+4. `build_obstacle_constraints()` が静的障害物線分から ORCA 制約を生成する
+5. `build_agent_constraints()` が近傍エージェントから reciprocal avoidance 制約を生成する
 6. `choose_preferred_velocity()` は、与えられた半平面制約列と速度上限円の中で希望速度に最も近い点を選ぶ
-7. 現時点では制約列が空のため、結果として希望速度を `max_speed` 以内で採用する
+7. 現時点の smoke シナリオは 1 エージェントなので、実行時には制約列が空のまま進む
 8. `Simulator.step()` が `position += velocity * time_step` で更新する
 
 したがって、現時点の ORCA skeleton は「ORCA の責務境界を保ったまま、希望速度追従だけを行う最小ループ」である。
@@ -243,6 +251,7 @@ poetry run pytest
 
 | テストファイル | 対象 |
 | --- | --- |
+| `tests/algorithms/test_orca_constraints.py` | agent-agent / obstacle 制約の非衝突・衝突ケース |
 | `tests/core/test_geometry.py` | `Vector2` の演算、正規化、距離、例外 |
 | `tests/core/test_neighbor_search.py` | 距離順、`max_neighbors`、障害物近傍、入力検証 |
 | `tests/core/test_solver.py` | 半平面制約なし、単一制約、複数制約、方向最適化、入力検証 |
@@ -269,7 +278,6 @@ poetry run pytest
 現時点の主要な未実装事項は以下。
 
 - 外部シナリオローダ
-- ORCA 制約生成の本実装
 - 複数アルゴリズム登録
 - 結果保存、可視化、メトリクス計算
 - upstream 比較用の回帰基盤

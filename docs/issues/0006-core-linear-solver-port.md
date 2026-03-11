@@ -53,7 +53,7 @@ upstream では `linearProgram1` `linearProgram2` `linearProgram3` が `Agent.cc
 - 将来の proxemic や CNav が別目的関数で利用できる形を保つ
 - `solve_linear_constraints()` を中立 API とし、`choose_preferred_velocity()` はその薄い wrapper にする
 - `solver.py` には upstream 参照と改変事実をヘッダコメントで残す
-- 現段階では ORCA 制約生成が空配列のため、シミュレーション全体の挙動は従来の smoke case と同じ
+- issue 完了時点では ORCA 制約生成が未実装だったため、シミュレーション全体の挙動は従来の smoke case と同じだった
 
 ## 依存関係
 

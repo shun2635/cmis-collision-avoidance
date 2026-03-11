@@ -33,8 +33,9 @@ upstream である `snape/RVO2` を参照しつつ、研究室内で読みやす
 
 - 利用可能なアルゴリズムは `orca` のみ
 - `--scenario` による外部シナリオ読込は未実装
-- ORCA 制約生成は placeholder 段階
+- ORCA 制約生成は基準実装まで完了
 - 共通ソルバは `LineConstraint + speed limit` の基準実装まで完了
+- 障害物 ORCA 制約は、現在の `ObstacleSegment` モデルに合わせて closest-point 近似で扱う
 
 実装済みの詳細仕様は [docs/specifications/python-skeleton-detailed-design.md](docs/specifications/python-skeleton-detailed-design.md) を参照してください。
 
