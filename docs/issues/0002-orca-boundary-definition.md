@@ -1,6 +1,6 @@
 # Issue 0002: ORCA の共通コア境界を先に固定する
 
-- ステータス: open
+- ステータス: completed
 - 優先度: high
 - 関連文書:
   - [docs/repository-architecture.md](../repository-architecture.md)
