@@ -1,1 +1,1 @@
-"""Python test package for unittest discovery."""
+"""Python tests for the collision avoidance package."""

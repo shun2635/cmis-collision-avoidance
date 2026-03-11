@@ -186,7 +186,7 @@ poetry run python scripts/smoke_run.py
 テスト実行:
 
 ```bash
-poetry run python -m unittest discover -s tests -p "test_*.py"
+poetry run pytest
 ```
 
 ## 6. 処理フロー、ロジック
@@ -246,6 +246,7 @@ poetry run python -m unittest discover -s tests -p "test_*.py"
 - 共通 core の型と基本演算は unit test で固定する
 - 実行導線は smoke test で最低限保証する
 - placeholder 実装であっても、現在の振る舞いはテストで固定する
+- テストランナーの標準は `pytest` とする
 - ORCA 本実装が入ったら、制約生成とソルバを別テストで分離する
 - 将来的には `tests/algorithms/` `tests/integration/` `tests/regression/` を拡充する
 

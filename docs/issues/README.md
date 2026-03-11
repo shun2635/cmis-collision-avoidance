@@ -35,3 +35,4 @@
 - [0008-orca-step-integration.md](0008-orca-step-integration.md)
 - [0009-scenario-schema-and-loader.md](0009-scenario-schema-and-loader.md)
 - [0010-upstream-circle-scenario-regression.md](0010-upstream-circle-scenario-regression.md)
+- [0011-pytest-test-suite-migration.md](0011-pytest-test-suite-migration.md)

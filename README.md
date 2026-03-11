@@ -83,7 +83,7 @@ poetry run cmis-ca run --algorithm orca --steps 1
 
 ```bash
 poetry run python scripts/smoke_run.py
-poetry run python -m unittest discover -s tests -p "test_*.py"
+poetry run pytest
 ```
 
 将来的には以下のような実行形へ広げます。
