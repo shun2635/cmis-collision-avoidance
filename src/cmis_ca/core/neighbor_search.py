@@ -1,19 +1,48 @@
-"""Neighbor search interfaces and a minimal reference implementation."""
+"""Neighbor search interfaces and a reference implementation."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Protocol
 
-from cmis_ca.core.world import WorldSnapshot
+from cmis_ca.core.geometry import Vector2
+from cmis_ca.core.world import ObstacleSegment, SnapshotAgent, WorldSnapshot
+
+
+@dataclass(frozen=True)
+class AgentNeighbor:
+    """Distance-ranked neighboring agent."""
+
+    index: int
+    distance: float
+
+
+@dataclass(frozen=True)
+class ObstacleNeighbor:
+    """Distance-ranked neighboring obstacle segment."""
+
+    index: int
+    distance: float
 
 
 @dataclass(frozen=True)
 class NeighborSet:
-    """Indices of nearby agents and obstacles for one agent."""
+    """Nearby agents and obstacles for one agent.
 
-    agent_indices: tuple[int, ...] = ()
-    obstacle_indices: tuple[int, ...] = ()
+    The core layer exposes only distance-ranked search results. Algorithm-
+    specific acceptance rules remain outside this type.
+    """
+
+    agent_neighbors: tuple[AgentNeighbor, ...] = ()
+    obstacle_neighbors: tuple[ObstacleNeighbor, ...] = ()
+
+    @property
+    def agent_indices(self) -> tuple[int, ...]:
+        return tuple(neighbor.index for neighbor in self.agent_neighbors)
+
+    @property
+    def obstacle_indices(self) -> tuple[int, ...]:
+        return tuple(neighbor.index for neighbor in self.obstacle_neighbors)
 
 
 class NeighborSearch(Protocol):
@@ -30,7 +59,7 @@ class NeighborSearch(Protocol):
 
 
 class NaiveNeighborSearch:
-    """O(n^2) reference implementation good enough for the initial skeleton."""
+    """O(n^2) reference implementation for the current codebase."""
 
     def find_neighbors(
         self,
@@ -39,19 +68,52 @@ class NaiveNeighborSearch:
         neighbor_dist: float,
         max_neighbors: int,
     ) -> NeighborSet:
-        origin = snapshot.agents[agent_index].state.position
-        candidates = []
+        if neighbor_dist < 0.0:
+            raise ValueError("neighbor_dist must be non-negative")
+        if max_neighbors < 0:
+            raise ValueError("max_neighbors must be non-negative")
 
+        origin_agent = _find_agent(snapshot, agent_index)
+        origin = origin_agent.state.position
+
+        agent_candidates = []
         for other in snapshot.agents:
             if other.index == agent_index:
                 continue
 
-            distance = (other.state.position - origin).norm()
+            distance = other.state.position.distance_to(origin)
             if distance <= neighbor_dist:
-                candidates.append((distance, other.index))
+                agent_candidates.append(AgentNeighbor(index=other.index, distance=distance))
 
-        candidates.sort(key=lambda item: item[0])
+        obstacle_candidates = []
+        for obstacle_index, obstacle in enumerate(snapshot.obstacles):
+            distance = _distance_to_obstacle(origin, obstacle)
+            if distance <= neighbor_dist:
+                obstacle_candidates.append(ObstacleNeighbor(index=obstacle_index, distance=distance))
+
+        agent_candidates.sort(key=lambda neighbor: (neighbor.distance, neighbor.index))
+        obstacle_candidates.sort(key=lambda neighbor: (neighbor.distance, neighbor.index))
+
         return NeighborSet(
-            agent_indices=tuple(index for _, index in candidates[:max_neighbors]),
-            obstacle_indices=tuple(range(len(snapshot.obstacles))),
+            agent_neighbors=tuple(agent_candidates[:max_neighbors]),
+            obstacle_neighbors=tuple(obstacle_candidates),
         )
+
+
+def _find_agent(snapshot: WorldSnapshot, agent_index: int) -> SnapshotAgent:
+    for agent in snapshot.agents:
+        if agent.index == agent_index:
+            return agent
+    raise ValueError(f"agent index {agent_index} is not present in the snapshot")
+
+
+def _distance_to_obstacle(point: Vector2, obstacle: ObstacleSegment) -> float:
+    segment = obstacle.end - obstacle.start
+    segment_length_sq = segment.abs_sq()
+    if segment_length_sq == 0.0:
+        return point.distance_to(obstacle.start)
+
+    projection = (point - obstacle.start).dot(segment) / segment_length_sq
+    clamped_projection = max(0.0, min(1.0, projection))
+    closest_point = obstacle.start + segment * clamped_projection
+    return point.distance_to(closest_point)

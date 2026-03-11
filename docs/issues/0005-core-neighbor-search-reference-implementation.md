@@ -1,6 +1,6 @@
 # Issue 0005: 共通コアの近傍探索基準実装を作る
 
-- ステータス: open
+- ステータス: completed
 - 優先度: high
 - 関連文書:
   - [docs/architecture/repository-structure.md](../architecture/repository-structure.md)
@@ -39,6 +39,7 @@ ORCA では近傍探索そのものは共通コアに置き、距離閾値や採
 - 参照実装が複数エージェントシナリオで使える
 - 距離順や `max_neighbors` の扱いにテストがある
 - アルゴリズム固有の採用規則がコア側へ漏れていない
+- 障害物近傍の取得条件が core 側で明文化されている
 
 ## 想定成果物
 
@@ -50,7 +51,9 @@ ORCA では近傍探索そのものは共通コアに置き、距離閾値や採
 - 高速化前に正しさを優先する
 - ORCA の `neighbor_dist` `max_neighbors` は ORCA 側パラメータとして残す
 - 将来の proxemic でも再利用できるよう、探索機構と意味付けを分ける
+- `NeighborSet` は距離付きの中立結果として保持し、互換性のため `agent_indices` `obstacle_indices` も公開する
+- 参照実装では、エージェントと障害物をともに距離順で返し、障害物は `neighbor_dist` 以内の線分のみ採用する
 
 ## 依存関係
 
-- [0004-core-reference-types-and-tests.md](0004-core-reference-types-and-tests.md): pending
+- [0004-core-reference-types-and-tests.md](0004-core-reference-types-and-tests.md): completed

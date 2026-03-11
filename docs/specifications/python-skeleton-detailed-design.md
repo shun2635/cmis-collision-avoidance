@@ -49,7 +49,7 @@
 | `state.py` | `AgentState` `AgentCommand` `SimulationResult` の定義 |
 | `scenario.py` | draft API 互換のため `Scenario` を再公開 |
 | `world.py` | `Scenario` `ObstacleSegment` `SnapshotAgent` `WorldSnapshot` の定義 |
-| `neighbor_search.py` | `NeighborSearch` protocol と `NaiveNeighborSearch` |
+| `neighbor_search.py` | `NeighborSearch` protocol、距離付き近傍結果、`NaiveNeighborSearch` |
 | `constraints.py` | 中立な半平面制約 `LineConstraint` |
 | `solver.py` | 制約付き速度選択の共通窓口 |
 | `simulation.py` | アルゴリズムに依存しないステップ更新ループ |
@@ -62,7 +62,17 @@
 | `constraints.py` | 障害物由来制約とエージェント間制約の生成窓口 |
 | `algorithm.py` | 近傍探索、制約生成、ソルバ呼び出しをまとめた ORCA 1 ステップ |
 
-### 3.3 既存構成上の制約
+### 3.3 `neighbor_search.py` の現行仕様
+
+- `NeighborSet` は `agent_neighbors` と `obstacle_neighbors` を持つ
+- 各要素は `index` と `distance` を持つ距離付き結果である
+- 互換性のため、`agent_indices` と `obstacle_indices` を property として残す
+- `NaiveNeighborSearch` は `agent_index` を `WorldSnapshot.agents` の tuple 位置ではなく agent ID として解決する
+- エージェント近傍は `neighbor_dist` 以内かつ距離順で返し、`max_neighbors` で件数制限する
+- 障害物近傍は点と線分の最短距離が `neighbor_dist` 以内のものだけを、距離順で返す
+- `neighbor_dist < 0` または `max_neighbors < 0` は `ValueError` とする
+
+### 3.4 既存構成上の制約
 
 - `core/solver.py` は現在 `preferred_velocity` を最大速度で clamp するだけで、制約を評価していない
 - `algorithms/orca/constraints.py` は現在空制約列を返す
@@ -91,6 +101,7 @@
 | `AgentConfig` | `name`, `profile`, `initial_position`, `initial_velocity`, `preferred_velocity` | シナリオ投入時の初期設定 |
 | `Scenario` | `agents`, `obstacles`, `time_step`, `steps`, `name` | シミュレーション入力全体 |
 | `WorldSnapshot` | `step_index`, `time_step`, `agents`, `obstacles` | 1 ステップごとの読み取り専用入力 |
+| `NeighborSet` | `agent_neighbors`, `obstacle_neighbors` | 距離付き近傍探索結果 |
 
 現在の入力バリデーション:
 
@@ -194,11 +205,12 @@ poetry run python -m unittest discover -s tests -p "test_*.py"
 ### 6.2 ORCA 1 ステップの現状ロジック
 
 1. `NaiveNeighborSearch` が距離ベースで近傍エージェントを列挙する
-2. 障害物近傍は、現時点では全障害物 index をそのまま返す
-3. `build_obstacle_constraints()` は現在空配列を返す
-4. `build_agent_constraints()` も現在空配列を返す
-5. `choose_preferred_velocity()` は制約を無視し、希望速度を `max_speed` で clamp する
-6. `Simulator.step()` が `position += velocity * time_step` で更新する
+2. 同時に、点と線分の最短距離に基づいて `neighbor_dist` 以内の障害物線分を列挙する
+3. どちらも距離順に整列し、エージェント近傍のみ `max_neighbors` で制限する
+4. `build_obstacle_constraints()` は現在空配列を返す
+5. `build_agent_constraints()` も現在空配列を返す
+6. `choose_preferred_velocity()` は制約を無視し、希望速度を `max_speed` で clamp する
+7. `Simulator.step()` が `position += velocity * time_step` で更新する
 
 したがって、現時点の ORCA skeleton は「ORCA の責務境界を保ったまま、希望速度追従だけを行う最小ループ」である。
 
@@ -224,6 +236,7 @@ poetry run python -m unittest discover -s tests -p "test_*.py"
 | テストファイル | 対象 |
 | --- | --- |
 | `tests/core/test_geometry.py` | `Vector2` の演算、正規化、距離、例外 |
+| `tests/core/test_neighbor_search.py` | 距離順、`max_neighbors`、障害物近傍、入力検証 |
 | `tests/core/test_state.py` | `AgentState` `AgentCommand` `SimulationResult` |
 | `tests/core/test_world.py` | `Scenario` `ObstacleSegment` `WorldSnapshot` `LineConstraint` |
 | `tests/test_simulator_smoke.py` | ORCA skeleton の 1 エージェント前進確認 |
