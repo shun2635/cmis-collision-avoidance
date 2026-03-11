@@ -19,9 +19,10 @@ upstream の概念を踏まえつつ、研究室内で扱いやすい Python ベ
 
 ```bash
 poetry run cmis-ca run --algorithm orca --steps 1
+poetry run cmis-ca run --algorithm orca --scenario scenarios/head_on.yaml
 ```
 
-現在は `run` サブコマンドのみ実装しており、`--scenario` による外部ファイル読込は未実装である。  
+現在は `run` サブコマンドのみ実装しており、`--scenario` には YAML / JSON シナリオファイルを渡せる。  
 将来的な到達形は以下を想定する。
 
 ```bash
@@ -95,11 +96,26 @@ result = simulator.run()
 ## 将来候補
 
 - 障害物 API の拡張
-- シナリオローダ
 - ログ出力
 - upstream 比較ユーティリティ
 - バッチ比較実験 API
 - 可視化 API
+
+## シナリオファイルの現行仕様
+
+- フォーマット: `.yaml` `.yml` `.json`
+- 必須トップレベル項目: `agents`
+- 任意トップレベル項目: `name`, `time_step`, `steps`, `obstacles`
+- `agents[*]`:
+  - 任意: `name`, `profile`, `initial_position`, `initial_velocity`, `preferred_velocity`
+  - `profile` の任意項目: `radius`, `max_speed`
+- `obstacles[*]`:
+  - 必須: `start`, `end`
+- ベクトル表現:
+  - `[x, y]`
+  - `{x: ..., y: ...}`
+
+CLI の `--steps` を指定した場合は、シナリオファイル中の `steps` より CLI 引数を優先する。
 
 ## 命名方針
 

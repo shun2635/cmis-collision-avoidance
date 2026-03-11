@@ -6,14 +6,14 @@ import argparse
 from typing import Sequence
 
 from cmis_ca.algorithms.registry import list_algorithms
-from cmis_ca.cli.run import run_demo
+from cmis_ca.cli.run import run_demo, run_scenario_file
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="cmis-ca")
     subparsers = parser.add_subparsers(dest="command")
 
-    run_parser = subparsers.add_parser("run", help="Run a built-in smoke scenario.")
+    run_parser = subparsers.add_parser("run", help="Run a built-in or file-based scenario.")
     run_parser.add_argument(
         "--algorithm",
         default="orca",
@@ -23,13 +23,13 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument(
         "--steps",
         type=int,
-        default=1,
-        help="Number of simulation steps for the built-in demo scenario.",
+        default=None,
+        help="Override the number of simulation steps.",
     )
     run_parser.add_argument(
         "--scenario",
         default=None,
-        help="Scenario path. Loading external scenario files is not implemented yet.",
+        help="Path to a YAML or JSON scenario file.",
     )
 
     return parser
@@ -43,10 +43,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         parser.print_help()
         return 0
 
-    if args.scenario:
-        parser.error("External scenario loading is not implemented yet. Omit --scenario for now.")
+    if args.steps is not None and args.steps < 0:
+        parser.error("--steps must be non-negative")
 
-    result = run_demo(args.algorithm, args.steps)
+    if args.scenario:
+        result = run_scenario_file(args.algorithm, args.scenario, steps=args.steps)
+    else:
+        result = run_demo(args.algorithm, steps=1 if args.steps is None else args.steps)
+
     for index, state in enumerate(result.final_states):
         print(
             f"agent={index} position=({state.position.x:.3f}, {state.position.y:.3f}) "

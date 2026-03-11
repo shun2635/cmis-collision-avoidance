@@ -1,6 +1,6 @@
 # Issue 0009: シナリオスキーマとローダを定義する
 
-- ステータス: open
+- ステータス: completed
 - 優先度: medium
 - 関連文書:
   - [docs/architecture/repository-structure.md](../architecture/repository-structure.md)
@@ -50,6 +50,9 @@
 - 最初は JSON でも YAML でもよいが、研究室で読みやすい形式を優先する
 - アルゴリズム固有設定はシナリオ本体と分離する
 - built-in デモから外部ファイルへ移る最初の踏み台と考える
+- 実装では YAML を正規フォーマットとしつつ、JSON も受け付ける
+- CLI の `--steps` は指定時のみ外部シナリオの `steps` を上書きする
+- サンプルとして `scenarios/head_on.yaml` と `scenarios/obstacle_demo.yaml` を追加した
 
 ## 依存関係
 

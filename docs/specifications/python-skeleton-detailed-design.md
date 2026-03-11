@@ -21,7 +21,7 @@
 - 正規実装言語は Python
 - 実装本体は `src/cmis_ca/`
 - 利用可能なアルゴリズムは `orca` のみ
-- 外部シナリオファイル読込は未実装
+- 外部シナリオファイル読込は YAML / JSON の最小ローダまで実装済み
 - ORCA 制約生成は基準実装まで完了
 - 共通ソルバは `LineConstraint + speed limit` に対する基準実装まで完了
 - C++ 側のコードは履歴的な足場または比較用として残置
@@ -32,11 +32,13 @@
 | --- | --- | --- |
 | CLI エントリ | `src/cmis_ca/cli/main.py` | `cmis-ca` の引数解析とコマンド実行 |
 | 実行導線 | `src/cmis_ca/cli/run.py` | 内蔵デモシナリオを作成し、シミュレータを起動 |
+| シナリオ入出力 | `src/cmis_ca/io/scenario_loader.py` | YAML / JSON から `Scenario` を復元 |
 | アルゴリズム共通 IF | `src/cmis_ca/algorithms/base.py` | `step(snapshot)` を持つ共通 protocol |
 | アルゴリズムレジストリ | `src/cmis_ca/algorithms/registry.py` | アルゴリズム名から実装を生成 |
 | 共通 core | `src/cmis_ca/core/` | 幾何、状態、ワールド、近傍探索、制約表現、共通ソルバ、実行ループ |
 | ORCA 固有実装 | `src/cmis_ca/algorithms/orca/` | ORCA 固有パラメータ、制約生成、ステップ判断 |
 | 補助スクリプト | `scripts/smoke_run.py` | 最小実行確認 |
+| 回帰スクリプト | `scripts/compare_upstream_circle.py` | upstream Circle 条件の比較メトリクスを出力 |
 | テスト | `tests/` | core の単体テストとスモークテスト |
 | upstream 参照 | `external/RVO2/` | 比較・参照用の外部コード |
 
@@ -94,10 +96,20 @@
 - obstacle 制約は先頭へまとめ、solver の `protected_constraint_count` に渡す
 - `AgentCommand` へ変換された速度指令を返す
 
-### 3.7 既存構成上の制約
+### 3.7 `io/scenario_loader.py` の現行仕様
 
-- `cli/main.py` の `--scenario` は予約済みだが、指定するとエラーで終了する
+- `.yaml` `.yml` `.json` を受け付ける
+- トップレベルは mapping のみを受け付ける
+- `agents` は必須で、1 件以上必要
+- `name` 未指定時はファイル名 stem を使う
+- `obstacles` は省略可能で、指定時は `start` `end` を必須とする
+- ベクトルは `[x, y]` または `{x: ..., y: ...}` の 2 形式を受け付ける
+- `--steps` が CLI から与えられた場合は、読み込んだ `Scenario.steps` を上書きする
+
+### 3.8 既存構成上の制約
+
 - `algorithms/registry.py` に登録されているアルゴリズムは `orca` のみ
+- upstream `Circle` の目標更新は専用 helper で実現しており、汎用 goal API にはまだなっていない
 
 ## 4. 入力仕様、出力仕様、DB スキーマ対応
 
@@ -108,8 +120,8 @@
 | 引数 | 型 | 既定値 | 現在の仕様 |
 | --- | --- | --- | --- |
 | `--algorithm` | `str` | `orca` | `algorithms/registry.py` の登録名から選択 |
-| `--steps` | `int` | `1` | 内蔵デモシナリオのステップ数に反映 |
-| `--scenario` | `str \| None` | `None` | 未実装。指定すると parser error |
+| `--steps` | `int \| None` | `None` | 指定時のみステップ数を上書き。未指定時は内蔵デモは `1`、外部シナリオはファイル記述値を使う |
+| `--scenario` | `str \| None` | `None` | YAML / JSON シナリオを読み込む |
 
 ### 4.2 Python API 入力仕様
 
@@ -131,6 +143,9 @@
 - `ObstacleSegment` は長さ 0 を禁止
 - `WorldSnapshot.agents` の `index` は一意
 - `LineConstraint.direction` はゼロベクトルを禁止
+- シナリオファイルはトップレベル mapping 必須
+- シナリオファイルの `agents` は非空 list 必須
+- ベクトル項目は 2 要素 list または `x` `y` を持つ mapping 必須
 
 ### 4.3 出力仕様
 
@@ -160,7 +175,6 @@ agent=<index> position=(<x>, <y>) velocity=(<vx>, <vy>)
 
 補足:
 
-- シナリオ YAML/JSON ローダは将来実装予定だが未着手
 - 結果のファイル出力、ログ保存、メトリクス保存も未実装
 - 永続化が入る場合は、この節にスキーマ対応表を追加する
 
@@ -179,9 +193,11 @@ agent=<index> position=(<x>, <y>) velocity=(<vx>, <vy>)
 | --- | --- |
 | `pyproject.toml` | Poetry 設定、依存関係、スクリプト登録、pytest/ruff 設定 |
 | `poetry.toml` | Poetry 仮想環境を `.venv/` に作る設定 |
+| `scenarios/*.yaml` | 共通シナリオ定義 |
+| `scenarios/upstream_circle.yaml` | upstream `Circle.cc` 由来の比較用シナリオ |
 | `docs/algorithms/orca.md` | ORCA の責務境界と設計方針 |
 
-現時点では `configs/` や外部シナリオ定義ファイルは未使用である。
+現時点で `configs/` は未使用だが、`scenarios/` は CLI から利用する。
 
 ### 5.3 環境構築手順
 
@@ -195,6 +211,7 @@ poetry install
 
 ```bash
 poetry run cmis-ca run --algorithm orca --steps 1
+poetry run cmis-ca run --algorithm orca --scenario scenarios/head_on.yaml
 ```
 
 補助スクリプト:
@@ -215,12 +232,22 @@ poetry run pytest
 
 1. CLI で `cmis-ca run` を受け付ける
 2. `algorithms/registry.py` から指定アルゴリズムを生成する
-3. `cli/run.py` が内蔵の 1 エージェントシナリオを構築する
-4. `Simulator` が `Scenario` から内部 `AgentState` を初期化する
-5. 各ステップで `Simulator.snapshot()` が `WorldSnapshot` を作る
-6. `ORCAAlgorithm.step()` が近傍探索、制約生成、速度選択を行う
-7. `Simulator.step()` が返却された `AgentCommand` を速度制限付きで適用し、位置を更新する
-8. `Simulator.run()` が履歴をまとめて `SimulationResult` を返す
+3. `--scenario` があれば `io/scenario_loader.py` が YAML / JSON を `Scenario` へ変換する
+4. `--scenario` がなければ `cli/run.py` が内蔵の 1 エージェントシナリオを構築する
+5. `Simulator` が `Scenario` から内部 `AgentState` を初期化する
+6. 各ステップで `Simulator.snapshot()` が `WorldSnapshot` を作る
+7. `ORCAAlgorithm.step()` が近傍探索、制約生成、速度選択を行う
+8. `Simulator.step()` が返却された `AgentCommand` を速度制限付きで適用し、位置を更新する
+9. `Simulator.run()` が履歴をまとめて `SimulationResult` を返す
+
+### 6.5 upstream Circle 回帰の現行ロジック
+
+1. `scenarios/upstream_circle.yaml` から 250 体の円周配置を読み込む
+2. `external/RVO2/examples/Circle.cc` と同じく、各 agent の goal を初期位置の antipodal point とみなす
+3. 各 step の直前に `goal - current_position` から希望速度を再計算する
+4. 目標ベクトル長が 1 を超えるときは正規化し、upstream と同じ unit preferred velocity を使う
+5. ORCA パラメータは `neighbor_dist=15`, `max_neighbors=10`, `time_horizon=10`, `time_horizon_obst=10` を使う
+6. 実行後は平均半径、最短 pair 距離、重心ずれ、goal 距離、速度上限、antipodal 対称性を比較メトリクスとして集計する
 
 ### 6.2 ORCA 1 ステップの現状ロジック
 
@@ -250,6 +277,25 @@ poetry run pytest
 
 このため、制約が空の現在実装では 1 ステップ後に `x = 0.5` まで前進する。
 
+### 6.4 外部シナリオファイルの最小スキーマ
+
+```yaml
+name: head-on-demo
+time_step: 0.5
+steps: 2
+agents:
+  - name: left
+    profile:
+      radius: 0.5
+      max_speed: 1.0
+    initial_position: [-1.0, 0.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [1.0, 0.0]
+obstacles:
+  - start: [0.6, -1.0]
+    end: [0.6, 1.0]
+```
+
 ## 7. テスト方針
 
 ### 7.1 現在のテスト構成
@@ -257,12 +303,15 @@ poetry run pytest
 | テストファイル | 対象 |
 | --- | --- |
 | `tests/algorithms/test_orca.py` | ORCA step の単独・head-on・障害物ケース |
+| `tests/cli/test_main.py` | `--scenario` 読込と `--steps` 上書き |
 | `tests/algorithms/test_orca_constraints.py` | agent-agent / obstacle 制約の非衝突・衝突ケース |
 | `tests/core/test_geometry.py` | `Vector2` の演算、正規化、距離、例外 |
 | `tests/core/test_neighbor_search.py` | 距離順、`max_neighbors`、障害物近傍、入力検証 |
 | `tests/core/test_solver.py` | 半平面制約なし、単一制約、複数制約、方向最適化、入力検証 |
 | `tests/core/test_state.py` | `AgentState` `AgentCommand` `SimulationResult` |
 | `tests/core/test_world.py` | `Scenario` `ObstacleSegment` `WorldSnapshot` `LineConstraint` |
+| `tests/io/test_scenario_loader.py` | YAML / JSON ローダ、スキーマ違反 |
+| `tests/regression/test_upstream_circle.py` | upstream Circle の条件と対称性・内向き収束 |
 | `tests/test_simulator_smoke.py` | ORCA skeleton の 1 エージェント前進確認 |
 
 ### 7.2 方針

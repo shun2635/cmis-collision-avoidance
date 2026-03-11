@@ -9,9 +9,9 @@ from cmis_ca.core.simulation import Simulator
 from cmis_ca.core.world import Scenario
 
 
-def run_demo(algorithm_name: str, steps: int):
-    """Run a built-in one-agent scenario for smoke testing the package layout."""
-    scenario = Scenario(
+def build_demo_scenario(steps: int = 1) -> Scenario:
+    """Build a built-in one-agent scenario for smoke testing the package layout."""
+    return Scenario(
         name="minimal-demo",
         time_step=0.5,
         steps=steps,
@@ -26,5 +26,29 @@ def run_demo(algorithm_name: str, steps: int):
         ),
     )
 
-    simulator = Simulator(scenario=scenario, algorithm=create_algorithm(algorithm_name))
+
+def run_demo(algorithm_name: str, steps: int = 1):
+    """Run the built-in one-agent scenario."""
+    simulator = Simulator(
+        scenario=build_demo_scenario(steps=steps),
+        algorithm=create_algorithm(algorithm_name),
+    )
+    return simulator.run()
+
+
+def run_scenario_file(algorithm_name: str, scenario_path: str, steps: int | None = None):
+    """Load and run a scenario file shared across algorithms."""
+    from cmis_ca.io import load_scenario
+
+    scenario = load_scenario(scenario_path)
+    simulator = Simulator(
+        scenario=Scenario(
+            name=scenario.name,
+            time_step=scenario.time_step,
+            steps=scenario.steps if steps is None else steps,
+            agents=scenario.agents,
+            obstacles=scenario.obstacles,
+        ),
+        algorithm=create_algorithm(algorithm_name),
+    )
     return simulator.run()

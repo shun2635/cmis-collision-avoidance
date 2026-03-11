@@ -13,3 +13,4 @@
 ## 現在の仕様書
 
 - `python-skeleton-detailed-design.md`
+- `upstream-circle-regression.md`

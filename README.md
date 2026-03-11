@@ -32,10 +32,11 @@ upstream である `snape/RVO2` を参照しつつ、研究室内で読みやす
 現時点の実装制約:
 
 - 利用可能なアルゴリズムは `orca` のみ
-- `--scenario` による外部シナリオ読込は未実装
+- `--scenario` による YAML / JSON シナリオ読込に対応
 - ORCA 制約生成は基準実装まで完了
 - 共通ソルバは `LineConstraint + speed limit` の基準実装まで完了
 - 障害物 ORCA 制約は、現在の `ObstacleSegment` モデルに合わせて closest-point 近似で扱う
+- upstream `Circle` 条件に基づく回帰シナリオと比較メトリクスの土台を追加済み
 
 実装済みの詳細仕様は [docs/specifications/python-skeleton-detailed-design.md](docs/specifications/python-skeleton-detailed-design.md) を参照してください。
 
@@ -79,6 +80,7 @@ CLI の最小形:
 
 ```bash
 poetry run cmis-ca run --algorithm orca --steps 1
+poetry run cmis-ca run --algorithm orca --scenario scenarios/head_on.yaml
 ```
 
 最小スケルトンの実行確認:
@@ -91,10 +93,16 @@ poetry run pytest
 将来的には以下のような実行形へ広げます。
 
 ```bash
-cmis-ca run --algorithm orca --scenario scenarios/circle.yaml
+cmis-ca run --algorithm orca --scenario scenarios/head_on.yaml
 cmis-ca run --algorithm proxemic --scenario scenarios/circle.yaml
 cmis-ca run --algorithm cnav --scenario scenarios/circle.yaml
 ```
+
+現時点で同梱しているシナリオ例:
+
+- `scenarios/head_on.yaml`: 2 エージェントの正面衝突回避
+- `scenarios/obstacle_demo.yaml`: 単一障害物付きの最小ケース
+- `scenarios/upstream_circle.yaml`: `external/RVO2/examples/Circle.cc` に基づく 250 体の比較用シナリオ
 
 ## 移行メモ
 
@@ -112,3 +120,4 @@ Poetry の仮想環境は [poetry.toml](poetry.toml) によりプロジェクト
 - 実装同期ポリシー: [docs/policies/documentation-sync-policy.md](docs/policies/documentation-sync-policy.md)
 - 由来コードの取り扱い方針: [docs/policies/source-file-policy.md](docs/policies/source-file-policy.md)
 - 現行実装の詳細設計書: [docs/specifications/python-skeleton-detailed-design.md](docs/specifications/python-skeleton-detailed-design.md)
+- upstream Circle 回帰基盤: [docs/specifications/upstream-circle-regression.md](docs/specifications/upstream-circle-regression.md)

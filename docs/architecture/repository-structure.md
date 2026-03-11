@@ -145,10 +145,12 @@ cmis-ca run --algorithm cnav --scenario scenarios/circle.yaml
 ```python
 from cmis_ca.algorithms.registry import create_algorithm
 from cmis_ca.core.simulation import Simulator
+from cmis_ca.io import load_scenario
 
 algorithm = create_algorithm("orca")
-simulator = Simulator(algorithm=algorithm)
-result = simulator.run(scenario)
+scenario = load_scenario("scenarios/head_on.yaml")
+simulator = Simulator(scenario=scenario, algorithm=algorithm)
+result = simulator.run()
 ```
 
 ## アルゴリズムインターフェース案
