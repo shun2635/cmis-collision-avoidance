@@ -32,7 +32,8 @@ upstream である `snape/RVO2` を参照しつつ、研究室内で読みやす
 - 将来の多アルゴリズム対応を見据えた設計文書
 - 暫定的な実装スケルトン
 
-現時点の実装は完成版ではなく、後続の Python ベース再構成に向けた準備段階です。
+現時点の実装は完成版ではなく、後続の Python ベース再構成に向けた準備段階です。  
+Python の最小スケルトンは `src/cmis_ca/` に追加済みで、`core/` と `algorithms/orca/` の責務分離を先に反映しています。
 
 ## 想定リポジトリ構成
 
@@ -40,7 +41,8 @@ upstream である `snape/RVO2` を参照しつつ、研究室内で読みやす
 .
 ├── docs/                   # 設計文書、API 草案、運用方針
 ├── external/RVO2/          # upstream 参照用コード
-├── src/                    # 研究室独自実装
+├── src/cmis_ca/            # Python 実装本体
+├── scripts/                # 最小サンプル実行
 ├── scenarios/              # シナリオ定義
 └── tests/                  # 自動テスト
 ```
@@ -59,15 +61,33 @@ upstream である `snape/RVO2` を参照しつつ、研究室内で読みやす
 
 リポジトリ構造の詳細は [docs/repository-architecture.md](docs/repository-architecture.md) を参照してください。
 
-## ビルド
+## 開発
 
-将来の実装は Python ベースを想定しており、CLI から以下のように切り替える設計を想定しています。
+最小スケルトンの実行確認:
+
+```bash
+PYTHONPATH=src python3 scripts/smoke_run.py
+PYTHONPATH=src python3 -m unittest discover -s tests -p "test_*.py"
+```
+
+CLI の最小形:
+
+```bash
+PYTHONPATH=src python3 -m cmis_ca.cli.main run --algorithm orca --steps 1
+```
+
+将来的には以下のような実行形へ広げます。
 
 ```bash
 cmis-ca run --algorithm orca --scenario scenarios/circle.yaml
 cmis-ca run --algorithm proxemic --scenario scenarios/circle.yaml
 cmis-ca run --algorithm cnav --scenario scenarios/circle.yaml
 ```
+
+## 移行メモ
+
+既存の C++ スケルトンは、初期検討時の暫定実装として残しています。  
+現時点で正規の実装対象は Python 側の `src/cmis_ca/` であり、`include/` `src/*.cpp` `examples/*.cpp` `tests/*.cpp` は比較用または履歴的な足場として扱います。
 
 ## 文書
 

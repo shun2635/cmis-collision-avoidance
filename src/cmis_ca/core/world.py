@@ -1,0 +1,54 @@
+"""Scenario and snapshot types shared across algorithms."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+
+from cmis_ca.core.agent import AgentConfig, AgentProfile
+from cmis_ca.core.geometry import Vector2
+from cmis_ca.core.state import AgentState
+
+
+@dataclass(frozen=True)
+class ObstacleSegment:
+    """Minimal line-segment obstacle used by the initial skeleton."""
+
+    start: Vector2 = field(default_factory=Vector2)
+    end: Vector2 = field(default_factory=Vector2)
+
+
+@dataclass(frozen=True)
+class Scenario:
+    """Input scenario shared by all algorithms."""
+
+    agents: tuple[AgentConfig, ...]
+    obstacles: tuple[ObstacleSegment, ...] = ()
+    time_step: float = 0.1
+    steps: int = 1
+    name: str = "unnamed"
+
+    def __post_init__(self) -> None:
+        if self.time_step <= 0.0:
+            raise ValueError("time_step must be positive")
+        if self.steps < 0:
+            raise ValueError("steps must be non-negative")
+
+
+@dataclass(frozen=True)
+class SnapshotAgent:
+    """Read-only view consumed by algorithms during one simulation step."""
+
+    index: int
+    name: str
+    profile: AgentProfile
+    state: AgentState
+
+
+@dataclass(frozen=True)
+class WorldSnapshot:
+    """Read-only world state delivered to an algorithm."""
+
+    step_index: int
+    time_step: float
+    agents: tuple[SnapshotAgent, ...]
+    obstacles: tuple[ObstacleSegment, ...] = ()
