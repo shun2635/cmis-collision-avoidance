@@ -2,6 +2,7 @@
 
 研究室向けの collision avoidance 研究用リポジトリです。  
 ORCA (Optimal Reciprocal Collision Avoidance) を軸に、将来的には proxemic や CNav などの関連アルゴリズムも同一基盤上で扱えるように設計します。  
+ただし直近の実装優先順位は `ORCA の upstream 再現度向上` に置き、proxemic / CNav は後回しにします。  
 upstream である `snape/RVO2` を参照しつつ、研究室内で読みやすく保守しやすい構成と日本語ドキュメントを備えた再実装を進めます。
 
 ## このリポジトリの位置付け
@@ -23,6 +24,7 @@ upstream である `snape/RVO2` を参照しつつ、研究室内で読みやす
 - upstream を参照しながら、共通コアを持つ研究室向け実装を段階的に構築する
 - 実装変更と docs を常に同期させ、引き継ぎコストを下げる
 - 将来的に upstream との比較で妥当性を確認する
+- 当面は ORCA 完全再現に必要な論点から順に詰める
 
 ## 現在の状態
 
@@ -64,7 +66,7 @@ upstream である `snape/RVO2` を参照しつつ、研究室内で読みやす
 3. 先に設計文書を書く
 4. 共通コアとアルゴリズム差分を分離した構造を採用する
 5. 1 コマンドでアルゴリズムを切り替えられる CLI を用意する
-6. まず ORCA を再実装し、その後に proxemic や CNav を追加する
+6. まず ORCA を upstream に近い形まで再実装し、その後に proxemic や CNav を追加する
 7. 実装変更時は、同じ change で関連仕様書と docs を更新する
 8. upstream 比較で妥当性を確認する
 
@@ -115,6 +117,7 @@ Poetry の仮想環境は [poetry.toml](poetry.toml) によりプロジェクト
 
 - docs 一覧: [docs/README.md](docs/README.md)
 - 設計概要: [docs/architecture/overview.md](docs/architecture/overview.md)
+- ORCA 完全再現ロードマップ: [docs/architecture/orca-reproduction-roadmap.md](docs/architecture/orca-reproduction-roadmap.md)
 - リポジトリ構造: [docs/architecture/repository-structure.md](docs/architecture/repository-structure.md)
 - API 設計: [docs/architecture/api.md](docs/architecture/api.md)
 - 実装同期ポリシー: [docs/policies/documentation-sync-policy.md](docs/policies/documentation-sync-policy.md)

@@ -6,6 +6,7 @@
 
 - `architecture/`
   - リポジトリ全体の方針、構造、API 設計
+  - 当面の優先順位は `ORCA 完全再現` を基準に整理する
 - `policies/`
   - 文書運用、由来コード管理、改変記録などの運用ルール
 - `specifications/`
@@ -21,5 +22,6 @@
 - 実装を変更したら、同じ change で関連する仕様書と docs を更新する
 - アルゴリズム固有の設計判断は `algorithms/` に記録する
 - 共通構造や公開面が変わる場合は `architecture/` と `specifications/` も更新する
+- 当面の優先順位は [architecture/orca-reproduction-roadmap.md](architecture/orca-reproduction-roadmap.md) を基準にする
 
 詳細な運用ルールは [policies/documentation-sync-policy.md](policies/documentation-sync-policy.md) を参照してください。

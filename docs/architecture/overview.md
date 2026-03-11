@@ -8,7 +8,8 @@
 - 日本語の説明が不足している
 - upstream の構成が、そのまま研究室の開発運用に適しているとは限らない
 
-そのため本リポジトリでは、upstream を参照しながら、ORCA を軸に proxemic や CNav なども同一基盤で扱える研究室向け実装を段階的に構築します。
+そのため本リポジトリでは、upstream を参照しながら、ORCA を軸に proxemic や CNav なども同一基盤で扱える研究室向け実装を段階的に構築します。  
+ただし当面の優先順位は `ORCA の upstream 再現度を上げること` に置き、他アルゴリズムへの展開はその後とします。
 
 ## 基本原則
 
@@ -47,13 +48,21 @@
 
 まずは読みやすさを優先し、必要であれば近傍探索を単純実装から始める。
 
-### Phase 3: 関連アルゴリズムの追加
+### Phase 3: ORCA 完全再現
+
+- goal / preferred velocity モデルの一般化
+- obstacle topology の再設計
+- obstacle ORCA 制約の厳密移植
+- agent / solver / neighbor semantics の差分監査
+- upstream scenario を用いた回帰 suite の拡張
+
+### Phase 4: 関連アルゴリズムの追加
 
 - proxemic の追加
 - CNav の追加
 - アルゴリズム差分の文書化
 
-### Phase 4: 研究室向け API と比較基盤の具体化
+### Phase 5: 研究室向け API と比較基盤の具体化
 
 - シナリオ記述
 - シミュレーション設定
@@ -80,6 +89,7 @@ tests/              自動テスト
 - upstream は ORCA 理解と比較検証の基準として使う
 - 研究室実装は upstream のファイル構成に拘束されない
 - 研究室実装は ORCA のみを前提とせず、多アルゴリズム比較基盤として構成する
+- ただし直近の issue 優先順位は ORCA 完全再現を最優先とする
 - upstream 由来コードを持ち込む場合は、出典と改変事実を記録する
 
 ## 現時点の実装について
@@ -87,5 +97,5 @@ tests/              自動テスト
 現時点の正規実装は Python 側の `src/cmis_ca/` である。  
 `core/` と `algorithms/orca/` の責務分離、Poetry 環境、最小 CLI、スモークテスト、共通コアの基準型を先行して整備している。
 
-一方で、外部シナリオ読込、ORCA 制約生成、共通ソルバの本実装は未完了であり、現在の実装は skeleton 段階にある。  
-この未完了部分も含めた現状仕様は [../specifications/python-skeleton-detailed-design.md](../specifications/python-skeleton-detailed-design.md) で管理する。
+一方で、goal モデル、upstream 準拠の obstacle 表現、ORCA 再現度の監査と回帰拡張は未完了である。  
+この未完了部分を含む現状仕様は [../specifications/python-skeleton-detailed-design.md](../specifications/python-skeleton-detailed-design.md) で管理し、優先順位は [orca-reproduction-roadmap.md](orca-reproduction-roadmap.md) に整理する。

@@ -36,3 +36,28 @@
 - [0009-scenario-schema-and-loader.md](0009-scenario-schema-and-loader.md)
 - [0010-upstream-circle-scenario-regression.md](0010-upstream-circle-scenario-regression.md)
 - [0011-pytest-test-suite-migration.md](0011-pytest-test-suite-migration.md)
+- [0012-orca-goal-model-and-pref-velocity-alignment.md](0012-orca-goal-model-and-pref-velocity-alignment.md)
+- [0013-orca-agent-and-simulator-parity-audit.md](0013-orca-agent-and-simulator-parity-audit.md)
+- [0014-orca-obstacle-topology-model-port.md](0014-orca-obstacle-topology-model-port.md)
+- [0015-orca-obstacle-constraint-exact-port.md](0015-orca-obstacle-constraint-exact-port.md)
+- [0016-orca-agent-constraint-and-solver-parity.md](0016-orca-agent-constraint-and-solver-parity.md)
+- [0017-orca-upstream-regression-suite-expansion.md](0017-orca-upstream-regression-suite-expansion.md)
+- [0018-orca-parity-gap-review.md](0018-orca-parity-gap-review.md)
+
+## 現在の優先順
+
+ORCA 完全再現を優先する。順序は [../architecture/orca-reproduction-roadmap.md](../architecture/orca-reproduction-roadmap.md) を正とする。
+
+1. [0012-orca-goal-model-and-pref-velocity-alignment.md](0012-orca-goal-model-and-pref-velocity-alignment.md)
+2. [0013-orca-agent-and-simulator-parity-audit.md](0013-orca-agent-and-simulator-parity-audit.md)
+3. [0014-orca-obstacle-topology-model-port.md](0014-orca-obstacle-topology-model-port.md)
+4. [0015-orca-obstacle-constraint-exact-port.md](0015-orca-obstacle-constraint-exact-port.md)
+5. [0016-orca-agent-constraint-and-solver-parity.md](0016-orca-agent-constraint-and-solver-parity.md)
+6. [0017-orca-upstream-regression-suite-expansion.md](0017-orca-upstream-regression-suite-expansion.md)
+7. [0018-orca-parity-gap-review.md](0018-orca-parity-gap-review.md)
+
+## 後回しメモ
+
+- `proxemic`
+- `cnav`
+- 多アルゴリズム比較の広い API 拡張
