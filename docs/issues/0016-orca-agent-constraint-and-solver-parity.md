@@ -1,6 +1,6 @@
 # Issue 0016: ORCA の agent constraint と solver の upstream 差分を詰める
 
-- ステータス: open
+- ステータス: completed
 - 優先度: high
 - 関連文書:
   - [docs/architecture/orca-reproduction-roadmap.md](../architecture/orca-reproduction-roadmap.md)
@@ -46,3 +46,11 @@ agent-agent ORCA line と solver 周辺の差分を洗い出して埋め、upstr
 ## 依存関係
 
 - [0013-orca-agent-and-simulator-parity-audit.md](0013-orca-agent-and-simulator-parity-audit.md): completed
+
+## 実施メモ
+
+- `core/solver.py` の `RVO_EPSILON` を upstream と同じ `1e-5` に揃えた
+- `linearProgram2` / `linearProgram3` の violation 判定を upstream 同様の厳密比較へ寄せた
+- agent-agent ORCA line の cut-off circle / left leg / right leg の代表ケースを追加した
+- solver の parallel opposite line と `protected_constraint_count` の代表ケースを追加した
+- 結果を [../specifications/orca-agent-solver-parity.md](../specifications/orca-agent-solver-parity.md) に記録した

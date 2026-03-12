@@ -53,7 +53,8 @@
 - goal / preferred velocity モデルの一般化 `completed`
 - obstacle topology の再設計 `completed`
 - obstacle ORCA 制約の厳密移植 `completed`
-- agent / solver / neighbor semantics の差分監査
+- agent / solver の差分監査 `completed`
+- neighbor semantics の差分監査
 - upstream scenario を用いた回帰 suite の拡張
 
 ### Phase 4: 関連アルゴリズムの追加

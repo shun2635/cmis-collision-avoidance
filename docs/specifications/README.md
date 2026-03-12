@@ -13,6 +13,7 @@
 ## 現在の仕様書
 
 - `orca-agent-simulator-parity.md`
+- `orca-agent-solver-parity.md`
 - `orca-obstacle-topology.md`
 - `python-skeleton-detailed-design.md`
 - `upstream-circle-regression.md`

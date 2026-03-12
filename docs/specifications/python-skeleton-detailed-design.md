@@ -25,6 +25,7 @@
 - ORCA 制約生成は基準実装まで完了
 - 共通ソルバは `LineConstraint + speed limit` に対する基準実装まで完了
 - upstream の agent / simulator 主要 parameter と clock を Python 側へ反映済み
+- agent-agent ORCA line と solver の主要分岐を upstream ベースで監査済み
 - C++ 側のコードは履歴的な足場または比較用として残置
 
 ## 3. コンポーネント構成と役割
@@ -80,12 +81,14 @@
 - `solve_linear_constraints()` は半平面制約列と速度上限円に対する 2D ソルバである
 - `choose_preferred_velocity()` は「希望速度に最も近い点」を選ぶ wrapper である
 - upstream `RVO2` の `linearProgram1/2/3` を中立 API へ再構成した実装である
+- parallel 判定の `EPSILON` は upstream と同じ `1e-5` を使う
 - `protected_constraint_count` により、先頭 N 本の制約を固定した fallback projection を扱える
 - `max_speed < 0` や不正な `protected_constraint_count` は `ValueError` とする
 
 ### 3.5 `algorithms/orca/constraints.py` の現行仕様
 
 - `build_agent_constraints()` は upstream の agent-agent ORCA line 生成をベースに、エージェント間の reciprocal avoidance 制約を作る
+- no-collision の cut-off circle / left leg / right leg と collision 分岐を upstream ベースで持つ
 - `build_obstacle_constraints()` は linked obstacle topology の outgoing edge に対して、upstream `Agent.cc` の obstacle 分岐を移植した ORCA 制約を作る
 - エージェント間制約は回避責任を `0.5` ずつ分担する
 - 障害物制約は静的障害物として agent 側が全責任を負う
@@ -327,12 +330,12 @@ obstacles:
 | --- | --- |
 | `tests/algorithms/test_orca.py` | ORCA step の単独・head-on・障害物ケース |
 | `tests/cli/test_main.py` | `--scenario` 読込と `--steps` 上書き |
-| `tests/algorithms/test_orca_constraints.py` | agent-agent / obstacle 制約の非衝突・衝突・foreign leg ケース |
+| `tests/algorithms/test_orca_constraints.py` | agent-agent / obstacle 制約の非衝突・衝突・left/right leg・foreign leg ケース |
 | `tests/core/test_agent.py` | `AgentProfile` の navigation parameter と ORCA override 解決 |
 | `tests/core/test_geometry.py` | `Vector2` の演算、正規化、距離、例外 |
 | `tests/core/test_neighbor_search.py` | 距離順、`max_neighbors`、障害物近傍、入力検証 |
 | `tests/core/test_simulation.py` | goal ベースの preferred velocity 自動更新 |
-| `tests/core/test_solver.py` | 半平面制約なし、単一制約、複数制約、方向最適化、入力検証 |
+| `tests/core/test_solver.py` | 半平面制約なし、単一制約、複数制約、parallel opposite line、protected fallback、入力検証 |
 | `tests/core/test_state.py` | `AgentState` `AgentCommand` `SimulationResult` |
 | `tests/core/test_world.py` | `Scenario` `ObstaclePath` `ObstacleVertex` `WorldSnapshot` `LineConstraint` |
 | `tests/io/test_scenario_loader.py` | YAML / JSON ローダ、スキーマ違反 |
@@ -358,7 +361,6 @@ obstacles:
 現時点の主要な未実装事項は以下。
 
 - 複数アルゴリズム登録
-- agent-agent / solver の完全一致監査
 - 回帰 suite のさらなる拡張
 - 結果保存、可視化
 

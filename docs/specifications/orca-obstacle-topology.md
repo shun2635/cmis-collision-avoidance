@@ -69,4 +69,4 @@ obstacles:
 
 ## 7. 次段階
 
-obstacle topology の次段階は、[../issues/0016-orca-agent-constraint-and-solver-parity.md](../issues/0016-orca-agent-constraint-and-solver-parity.md) に進み、agent-agent 側と solver 側の upstream 差分を詰めることになる。
+obstacle topology の次段階は、[../issues/0017-orca-upstream-regression-suite-expansion.md](../issues/0017-orca-upstream-regression-suite-expansion.md) に進み、この topology と obstacle line 実装が複数 scenario でどう振る舞うかを回帰 suite で確認することになる。

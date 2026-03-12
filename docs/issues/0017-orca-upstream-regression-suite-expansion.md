@@ -45,4 +45,4 @@ ORCA 完全再現を判断するには、複数 scenario を使った回帰 suit
 ## 依存関係
 
 - [0015-orca-obstacle-constraint-exact-port.md](0015-orca-obstacle-constraint-exact-port.md): completed
-- [0016-orca-agent-constraint-and-solver-parity.md](0016-orca-agent-constraint-and-solver-parity.md): pending
+- [0016-orca-agent-constraint-and-solver-parity.md](0016-orca-agent-constraint-and-solver-parity.md): completed

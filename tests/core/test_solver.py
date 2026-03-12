@@ -89,3 +89,48 @@ def test_solve_linear_constraints_validates_arguments() -> None:
             optimization_velocity=Vector2(),
             protected_constraint_count=2,
         )
+
+
+def test_solve_linear_constraints_matches_parallel_opposite_line_behavior() -> None:
+    constraints = [
+        LineConstraint(point=Vector2(0.0, 0.0), direction=Vector2(1.0, 0.0)),
+        LineConstraint(point=Vector2(0.0, 0.0), direction=Vector2(-1.0, 0.0)),
+    ]
+
+    result = solve_linear_constraints(
+        constraints=constraints,
+        max_speed=1.0,
+        optimization_velocity=Vector2(0.3, 0.4),
+    )
+
+    assert result.x == pytest.approx(0.3)
+    assert result.y == pytest.approx(0.0)
+    _assert_satisfies_all(result, constraints)
+
+
+def test_solve_linear_constraints_respects_protected_constraint_count() -> None:
+    constraints = [
+        LineConstraint(point=Vector2(0.0, 0.0), direction=Vector2(-1.0, 0.0)),
+        LineConstraint(point=Vector2(0.0, 0.0), direction=Vector2(0.0, 1.0)),
+        LineConstraint(point=Vector2(0.3, -0.1), direction=Vector2(1.0, -1.0)),
+    ]
+
+    unprotected = solve_linear_constraints(
+        constraints=constraints,
+        max_speed=1.0,
+        optimization_velocity=Vector2(1.0, 1.0),
+        protected_constraint_count=0,
+    )
+    protected = solve_linear_constraints(
+        constraints=constraints,
+        max_speed=1.0,
+        optimization_velocity=Vector2(1.0, 1.0),
+        protected_constraint_count=1,
+    )
+
+    assert unprotected.x == pytest.approx(0.058578643762690494)
+    assert unprotected.y == pytest.approx(0.05857864376269045)
+    assert protected.x == pytest.approx(0.082842712474619)
+    assert protected.y == pytest.approx(0.0)
+    assert constraints[0].signed_distance(protected) >= -1e-8
+    assert constraints[1].signed_distance(protected) < 0.0

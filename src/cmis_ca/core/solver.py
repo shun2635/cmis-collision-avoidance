@@ -14,7 +14,7 @@ from typing import Sequence
 from cmis_ca.core.constraints import LineConstraint
 from cmis_ca.core.geometry import Vector2
 
-EPSILON = 1e-9
+EPSILON = 1e-5
 
 
 def solve_linear_constraints(
@@ -141,7 +141,7 @@ def _linear_program_2(
         result = optimization_velocity
 
     for index, constraint in enumerate(constraints):
-        if constraint.signed_distance(result) < -EPSILON:
+        if constraint.signed_distance(result) < 0.0:
             candidate = _linear_program_1(
                 constraints=constraints,
                 line_index=index,
@@ -168,7 +168,7 @@ def _linear_program_3(
     for index in range(begin_index, len(constraints)):
         constraint = constraints[index]
         violation = -constraint.signed_distance(result)
-        if violation <= max_violation + EPSILON:
+        if violation <= max_violation:
             continue
 
         projected_constraints = list(constraints[:protected_constraint_count])

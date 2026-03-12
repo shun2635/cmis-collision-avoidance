@@ -76,6 +76,78 @@ def test_build_agent_constraints_collision_case() -> None:
     assert constraint.signed_distance(Vector2(-1.5, 0.0)) > 0.0
 
 
+def test_build_agent_constraints_cutoff_circle_branch() -> None:
+    snapshot = WorldSnapshot(
+        step_index=0,
+        global_time=0.0,
+        time_step=0.1,
+        agents=(
+            _agent(0, Vector2(0.0, 0.0), Vector2(0.0, 0.0)),
+            _agent(1, Vector2(2.0, 0.0), Vector2(1.0, 0.0)),
+        ),
+    )
+    neighbors = NeighborSet(agent_neighbors=(AgentNeighbor(index=1, distance=2.0),))
+
+    constraints = build_agent_constraints(snapshot, 0, neighbors, ORCAParameters(time_horizon=5.0))
+
+    assert len(constraints) == 1
+    constraint = constraints[0]
+    assert constraint.point.x == pytest.approx(0.6)
+    assert constraint.point.y == pytest.approx(0.0)
+    assert constraint.direction.x == pytest.approx(0.0)
+    assert constraint.direction.y == pytest.approx(1.0)
+    assert constraint.signed_distance(Vector2(0.0, 0.0)) > 0.0
+    assert constraint.signed_distance(Vector2(1.0, 0.0)) < 0.0
+
+
+def test_build_agent_constraints_left_leg_branch() -> None:
+    snapshot = WorldSnapshot(
+        step_index=0,
+        global_time=0.0,
+        time_step=0.1,
+        agents=(
+            _agent(0, Vector2(0.0, 0.0), Vector2(0.0, 0.0)),
+            _agent(1, Vector2(2.0, 0.0), Vector2(0.0, -1.0)),
+        ),
+    )
+    neighbors = NeighborSet(agent_neighbors=(AgentNeighbor(index=1, distance=2.0),))
+
+    constraints = build_agent_constraints(snapshot, 0, neighbors, ORCAParameters(time_horizon=5.0))
+
+    assert len(constraints) == 1
+    constraint = constraints[0]
+    assert constraint.point.x == pytest.approx(0.21650635094610965)
+    assert constraint.point.y == pytest.approx(-0.375)
+    assert constraint.direction.x == pytest.approx(0.8660254037844386)
+    assert constraint.direction.y == pytest.approx(0.5)
+    assert constraint.signed_distance(Vector2(0.0, 0.0)) > 0.0
+    assert constraint.signed_distance(Vector2(1.0, 0.0)) < 0.0
+
+
+def test_build_agent_constraints_right_leg_branch() -> None:
+    snapshot = WorldSnapshot(
+        step_index=0,
+        global_time=0.0,
+        time_step=0.1,
+        agents=(
+            _agent(0, Vector2(0.0, 0.0), Vector2(0.0, 0.0)),
+            _agent(1, Vector2(2.0, 0.0), Vector2(0.0, 1.0)),
+        ),
+    )
+    neighbors = NeighborSet(agent_neighbors=(AgentNeighbor(index=1, distance=2.0),))
+
+    constraints = build_agent_constraints(snapshot, 0, neighbors, ORCAParameters(time_horizon=5.0))
+
+    assert len(constraints) == 1
+    constraint = constraints[0]
+    assert constraint.point.x == pytest.approx(0.21650635094610965)
+    assert constraint.point.y == pytest.approx(0.375)
+    assert constraint.direction.x == pytest.approx(-0.8660254037844386)
+    assert constraint.direction.y == pytest.approx(0.5)
+    assert constraint.signed_distance(Vector2(0.0, 0.0)) > 0.0
+    assert constraint.signed_distance(Vector2(1.0, 0.0)) < 0.0
+
+
 def test_build_obstacle_constraints_non_collision_case() -> None:
     obstacles = build_obstacle_polygon(
         (
