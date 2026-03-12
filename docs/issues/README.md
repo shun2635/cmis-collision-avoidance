@@ -43,6 +43,8 @@
 - [0016-orca-agent-constraint-and-solver-parity.md](0016-orca-agent-constraint-and-solver-parity.md)
 - [0017-orca-upstream-regression-suite-expansion.md](0017-orca-upstream-regression-suite-expansion.md)
 - [0018-orca-parity-gap-review.md](0018-orca-parity-gap-review.md)
+- [0019-orca-neighbor-search-parity-audit.md](0019-orca-neighbor-search-parity-audit.md)
+- [0020-orca-roadmap-regression-support.md](0020-orca-roadmap-regression-support.md)
 
 ## 現在の優先順
 
@@ -54,7 +56,9 @@ ORCA 完全再現を優先する。順序は [../architecture/orca-reproduction-
 4. [0015-orca-obstacle-constraint-exact-port.md](0015-orca-obstacle-constraint-exact-port.md) `completed`
 5. [0016-orca-agent-constraint-and-solver-parity.md](0016-orca-agent-constraint-and-solver-parity.md) `completed`
 6. [0017-orca-upstream-regression-suite-expansion.md](0017-orca-upstream-regression-suite-expansion.md) `completed`
-7. [0018-orca-parity-gap-review.md](0018-orca-parity-gap-review.md)
+7. [0018-orca-parity-gap-review.md](0018-orca-parity-gap-review.md) `completed`
+8. [0019-orca-neighbor-search-parity-audit.md](0019-orca-neighbor-search-parity-audit.md)
+9. [0020-orca-roadmap-regression-support.md](0020-orca-roadmap-regression-support.md)
 
 ## 後回しメモ
 

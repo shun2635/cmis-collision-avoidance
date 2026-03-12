@@ -1,0 +1,64 @@
+# ORCA parity gap review
+
+## 1. 目的
+
+この文書は、issue `0012` から `0017` までで到達した ORCA 再現度を棚卸しし、未解決の差分と次段階の判断基準を固定する。
+
+## 2. 現時点の到達点
+
+2026-03-12 時点で、以下は実装済みである。
+
+- goal / preferred velocity モデル
+- agent / simulator の主要 parameter と clock
+- obstacle topology の linked vertex 化
+- obstacle ORCA line の upstream ベース移植
+- agent-agent ORCA line の主要分岐
+- solver の主要分岐
+- upstream `Circle` / `Blocks` の定性的 regression
+
+## 3. 残差一覧
+
+| 項目 | 現在の状態 | 影響 | 判定 |
+| --- | --- | --- | --- |
+| agent neighbor search | `NaiveNeighborSearch` の距離順実装 | neighbor 採用順や打ち切り境界が upstream kd-tree と一致しない可能性がある | high |
+| obstacle neighbor search | obstacle kd-tree 未実装 | obstacle line 本体は移植済みでも、入力となる近傍集合が upstream とずれる可能性がある | high |
+| open chain semantics | 研究室拡張として一般化 | upstream の閉 polygon 前提と完全には一致しない | medium |
+| regression strength | `Circle` と `Blocks` の定性的比較まで | 厳密な parity 判定にはまだ弱い | medium |
+| example-specific perturbation | `Circle.cc` / `Blocks.cc` の微小 perturbation は未導入 | 対称ケースの deadlock 回避や tie-break が完全一致しない | low |
+| public API shape | setter 群や default agent object は Python らしく再構成 | API 形は違うが ORCA の挙動再現そのものには直結しない | accepted |
+
+## 4. docs 整合性の結論
+
+- ORCA の主要幾何ロジックは `orca-agent-solver-parity.md` と `orca-obstacle-topology.md` に反映済み
+- regression は `upstream-circle-regression.md` と `upstream-blocks-regression.md` に分離され、入口が明確になった
+- 旧状態の「obstacle line 未移植」「Circle のみ」という記述は更新済み
+
+## 5. 進行判断
+
+### 5.1 現時点で言えること
+
+- `研究室向け ORCA 基盤` としては十分に成立している
+- `upstream 完全再現が終わった` と断言できる段階ではない
+
+### 5.2 multi-algorithm へ進む判断
+
+現時点では、`proxemic` / `cnav` を mainline の次優先へ上げるのはまだ早い。  
+理由は、neighbor semantics と regression strength に未解決の差分が残っており、共通コアの正しさを ORCA で十分に詰め切っていないためである。
+
+## 6. multi-algorithm 着手の条件
+
+以下を満たした時点で、ORCA 優先フェーズを一段落とみなす。
+
+1. neighbor search の upstream 差分が docs で説明可能になっている
+2. obstacle を含む scenario で回帰条件がもう 1 段強化されている
+3. ORCA の残差が「受容する差分」と「未解決バグ候補」に分離されている
+
+## 7. follow-up issue
+
+- [../issues/0019-orca-neighbor-search-parity-audit.md](../issues/0019-orca-neighbor-search-parity-audit.md)
+- [../issues/0020-orca-roadmap-regression-support.md](../issues/0020-orca-roadmap-regression-support.md)
+
+## 8. 結論
+
+ORCA は、研究室内で説明・実験・保守できる水準まで整っている。  
+ただし upstream parity の最終確認としては、neighbor semantics と regression 拡張を先に片付けるべきであり、その前に `proxemic` / `cnav` へ主軸を移すべきではない。

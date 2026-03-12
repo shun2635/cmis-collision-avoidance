@@ -136,5 +136,6 @@ Poetry の仮想環境は [poetry.toml](poetry.toml) によりプロジェクト
 - ORCA agent / simulator parity 監査: [docs/specifications/orca-agent-simulator-parity.md](docs/specifications/orca-agent-simulator-parity.md)
 - ORCA agent / solver parity: [docs/specifications/orca-agent-solver-parity.md](docs/specifications/orca-agent-solver-parity.md)
 - ORCA obstacle topology: [docs/specifications/orca-obstacle-topology.md](docs/specifications/orca-obstacle-topology.md)
+- ORCA parity gap review: [docs/specifications/orca-parity-gap-review.md](docs/specifications/orca-parity-gap-review.md)
 - upstream Blocks 回帰基盤: [docs/specifications/upstream-blocks-regression.md](docs/specifications/upstream-blocks-regression.md)
 - upstream Circle 回帰基盤: [docs/specifications/upstream-circle-regression.md](docs/specifications/upstream-circle-regression.md)

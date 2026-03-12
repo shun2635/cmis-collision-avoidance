@@ -38,7 +38,7 @@
 
 ## 5. 未対応として残す差分
 
-- upstream の obstacle graph / convexity は未対応
+- upstream の obstacle topology / convexity 自体は実装済みだが、obstacle kd-tree と open chain semantics は完全一致ではない
 - upstream の kd-tree 実装は未対応で、近傍探索は `NaiveNeighborSearch`
 - `RVOSimulator` の setter 群をそのまま Python API に写してはいない
 - default agent object の生成・複製モデルは dataclass default へ簡略化している
@@ -46,4 +46,4 @@
 ## 6. 現時点の結論
 
 agent / simulator semantics については、ORCA 再現に直結する主要 parameter と clock は Python 側へ反映済みである。  
-次段階の主要 gap は agent-agent constraint と solver の upstream 差分監査である。
+次段階の主要 gap は neighbor semantics と回帰強化である。

@@ -1,6 +1,6 @@
 # Issue 0018: ORCA 再現度の残差を棚卸しして次段階へ進む判断材料を作る
 
-- ステータス: open
+- ステータス: completed
 - 優先度: medium
 - 関連文書:
   - [docs/architecture/orca-reproduction-roadmap.md](../architecture/orca-reproduction-roadmap.md)
@@ -42,3 +42,10 @@ ORCA の残差を監査し、未解決項目と妥協点を一覧化して、次
 ## 依存関係
 
 - [0017-orca-upstream-regression-suite-expansion.md](0017-orca-upstream-regression-suite-expansion.md): completed
+
+## 実施メモ
+
+- ORCA の残差一覧を [../specifications/orca-parity-gap-review.md](../specifications/orca-parity-gap-review.md) に整理した
+- 「まだ `proxemic` / `cnav` へ主軸を移さない」判断を docs に固定した
+- follow-up issue として `0019` と `0020` を追加した
+- parity 文書の古い記述を見直し、docs 間の整合性を取った
