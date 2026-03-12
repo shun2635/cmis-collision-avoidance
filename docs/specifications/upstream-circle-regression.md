@@ -17,8 +17,8 @@ obstacle を含む companion scenario については [upstream-blocks-regressio
 
 | 種別 | パス | 内容 |
 | --- | --- | --- |
-| 比較用シナリオ | `scenarios/upstream_circle.yaml` | 250 体を半径 200 の円周上へ等間隔配置し、profile に ORCA defaults を保持 |
-| 回帰 helper | `src/cmis_ca/regression/upstream_circle.py` | scenario-defined goals と profile defaults を使って metric を集計 |
+| 比較用シナリオ | `scenarios/upstream_circle.yaml` | 250 体を半径 200 の円周上へ等間隔配置し、profile に ORCA defaults と goal-stop 条件を保持 |
+| 回帰 helper | `src/cmis_ca/regression/upstream_circle.py` | scenario-defined goals と upstream-style stop 条件を使って metric を集計 |
 | 実行スクリプト | `scripts/compare_upstream_circle.py` | metric の出力 |
 | 回帰テスト | `tests/regression/test_upstream_circle.py` | 条件確認と定性的回帰チェック |
 
@@ -39,6 +39,8 @@ obstacle を含む companion scenario については [upstream-blocks-regressio
 - goal は各 agent の初期位置の antipodal point
 - `scenarios/upstream_circle.yaml` に `goal_position` と `preferred_speed=1.0` を明示する
 - preferred velocity は `Simulator` が各 step で goal 方向へ再計算する
+- upstream `do ... while (!reachedGoal())` に合わせ、既定実行は全 agent が各自の `radius` 以内へ到達するまで継続する
+- `scenarios/upstream_circle.yaml` では `steps: 0` と `stop_when_all_agents_reach_goals: true` を使ってこの停止条件を表す
 
 ## 5. 現在の比較観点
 
@@ -60,21 +62,24 @@ obstacle を含む companion scenario については [upstream-blocks-regressio
 - `max_speed <= 2.0`
 - `max_antipodal_error < 1.0e-8`
 
-これらは 2026-03-11 時点の現行実装を基準にした定性的な閾値である。
+これらは 2026-03-12 時点の現行実装を基準にした定性的な閾値である。
 
 ## 7. 実測メモ
 
-`scripts/compare_upstream_circle.py` を 20 step で実行したときの現行値は以下。
+`run_upstream_circle_regression()` は既定では upstream と同じく goal 到達まで回す。  
+一方、pytest の回帰は実行時間を抑えるため `steps=8` の fixed-step で固定している。
 
-- `average_radius = 195.0`
-- `minimum_pair_distance ≈ 4.900756`
-- `centroid_distance = 0.0`
-- `average_goal_distance = 395.0`
-- `max_speed = 1.0`
-- `max_antipodal_error = 0.0`
+2026-03-12 時点の `steps=8` 実測は以下。
+
+- `average_radius < 198.5`
+- `minimum_pair_distance > 3.0`
+- `centroid_distance < 1.0e-9`
+- `max_speed <= 2.0`
+- `max_antipodal_error < 1.0e-8`
 
 ## 8. 制約
 
 - goal API は scenario schema と `Simulator` に導入済みである
 - 比較は upstream 完全一致ではなく、早期ステップの定性的挙動固定にとどまる
+- full run は `NaiveNeighborSearch` のため計算量が大きく、日常の自動テストでは固定 step 回帰を使う
 - 近傍探索は `NaiveNeighborSearch` のため、大規模 step 数では計算量が大きい

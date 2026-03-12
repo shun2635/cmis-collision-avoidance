@@ -40,7 +40,7 @@ def run_upstream_circle_regression(
     steps: int | None = None,
     scenario_path: str | Path = UPSTREAM_CIRCLE_SCENARIO,
 ) -> CircleRegressionMetrics:
-    """Run the upstream Circle scenario using scenario-defined goals."""
+    """Run the upstream Circle scenario using upstream-style stop conditions."""
     scenario = load_scenario(scenario_path)
     simulator = Simulator(
         scenario=scenario,
@@ -50,11 +50,8 @@ def run_upstream_circle_regression(
     if any(goal is None for goal in goals):
         raise ValueError("upstream circle scenario requires goal_position for every agent")
     concrete_goals = tuple(goal for goal in goals if goal is not None)
-    total_steps = scenario.steps if steps is None else steps
-
-    simulator.run(steps=total_steps)
-
-    return _collect_metrics(simulator.states, concrete_goals, steps_run=total_steps)
+    result = simulator.run(steps=steps)
+    return _collect_metrics(simulator.states, concrete_goals, steps_run=result.num_steps)
 
 
 def _collect_metrics(

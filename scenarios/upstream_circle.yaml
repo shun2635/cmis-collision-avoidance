@@ -4,7 +4,8 @@
 # Summary of changes: represented the upstream circle setup as a YAML scenario for regression use.
 name: upstream-circle
 time_step: 0.25
-steps: 20
+steps: 0
+stop_when_all_agents_reach_goals: true
 agents:
   - name: agent_000
     profile:

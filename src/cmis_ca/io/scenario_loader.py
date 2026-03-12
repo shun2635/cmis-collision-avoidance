@@ -53,6 +53,10 @@ def _parse_scenario(document: dict[str, Any], path: Path) -> Scenario:
         name=_parse_name(document.get("name"), path),
         time_step=_parse_float(document.get("time_step", 0.1), "time_step"),
         steps=_parse_int(document.get("steps", 1), "steps"),
+        stop_when_all_agents_reach_goals=_parse_bool(
+            document.get("stop_when_all_agents_reach_goals", False),
+            "stop_when_all_agents_reach_goals",
+        ),
         agents=tuple(_parse_agent(entry, index) for index, entry in enumerate(agents_raw)),
         obstacles=build_obstacle_topology(
             tuple(_parse_obstacle(entry, index) for index, entry in enumerate(obstacles_raw))

@@ -3,13 +3,18 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import math
 from typing import TYPE_CHECKING
 
+from cmis_ca.core.geometry import Vector2
 from cmis_ca.core.state import AgentState, SimulationResult
 from cmis_ca.core.world import Scenario, SnapshotAgent, WorldSnapshot
 
 if TYPE_CHECKING:
     from cmis_ca.algorithms.base import CollisionAvoidanceAlgorithm
+
+
+PERTURBATION_STEP_PHASE = 0.6180339887498948
 
 
 class Simulator:
@@ -66,7 +71,7 @@ class Simulator:
     def refresh_preferred_velocities_from_goals(self) -> None:
         next_states = []
         for config, state in zip(self._scenario.agents, self._states):
-            if config.goal_position is None:
+            if config.goal_position is None or not config.auto_update_preferred_velocity_from_goal:
                 next_states.append(state)
                 continue
 
@@ -76,9 +81,28 @@ class Simulator:
             else:
                 preferred_velocity = goal_vector.normalized() * config.preferred_speed
 
+            if config.preferred_velocity_perturbation_scale > 0.0:
+                angle = (
+                    config.preferred_velocity_perturbation_phase
+                    + self._step_index * PERTURBATION_STEP_PHASE
+                )
+                preferred_velocity = preferred_velocity + (
+                    config.preferred_velocity_perturbation_scale
+                    * Vector2(math.cos(angle), math.sin(angle))
+                )
+
             next_states.append(state.with_preferred_velocity(preferred_velocity))
 
         self._states = next_states
+
+    def all_agents_reached_goals(self) -> bool:
+        for config, state in zip(self._scenario.agents, self._states):
+            if config.goal_position is None:
+                return False
+            goal_offset = state.position - config.goal_position
+            if goal_offset.abs_sq() > config.profile.radius * config.profile.radius:
+                return False
+        return True
 
     def step(self) -> tuple[AgentState, ...]:
         self.refresh_preferred_velocities_from_goals()
@@ -103,11 +127,27 @@ class Simulator:
         return self.states
 
     def run(self, steps: int | None = None) -> SimulationResult:
-        total_steps = self._scenario.steps if steps is None else steps
         history = [self.states]
+        if steps is not None:
+            for _ in range(steps):
+                history.append(self.step())
+            return SimulationResult(
+                algorithm=self._algorithm.name,
+                final_states=self.states,
+                history=tuple(history),
+            )
 
-        for _ in range(total_steps):
-            history.append(self.step())
+        if self._scenario.stop_when_all_agents_reach_goals:
+            max_steps = None if self._scenario.steps == 0 else self._scenario.steps
+            steps_run = 0
+            while max_steps is None or steps_run < max_steps:
+                if self.all_agents_reached_goals():
+                    break
+                history.append(self.step())
+                steps_run += 1
+        else:
+            for _ in range(self._scenario.steps):
+                history.append(self.step())
 
         return SimulationResult(
             algorithm=self._algorithm.name,

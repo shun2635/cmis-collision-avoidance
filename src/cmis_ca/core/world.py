@@ -143,6 +143,7 @@ class Scenario:
     obstacles: tuple[ObstacleVertex, ...] = ()
     time_step: float = 0.1
     steps: int = 1
+    stop_when_all_agents_reach_goals: bool = False
     name: str = "unnamed"
 
     def __post_init__(self) -> None:
@@ -152,6 +153,12 @@ class Scenario:
             raise ValueError("steps must be non-negative")
         if not self.agents:
             raise ValueError("scenario must contain at least one agent")
+        if self.stop_when_all_agents_reach_goals and any(
+            agent.goal_position is None for agent in self.agents
+        ):
+            raise ValueError(
+                "scenario with stop_when_all_agents_reach_goals requires goal_position for every agent"
+            )
 
 
 @dataclass(frozen=True)

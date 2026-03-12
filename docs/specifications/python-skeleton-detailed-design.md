@@ -52,7 +52,7 @@
 | モジュール | 役割 |
 | --- | --- |
 | `geometry.py` | `Vector2` と基本的な 2D 幾何演算 |
-| `agent.py` | `AgentProfile` と `AgentConfig` の定義、goal 情報と upstream 寄り navigation parameter の保持 |
+| `agent.py` | `AgentProfile` と `AgentConfig` の定義、goal 情報、goal 自動更新の有無、upstream 寄り navigation parameter の保持 |
 | `state.py` | `AgentState` `AgentCommand` `SimulationResult` の定義 |
 | `scenario.py` | draft API 互換のため `Scenario` を再公開 |
 | `world.py` | `Scenario` `ObstaclePath` `ObstacleVertex` `SnapshotAgent` `WorldSnapshot` の定義 |
@@ -116,12 +116,14 @@
 - `agents` は必須で、1 件以上必要
 - `name` 未指定時はファイル名 stem を使う
 - `obstacles` は省略可能で、正規 schema は `vertices` と任意 `closed` を受け付ける
+- `stop_when_all_agents_reach_goals` は任意で、`true` のとき既定実行は全 agent が goal 到達するまで継続する
 - loader は互換のため `start` `end` 2 点定義も受け付ける
 - ベクトルは `[x, y]` または `{x: ..., y: ...}` の 2 形式を受け付ける
 - `agent.profile` では `radius`, `max_speed`, `neighbor_dist`, `max_neighbors`, `time_horizon`, `time_horizon_obst` を受け付ける
 - `agent.goal_position` は任意で、指定時は vector として読み込む
 - `agent.preferred_speed` は任意で、既定値は `1.0`
-- `--steps` が CLI から与えられた場合は、読み込んだ `Scenario.steps` を上書きする
+- `agent.auto_update_preferred_velocity_from_goal` は現時点では scenario loader 非対応で、コード生成 scenario だけで使う
+- `--steps` が CLI から与えられた場合は、読み込んだ scenario の停止条件より CLI の固定 step 指定を優先する
 
 ### 3.8 既存構成上の制約
 
@@ -137,7 +139,7 @@
 | 引数 | 型 | 既定値 | 現在の仕様 |
 | --- | --- | --- | --- |
 | `--algorithm` | `str` | `orca` | `algorithms/registry.py` の登録名から選択 |
-| `--steps` | `int \| None` | `None` | 指定時のみステップ数を上書き。未指定時は内蔵デモは `1`、外部シナリオはファイル記述値を使う |
+| `--steps` | `int \| None` | `None` | 指定時のみ固定 step 数を上書き。未指定時は内蔵デモは `100`、外部シナリオは file 記述の step / goal-stop 条件を使う |
 | `--scenario` | `str \| None` | `None` | YAML / JSON シナリオを読み込む |
 | `--fps` | `float` | `30.0` | `visualize` でのみ使用。viewer の再生速度 |
 
@@ -148,8 +150,8 @@
 | 型 | 主なフィールド | 用途 |
 | --- | --- | --- |
 | `AgentProfile` | `radius`, `max_speed`, `neighbor_dist`, `max_neighbors`, `time_horizon`, `time_horizon_obst` | エージェントの固定属性と ORCA 既定 parameter |
-| `AgentConfig` | `name`, `profile`, `initial_position`, `initial_velocity`, `preferred_velocity`, `goal_position`, `preferred_speed` | シナリオ投入時の初期設定 |
-| `Scenario` | `agents`, `obstacles`, `time_step`, `steps`, `name` | シミュレーション入力全体 |
+| `AgentConfig` | `name`, `profile`, `initial_position`, `initial_velocity`, `preferred_velocity`, `goal_position`, `preferred_speed`, `auto_update_preferred_velocity_from_goal`, `preferred_velocity_perturbation_scale`, `preferred_velocity_perturbation_phase` | シナリオ投入時の初期設定 |
+| `Scenario` | `agents`, `obstacles`, `time_step`, `steps`, `stop_when_all_agents_reach_goals`, `name` | シミュレーション入力全体 |
 | `WorldSnapshot` | `step_index`, `global_time`, `time_step`, `agents`, `obstacles` | 1 ステップごとの読み取り専用入力 |
 | `NeighborSet` | `agent_neighbors`, `obstacle_neighbors` | 距離付き近傍探索結果 |
 | `VisualizationTrace` | `frames`, `obstacles`, `initial_positions`, `agent_names` | 可視化 viewer 向けの再生データ |
@@ -158,6 +160,7 @@
 
 - `Scenario.time_step` は正数
 - `Scenario.steps` は 0 以上
+- `Scenario.stop_when_all_agents_reach_goals=True` のとき全 agent に `goal_position` が必要
 - `Scenario.agents` は 1 体以上必須
 - `AgentProfile.radius` は 0 以上
 - `AgentProfile.max_speed` は 0 以上
@@ -172,6 +175,7 @@
 - `WorldSnapshot.agents` の `index` は一意
 - `LineConstraint.direction` はゼロベクトルを禁止
 - `AgentConfig.preferred_speed` は 0 以上
+- `AgentConfig.preferred_velocity_perturbation_scale` は 0 以上
 - シナリオファイルはトップレベル mapping 必須
 - シナリオファイルの `agents` は非空 list 必須
 - ベクトル項目は 2 要素 list または `x` `y` を持つ mapping 必須
@@ -268,30 +272,33 @@ poetry run pytest
 3. `--scenario` があれば `io/scenario_loader.py` が YAML / JSON を `Scenario` へ変換する
 4. `--scenario` がなければ `cli/run.py` が内蔵の circle scenario を構築する
 5. `Simulator` が `Scenario` から内部 `AgentState` を初期化する
-6. goal を持つ agent がいれば、各 step の直前に `goal_position - current_position` から preferred velocity を更新する
-7. `Simulator.snapshot()` が `global_time` を含む `WorldSnapshot` を作る
-8. `ORCAAlgorithm.step()` が各 agent の `AgentProfile` を既定値として ORCA parameter を解決し、近傍探索、制約生成、速度選択を行う
-9. `Simulator.step()` が返却された `AgentCommand` を速度制限付きで適用し、位置を更新する
-10. `Simulator` は `global_time += time_step` を進める
-11. `Simulator.run()` が履歴をまとめて `SimulationResult` を返す
-12. `visualize` 導線では `visualization/trace_builder.py` が `Scenario` と `SimulationResult` を `VisualizationTrace` へ変換する
-13. `visualization/pyqtgraph_viewer.py` が障害物、初期位置、現在位置、軌跡を再生表示する
+6. `goal_position` を持ち、かつ `auto_update_preferred_velocity_from_goal=True` の agent がいれば、各 step の直前に `goal_position - current_position` から preferred velocity を更新する
+7. `preferred_velocity_perturbation_scale > 0` の agent では、完全対称の停滞を避けるため deterministic perturbation を希望速度へ加える
+8. `Simulator.snapshot()` が `global_time` を含む `WorldSnapshot` を作る
+9. `ORCAAlgorithm.step()` が各 agent の `AgentProfile` を既定値として ORCA parameter を解決し、近傍探索、制約生成、速度選択を行う
+10. `Simulator.step()` が返却された `AgentCommand` を速度制限付きで適用し、位置を更新する
+11. `Simulator` は `global_time += time_step` を進める
+12. `Simulator.run()` は、通常は固定 step 数で、`stop_when_all_agents_reach_goals=True` のときは goal 到達判定で停止しつつ履歴をまとめて `SimulationResult` を返す
+13. `visualize` 導線では `visualization/trace_builder.py` が `Scenario` と `SimulationResult` を `VisualizationTrace` へ変換する
+14. `visualization/pyqtgraph_viewer.py` が障害物、初期位置、現在位置、軌跡を再生表示する
 
 ### 6.5 upstream Circle 回帰の現行ロジック
 
 1. `scenarios/upstream_circle.yaml` から 250 体の円周配置を読み込む
 2. `external/RVO2/examples/Circle.cc` と同じく、各 agent の goal は `goal_position` に antipodal point として記述する
-3. `Simulator.refresh_preferred_velocities_from_goals()` が各 step の直前に `goal - current_position` から希望速度を再計算する
-4. 目標ベクトル長が `preferred_speed` を超えるときは正規化して速度をそろえ、近傍なら goal までの残差ベクトルをそのまま使う
-5. ORCA パラメータは各 agent の `profile.neighbor_dist=15`, `profile.max_neighbors=10`, `profile.time_horizon=10`, `profile.time_horizon_obst=10` を使う
-6. 実行後は平均半径、最短 pair 距離、重心ずれ、goal 距離、速度上限、antipodal 対称性を比較メトリクスとして集計する
+3. `Scenario.stop_when_all_agents_reach_goals=True` により、既定実行は upstream と同じく全 agent の goal 到達まで続く
+4. `Simulator.refresh_preferred_velocities_from_goals()` が各 step の直前に `goal - current_position` から希望速度を再計算する
+5. 目標ベクトル長が `preferred_speed` を超えるときは正規化して速度をそろえ、近傍なら goal までの残差ベクトルをそのまま使う
+6. ORCA パラメータは各 agent の `profile.neighbor_dist=15`, `profile.max_neighbors=10`, `profile.time_horizon=10`, `profile.time_horizon_obst=10` を使う
+7. 明示的に `steps` override を渡した場合だけ、goal 到達停止ではなく固定 step 実行へ切り替える
+8. 実行後は平均半径、最短 pair 距離、重心ずれ、goal 距離、速度上限、antipodal 対称性を比較メトリクスとして集計する
 
 ### 6.6 upstream Blocks 回帰の現行ロジック
 
 1. `src/cmis_ca/regression/upstream_blocks.py` が `external/RVO2/examples/Blocks.cc` に対応する `Scenario` を code-generated で構築する
 2. 100 体の agent を 4 隅へ 25 体ずつ配置し、対角側 goal を与える
 3. 4 個の polygon obstacle を upstream と同じ頂点順で配置する
-4. `Simulator.refresh_preferred_velocities_from_goals()` が各 step の直前に goal 方向へ希望速度を更新する
+4. `Blocks` では upstream と同様に helper 側が各 step の直前に goal 方向の unit vector と微小 perturbation から preferred velocity を更新する
 5. 実行後は average goal distance、goal distance reduction、最短 pair 距離、重心ずれ、速度上限、central agent count を集計する
 
 ### 6.7 upstream Roadmap 回帰の現行ロジック
@@ -329,6 +336,7 @@ poetry run pytest
 - preferred speed: `1.0`
 - `time_step`: `0.5`
 - 既定 step 数: `100`
+- goal 追従時にごく小さい deterministic perturbation を加えて、8 体の完全対称停滞を避ける
 
 このため、`run` と `visualize` の既定挙動でも複数 agent の相互作用を確認できる。
 
@@ -338,6 +346,7 @@ poetry run pytest
 name: head-on-demo
 time_step: 0.5
 steps: 2
+stop_when_all_agents_reach_goals: false
 agents:
   - name: left
     profile:

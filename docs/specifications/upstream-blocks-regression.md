@@ -34,11 +34,12 @@
 - agent 最大速度 `2.0`
 - goal は対角側の corner goal
 - 4 個の polygon obstacle を upstream と同じ頂点順で配置
+- preferred velocity は helper 側で step ごとに再計算し、微小 perturbation も加える
 
 ## 5. scenario を code-generated にしている理由
 
 Blocks は 100 体の反復配置と 4 グループの goal を持つため、YAML へ展開すると可読性が落ちる。  
-現時点では scenario builder を Python に置き、upstream 条件と対応づけやすい形を優先している。
+また、upstream は scenario 外で preferred velocity と perturbation を更新するため、現時点では scenario builder と helper を Python に置き、upstream 条件と対応づけやすい形を優先している。
 
 ## 6. 現在の比較観点
 
@@ -56,7 +57,7 @@ Blocks は 100 体の反復配置と 4 グループの goal を持つため、YA
 
 - `goal_distance_reduction > 10.0`
 - `minimum_pair_distance > 6.0`
-- `centroid_distance < 1.0e-9`
+- `centroid_distance < 1.0e-4`
 - `max_speed <= 2.0`
 - `central_agent_count >= 4`
 
@@ -66,15 +67,15 @@ Blocks は 100 体の反復配置と 4 グループの goal を持つため、YA
 
 `scripts/compare_upstream_blocks.py` を 64 step で実行したときの現行値は以下。
 
-- `average_goal_distance ≈ 196.647592`
-- `goal_distance_reduction ≈ 15.955355`
-- `minimum_pair_distance ≈ 9.445481`
-- `centroid_distance = 0.0`
-- `max_speed = 1.0`
+- `average_goal_distance ≈ 196.647580`
+- `goal_distance_reduction ≈ 15.955368`
+- `minimum_pair_distance ≈ 9.445364`
+- `centroid_distance ≈ 0.000004`
+- `max_speed ≈ 1.000098`
 - `central_agent_count = 4`
 
 ## 9. 制約
 
-- upstream `Blocks.cc` の微小 perturbation は現時点では入れていない
+- perturbation は upstream の time-seeded random ではなく deterministic seed を使う
 - roadmap は使わず、`Blocks.cc` 同様に direct goal だけを使う
 - 近傍探索は `NaiveNeighborSearch` のため、長時間実行の性能と順序は upstream kd-tree と一致しない

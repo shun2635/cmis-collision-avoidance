@@ -44,10 +44,15 @@ class AgentConfig:
     preferred_velocity: Vector2 = field(default_factory=Vector2)
     goal_position: Vector2 | None = None
     preferred_speed: float = 1.0
+    auto_update_preferred_velocity_from_goal: bool = True
+    preferred_velocity_perturbation_scale: float = 0.0
+    preferred_velocity_perturbation_phase: float = 0.0
 
     def __post_init__(self) -> None:
         if self.preferred_speed < 0.0:
             raise ValueError("preferred_speed must be non-negative")
+        if self.preferred_velocity_perturbation_scale < 0.0:
+            raise ValueError("preferred_velocity_perturbation_scale must be non-negative")
 
 
 # The draft API refers to `Agent`; the initial skeleton keeps `AgentConfig` as

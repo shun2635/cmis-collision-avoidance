@@ -17,6 +17,7 @@ def test_load_scenario_reads_yaml_with_agents_and_obstacles(tmp_path) -> None:
                 "name: yaml-sample",
                 "time_step: 0.25",
                 "steps: 3",
+                "stop_when_all_agents_reach_goals: true",
                 "agents:",
                 "  - name: agent_0",
                 "    profile:",
@@ -47,6 +48,7 @@ def test_load_scenario_reads_yaml_with_agents_and_obstacles(tmp_path) -> None:
     assert scenario.name == "yaml-sample"
     assert scenario.time_step == pytest.approx(0.25)
     assert scenario.steps == 3
+    assert scenario.stop_when_all_agents_reach_goals is True
     assert len(scenario.agents) == 1
     assert scenario.agents[0].profile.max_speed == pytest.approx(1.2)
     assert scenario.agents[0].profile.neighbor_dist == pytest.approx(7.5)
@@ -111,4 +113,21 @@ def test_load_scenario_rejects_invalid_vector_shape(tmp_path) -> None:
     )
 
     with pytest.raises(ValueError, match="initial_position"):
+        load_scenario(scenario_path)
+
+
+def test_load_scenario_rejects_goal_stop_without_agent_goals(tmp_path) -> None:
+    scenario_path = tmp_path / "invalid_goal_stop.yaml"
+    scenario_path.write_text(
+        "\n".join(
+            [
+                "stop_when_all_agents_reach_goals: true",
+                "agents:",
+                "  - initial_position: [0.0, 0.0]",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="goal_position"):
         load_scenario(scenario_path)

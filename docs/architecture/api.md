@@ -20,9 +20,10 @@ upstream の概念を踏まえつつ、研究室内で扱いやすい Python ベ
 ```bash
 poetry run cmis-ca run --algorithm orca --steps 1
 poetry run cmis-ca run --algorithm orca --scenario scenarios/head_on.yaml
+poetry run cmis-ca visualize --algorithm orca --scenario scenarios/head_on.yaml
 ```
 
-現在は `run` サブコマンドのみ実装しており、`--scenario` には YAML / JSON シナリオファイルを渡せる。  
+現在は `run` と `visualize` を実装しており、`--scenario` には YAML / JSON シナリオファイルを渡せる。  
 将来的な到達形は以下を想定する。
 
 ```bash
@@ -48,7 +49,7 @@ cmis-ca run --algorithm cnav --scenario scenarios/circle.yaml
 - `ObstacleVertex`
   - 前後リンク、方向、凸性を含む runtime 障害物 vertex
 - `Scenario`
-  - 初期配置、障害物、タイムステップ、総ステップ数
+  - 初期配置、障害物、タイムステップ、停止条件
 - `WorldSnapshot`
   - 1 ステップ分の読み取り専用ワールド状態
   - `global_time` を含む
@@ -113,8 +114,10 @@ result = simulator.run()
 
 - フォーマット: `.yaml` `.yml` `.json`
 - 必須トップレベル項目: `agents`
-- 任意トップレベル項目: `name`, `time_step`, `steps`, `obstacles`
+- 任意トップレベル項目: `name`, `time_step`, `steps`, `stop_when_all_agents_reach_goals`, `obstacles`
 - goal 更新は `Simulator.step()` の前に自動適用される
+- `stop_when_all_agents_reach_goals: true` のとき、`run()` 既定挙動は全 agent が各自の `radius` 以内に goal 到達するまで続く
+- `steps: 0` は、`stop_when_all_agents_reach_goals: true` と組み合わせたとき無制限の goal 到達待ちを表す
 - `agents[*]`:
   - 任意: `name`, `profile`, `initial_position`, `initial_velocity`, `preferred_velocity`, `goal_position`, `preferred_speed`
   - `profile` の任意項目: `radius`, `max_speed`, `neighbor_dist`, `max_neighbors`, `time_horizon`, `time_horizon_obst`
@@ -131,7 +134,7 @@ result = simulator.run()
 loader は `vertices + closed` を `ObstaclePath` として受け取り、runtime では linked な `ObstacleVertex` 列へ展開する。  
 `start` / `end` は移行のための互換入力であり、内部では `closed: false` の 2 点 chain として扱う。
 
-CLI の `--steps` を指定した場合は、シナリオファイル中の `steps` より CLI 引数を優先する。
+CLI の `--steps` を指定した場合は、シナリオファイル中の停止条件より CLI 引数の固定 step 実行を優先する。
 
 ## 命名方針
 

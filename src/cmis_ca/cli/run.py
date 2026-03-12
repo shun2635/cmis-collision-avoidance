@@ -11,6 +11,8 @@ from cmis_ca.core.simulation import Simulator
 from cmis_ca.core.world import Scenario
 
 DEFAULT_DEMO_STEPS = 100
+DEFAULT_DEMO_PERTURBATION_SCALE = 1.0e-3
+GOLDEN_ANGLE = 2.39996322972865332
 
 
 def build_demo_scenario(steps: int = DEFAULT_DEMO_STEPS) -> Scenario:
@@ -38,6 +40,8 @@ def build_demo_scenario(steps: int = DEFAULT_DEMO_STEPS) -> Scenario:
                 preferred_velocity=Vector2(),
                 goal_position=-position,
                 preferred_speed=1.0,
+                preferred_velocity_perturbation_scale=DEFAULT_DEMO_PERTURBATION_SCALE,
+                preferred_velocity_perturbation_phase=index * GOLDEN_ANGLE,
             )
         )
 
@@ -63,14 +67,5 @@ def run_scenario_file(algorithm_name: str, scenario_path: str, steps: int | None
     from cmis_ca.io import load_scenario
 
     scenario = load_scenario(scenario_path)
-    simulator = Simulator(
-        scenario=Scenario(
-            name=scenario.name,
-            time_step=scenario.time_step,
-            steps=scenario.steps if steps is None else steps,
-            agents=scenario.agents,
-            obstacles=scenario.obstacles,
-        ),
-        algorithm=create_algorithm(algorithm_name),
-    )
-    return simulator.run()
+    simulator = Simulator(scenario=scenario, algorithm=create_algorithm(algorithm_name))
+    return simulator.run(steps=steps)

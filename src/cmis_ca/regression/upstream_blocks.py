@@ -10,6 +10,8 @@ scenario and regression helper for the Python codebase.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
+import random
 
 from cmis_ca.algorithms.orca.algorithm import ORCAAlgorithm
 from cmis_ca.algorithms.orca.parameters import ORCAParameters
@@ -20,6 +22,8 @@ from cmis_ca.core.state import AgentState
 from cmis_ca.core.world import ObstaclePath, Scenario, build_obstacle_topology
 
 UPSTREAM_BLOCKS_DEFAULT_STEPS = 64
+UPSTREAM_BLOCKS_RANDOM_SEED = 7
+_TWO_PI = 2.0 * math.pi
 
 
 @dataclass(frozen=True)
@@ -125,7 +129,10 @@ def build_upstream_blocks_scenario(steps: int = UPSTREAM_BLOCKS_DEFAULT_STEPS) -
     )
 
 
-def run_upstream_blocks_regression(steps: int = UPSTREAM_BLOCKS_DEFAULT_STEPS) -> BlocksRegressionMetrics:
+def run_upstream_blocks_regression(
+    steps: int = UPSTREAM_BLOCKS_DEFAULT_STEPS,
+    random_seed: int = UPSTREAM_BLOCKS_RANDOM_SEED,
+) -> BlocksRegressionMetrics:
     """Run the upstream Blocks scenario and collect qualitative metrics."""
 
     scenario = build_upstream_blocks_scenario(steps=steps)
@@ -134,8 +141,11 @@ def run_upstream_blocks_regression(steps: int = UPSTREAM_BLOCKS_DEFAULT_STEPS) -
         algorithm=ORCAAlgorithm(parameters=ORCAParameters()),
     )
     initial_average_goal_distance = _average_goal_distance_from_config(scenario.agents)
+    rng = random.Random(random_seed)
 
-    simulator.run(steps=steps)
+    for _ in range(steps):
+        _set_preferred_velocities(simulator, scenario.agents, rng)
+        simulator.step()
 
     return _collect_metrics(
         states=simulator.states,
@@ -161,7 +171,31 @@ def _build_blocks_agent(
         preferred_velocity=preferred_velocity,
         goal_position=goal,
         preferred_speed=1.0,
+        auto_update_preferred_velocity_from_goal=False,
     )
+
+
+def _set_preferred_velocities(
+    simulator: Simulator,
+    agents: tuple[AgentConfig, ...],
+    rng: random.Random,
+) -> None:
+    for index, (config, state) in enumerate(zip(agents, simulator.states)):
+        if config.goal_position is None:
+            simulator.set_preferred_velocity(index, Vector2())
+            continue
+
+        goal_vector = config.goal_position - state.position
+        if goal_vector.abs_sq() > 1.0:
+            goal_vector = goal_vector.normalized()
+
+        simulator.set_preferred_velocity(index, goal_vector + _tiny_perturbation(rng))
+
+
+def _tiny_perturbation(rng: random.Random) -> Vector2:
+    angle = rng.random() * _TWO_PI
+    distance = rng.random() * 1.0e-4
+    return Vector2(math.cos(angle), math.sin(angle)) * distance
 
 
 def _average_goal_distance_from_config(agents: tuple[AgentConfig, ...]) -> float:

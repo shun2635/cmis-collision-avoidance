@@ -36,6 +36,7 @@ upstream である `snape/RVO2` を参照しつつ、研究室内で読みやす
 - 利用可能なアルゴリズムは `orca` のみ
 - `--scenario` による YAML / JSON シナリオ読込に対応
 - goal / preferred velocity の scenario 記述と step 前自動更新に対応
+- scenario ごとの停止条件として `fixed steps` と `all goals reached` に対応
 - upstream 寄りの per-agent ORCA defaults と `global_time` を Python 側へ反映済み
 - ORCA 制約生成は基準実装まで完了
 - 共通ソルバは `LineConstraint + speed limit` の基準実装まで完了
@@ -98,6 +99,7 @@ poetry run cmis-ca visualize --algorithm orca --scenario scenarios/head_on.yaml
 
 `--scenario` を省略した場合の既定は、軽量な built-in `circle-demo` です。  
 既定 step 数は `100` です。
+この demo は 8 体の完全対称配置で中央停滞しないよう、goal 追従にごく小さい deterministic perturbation を加えています。
 
 最小スケルトンの実行確認:
 
@@ -118,7 +120,7 @@ cmis-ca run --algorithm cnav --scenario scenarios/circle.yaml
 
 - `scenarios/head_on.yaml`: 2 エージェントの正面衝突回避
 - `scenarios/obstacle_demo.yaml`: 単一障害物付きの最小ケース
-- `scenarios/upstream_circle.yaml`: `external/RVO2/examples/Circle.cc` に基づく 250 体の比較用シナリオ
+- `scenarios/upstream_circle.yaml`: `external/RVO2/examples/Circle.cc` に基づく 250 体の比較用シナリオ。`steps: 0` と `stop_when_all_agents_reach_goals: true` により、既定では goal 到達まで回す
 
 upstream 由来の regression helper:
 

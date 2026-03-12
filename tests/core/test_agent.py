@@ -5,7 +5,8 @@ from __future__ import annotations
 import pytest
 
 from cmis_ca.algorithms.orca.parameters import ORCAParameters
-from cmis_ca.core.agent import AgentProfile
+from cmis_ca.core.agent import AgentConfig, AgentProfile
+from cmis_ca.core.geometry import Vector2
 
 
 def test_agent_profile_exposes_upstream_style_navigation_defaults() -> None:
@@ -55,3 +56,14 @@ def test_orca_parameters_resolve_against_agent_profile() -> None:
     assert overridden.neighbor_dist == pytest.approx(15.0)
     assert overridden.max_neighbors == 4
     assert overridden.time_horizon == pytest.approx(3.0)
+
+
+def test_agent_config_enables_goal_refresh_by_default() -> None:
+    config = AgentConfig(goal_position=Vector2(1.0, 0.0))
+
+    assert config.auto_update_preferred_velocity_from_goal is True
+
+
+def test_agent_config_rejects_negative_goal_perturbation_scale() -> None:
+    with pytest.raises(ValueError):
+        AgentConfig(preferred_velocity_perturbation_scale=-1.0e-3)

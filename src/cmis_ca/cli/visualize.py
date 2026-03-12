@@ -38,10 +38,13 @@ def _load_scenario_for_visualization(scenario_path: str, steps: int | None) -> S
     from cmis_ca.io import load_scenario
 
     scenario = load_scenario(scenario_path)
+    if steps is None:
+        return scenario
     return Scenario(
         name=scenario.name,
         time_step=scenario.time_step,
-        steps=scenario.steps if steps is None else steps,
+        steps=steps,
+        stop_when_all_agents_reach_goals=False,
         agents=scenario.agents,
         obstacles=scenario.obstacles,
     )

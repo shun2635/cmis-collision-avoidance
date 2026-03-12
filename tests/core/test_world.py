@@ -30,6 +30,14 @@ def test_scenario_requires_agents_and_positive_time_step() -> None:
         )
 
 
+def test_scenario_rejects_goal_stop_without_agent_goals() -> None:
+    with pytest.raises(ValueError, match="goal_position"):
+        Scenario(
+            agents=(AgentConfig(profile=AgentProfile()),),
+            stop_when_all_agents_reach_goals=True,
+        )
+
+
 def test_obstacle_chain_builds_linked_vertices() -> None:
     obstacles = build_obstacle_chain((Vector2(0.0, 0.0), Vector2(0.0, 2.0)))
 

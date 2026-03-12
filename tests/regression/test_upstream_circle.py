@@ -13,7 +13,8 @@ def test_upstream_circle_scenario_matches_expected_setup() -> None:
 
     assert scenario.name == "upstream-circle"
     assert scenario.time_step == pytest.approx(0.25)
-    assert scenario.steps == 20
+    assert scenario.steps == 0
+    assert scenario.stop_when_all_agents_reach_goals is True
     assert len(scenario.agents) == 250
     assert scenario.agents[0].initial_position.x == pytest.approx(200.0)
     assert scenario.agents[0].goal_position is not None

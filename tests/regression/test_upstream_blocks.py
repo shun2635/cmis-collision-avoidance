@@ -18,6 +18,7 @@ def test_upstream_blocks_scenario_matches_expected_setup() -> None:
     assert len(scenario.obstacles) == 16
     assert scenario.agents[0].initial_position == Vector2(55.0, 55.0)
     assert scenario.agents[0].goal_position == Vector2(-75.0, -75.0)
+    assert scenario.agents[0].auto_update_preferred_velocity_from_goal is False
     assert scenario.agents[0].profile.radius == pytest.approx(2.0)
     assert scenario.agents[0].profile.max_speed == pytest.approx(2.0)
     assert scenario.agents[0].profile.neighbor_dist == pytest.approx(15.0)
@@ -32,6 +33,6 @@ def test_upstream_blocks_regression_keeps_progress_and_symmetry() -> None:
     assert metrics.steps_run == 64
     assert metrics.goal_distance_reduction > 10.0
     assert metrics.minimum_pair_distance > 6.0
-    assert metrics.centroid_distance < 1.0e-9
+    assert metrics.centroid_distance < 1.0e-4
     assert metrics.max_speed <= 2.0
     assert metrics.central_agent_count >= 4

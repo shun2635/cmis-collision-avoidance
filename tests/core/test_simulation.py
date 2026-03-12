@@ -76,3 +76,48 @@ def test_simulator_snapshot_exposes_global_time() -> None:
     assert simulator.snapshot().global_time == pytest.approx(0.0)
     simulator.step()
     assert simulator.snapshot().global_time == pytest.approx(0.25)
+
+
+def test_simulator_stops_when_all_agents_reach_goals() -> None:
+    scenario = Scenario(
+        agents=(
+                AgentConfig(
+                    profile=AgentProfile(radius=0.25, max_speed=2.0),
+                    initial_position=Vector2(0.0, 0.0),
+                    goal_position=Vector2(0.3, 0.0),
+                    preferred_speed=1.0,
+                ),
+        ),
+        time_step=0.5,
+        steps=0,
+        stop_when_all_agents_reach_goals=True,
+    )
+    simulator = Simulator(scenario=scenario, algorithm=create_algorithm("orca"))
+
+    result = simulator.run()
+
+    assert result.num_steps == 1
+    assert simulator.all_agents_reached_goals() is True
+    assert simulator.states[0].position.x == pytest.approx(0.15)
+
+
+def test_explicit_step_override_ignores_goal_stop_condition() -> None:
+    scenario = Scenario(
+        agents=(
+            AgentConfig(
+                profile=AgentProfile(radius=0.25, max_speed=2.0),
+                initial_position=Vector2(0.0, 0.0),
+                goal_position=Vector2(10.0, 0.0),
+                preferred_speed=1.0,
+            ),
+        ),
+        time_step=1.0,
+        steps=0,
+        stop_when_all_agents_reach_goals=True,
+    )
+    simulator = Simulator(scenario=scenario, algorithm=create_algorithm("orca"))
+
+    result = simulator.run(steps=2)
+
+    assert result.num_steps == 2
+    assert simulator.states[0].position.x == pytest.approx(2.0)
