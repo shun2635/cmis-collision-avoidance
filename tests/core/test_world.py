@@ -8,7 +8,15 @@ from cmis_ca.core.agent import AgentConfig, AgentProfile
 from cmis_ca.core.constraints import LineConstraint
 from cmis_ca.core.geometry import Vector2
 from cmis_ca.core.state import AgentState
-from cmis_ca.core.world import ObstacleSegment, Scenario, SnapshotAgent, WorldSnapshot
+from cmis_ca.core.world import (
+    ObstaclePath,
+    Scenario,
+    SnapshotAgent,
+    WorldSnapshot,
+    build_obstacle_chain,
+    build_obstacle_polygon,
+    obstacle_segment,
+)
 
 
 def test_scenario_requires_agents_and_positive_time_step() -> None:
@@ -22,16 +30,38 @@ def test_scenario_requires_agents_and_positive_time_step() -> None:
         )
 
 
-def test_obstacle_segment_exposes_length_and_direction() -> None:
-    segment = ObstacleSegment(start=Vector2(0.0, 0.0), end=Vector2(0.0, 2.0))
+def test_obstacle_chain_builds_linked_vertices() -> None:
+    obstacles = build_obstacle_chain((Vector2(0.0, 0.0), Vector2(0.0, 2.0)))
 
-    assert segment.length == 2.0
-    assert segment.direction == Vector2(0.0, 1.0)
+    assert len(obstacles) == 2
+    assert obstacles[0].next_index == 1
+    assert obstacles[1].next_index is None
+    assert obstacles[0].direction == Vector2(0.0, 1.0)
+    assert obstacle_segment(obstacles, 0) == (Vector2(0.0, 0.0), Vector2(0.0, 2.0))
 
 
-def test_zero_length_obstacle_segment_raises() -> None:
+def test_closed_obstacle_polygon_marks_convex_vertices() -> None:
+    obstacles = build_obstacle_polygon(
+        (
+            Vector2(0.0, 0.0),
+            Vector2(1.0, 0.0),
+            Vector2(1.0, 1.0),
+            Vector2(0.0, 1.0),
+        )
+    )
+
+    assert len(obstacles) == 4
+    assert all(obstacle.is_convex for obstacle in obstacles)
+    assert obstacles[0].previous_index == 3
+    assert obstacles[3].next_index == 0
+
+
+def test_invalid_obstacle_path_raises() -> None:
     with pytest.raises(ValueError):
-        ObstacleSegment(start=Vector2(1.0, 1.0), end=Vector2(1.0, 1.0))
+        ObstaclePath(vertices=(Vector2(1.0, 1.0),), closed=False)
+
+    with pytest.raises(ValueError):
+        ObstaclePath(vertices=(Vector2(1.0, 1.0), Vector2(1.0, 1.0)), closed=False)
 
 
 def test_world_snapshot_requires_unique_indices() -> None:

@@ -8,7 +8,7 @@ from cmis_ca.algorithms.orca.algorithm import ORCAAlgorithm
 from cmis_ca.core.agent import AgentConfig, AgentProfile
 from cmis_ca.core.geometry import Vector2
 from cmis_ca.core.simulation import Simulator
-from cmis_ca.core.world import ObstacleSegment, Scenario
+from cmis_ca.core.world import Scenario, build_obstacle_chain
 
 
 def test_orca_step_keeps_single_agent_smoke_case() -> None:
@@ -83,9 +83,7 @@ def test_orca_step_uses_obstacle_constraints() -> None:
                 preferred_velocity=Vector2(1.0, 0.0),
             ),
         ),
-        obstacles=(
-            ObstacleSegment(start=Vector2(0.2, -1.0), end=Vector2(0.2, 1.0)),
-        ),
+        obstacles=build_obstacle_chain((Vector2(0.2, -1.0), Vector2(0.2, 1.0))),
     )
 
     simulator = Simulator(scenario=scenario, algorithm=ORCAAlgorithm())

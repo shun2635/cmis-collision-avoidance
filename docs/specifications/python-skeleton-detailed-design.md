@@ -51,7 +51,7 @@
 | `agent.py` | `AgentProfile` と `AgentConfig` の定義、goal 情報と upstream 寄り navigation parameter の保持 |
 | `state.py` | `AgentState` `AgentCommand` `SimulationResult` の定義 |
 | `scenario.py` | draft API 互換のため `Scenario` を再公開 |
-| `world.py` | `Scenario` `ObstacleSegment` `SnapshotAgent` `WorldSnapshot` の定義 |
+| `world.py` | `Scenario` `ObstaclePath` `ObstacleVertex` `SnapshotAgent` `WorldSnapshot` の定義 |
 | `neighbor_search.py` | `NeighborSearch` protocol、距離付き近傍結果、`NaiveNeighborSearch` |
 | `constraints.py` | 中立な半平面制約 `LineConstraint` |
 | `solver.py` | 制約付き速度選択の共通ソルバ |
@@ -86,7 +86,7 @@
 ### 3.5 `algorithms/orca/constraints.py` の現行仕様
 
 - `build_agent_constraints()` は upstream の agent-agent ORCA line 生成をベースに、エージェント間の reciprocal avoidance 制約を作る
-- `build_obstacle_constraints()` は現行 `ObstacleSegment` モデルに合わせて、線分最近点を使う closest-point 近似で静的障害物制約を作る
+- `build_obstacle_constraints()` は linked obstacle topology の outgoing edge に対して、線分最近点を使う closest-point 近似で静的障害物制約を作る
 - エージェント間制約は回避責任を `0.5` ずつ分担する
 - 障害物制約は静的障害物として agent 側が全責任を負う
 - どちらも `LineConstraint` を返し、ORCA 固有の意味付けは `algorithms/orca/` に閉じ込める
@@ -105,7 +105,8 @@
 - トップレベルは mapping のみを受け付ける
 - `agents` は必須で、1 件以上必要
 - `name` 未指定時はファイル名 stem を使う
-- `obstacles` は省略可能で、指定時は `start` `end` を必須とする
+- `obstacles` は省略可能で、正規 schema は `vertices` と任意 `closed` を受け付ける
+- loader は互換のため `start` `end` 2 点定義も受け付ける
 - ベクトルは `[x, y]` または `{x: ..., y: ...}` の 2 形式を受け付ける
 - `agent.profile` では `radius`, `max_speed`, `neighbor_dist`, `max_neighbors`, `time_horizon`, `time_horizon_obst` を受け付ける
 - `agent.goal_position` は任意で、指定時は vector として読み込む
@@ -152,7 +153,9 @@
 - `AgentProfile.max_neighbors` は 0 以上
 - `AgentProfile.time_horizon` は正数
 - `AgentProfile.time_horizon_obst` は正数
-- `ObstacleSegment` は長さ 0 を禁止
+- `ObstaclePath` は 2 点以上必須
+- `ObstaclePath` は連続重複点を禁止
+- `ObstaclePath` は `closed: true` のとき先頭点の末尾再掲を禁止
 - `WorldSnapshot.global_time` は 0 以上
 - `WorldSnapshot.agents` の `index` は一意
 - `LineConstraint.direction` はゼロベクトルを禁止
@@ -268,9 +271,9 @@ poetry run pytest
 ### 6.2 ORCA 1 ステップの現状ロジック
 
 1. `NaiveNeighborSearch` が距離ベースで近傍エージェントを列挙する
-2. 同時に、点と線分の最短距離に基づいて `neighbor_dist` 以内の障害物線分を列挙する
+2. 同時に、linked obstacle topology のうち `next_index` を持つ outgoing edge を対象に、点と線分の最短距離に基づいて `neighbor_dist` 以内の障害物辺を列挙する
 3. どちらも距離順に整列し、エージェント近傍のみ `max_neighbors` で制限する
-4. `build_obstacle_constraints()` が静的障害物線分から ORCA 制約を生成する
+4. `build_obstacle_constraints()` が static obstacle edge から ORCA 制約を生成する
 5. `build_agent_constraints()` が近傍エージェントから reciprocal avoidance 制約を生成する
 6. `solve_linear_constraints()` が obstacle 制約数を `protected_constraint_count` として受け取り、速度上限円付きの制約付き速度選択を行う
 7. 現時点の smoke シナリオは 1 エージェントなので、実行時には制約列が空のまま進む
@@ -308,8 +311,10 @@ agents:
     initial_velocity: [0.0, 0.0]
     preferred_velocity: [1.0, 0.0]
 obstacles:
-  - start: [0.6, -1.0]
-    end: [0.6, 1.0]
+  - closed: false
+    vertices:
+      - [0.6, -1.0]
+      - [0.6, 1.0]
 ```
 
 ## 7. テスト方針
@@ -327,7 +332,7 @@ obstacles:
 | `tests/core/test_simulation.py` | goal ベースの preferred velocity 自動更新 |
 | `tests/core/test_solver.py` | 半平面制約なし、単一制約、複数制約、方向最適化、入力検証 |
 | `tests/core/test_state.py` | `AgentState` `AgentCommand` `SimulationResult` |
-| `tests/core/test_world.py` | `Scenario` `ObstacleSegment` `WorldSnapshot` `LineConstraint` |
+| `tests/core/test_world.py` | `Scenario` `ObstaclePath` `ObstacleVertex` `WorldSnapshot` `LineConstraint` |
 | `tests/io/test_scenario_loader.py` | YAML / JSON ローダ、スキーマ違反 |
 | `tests/regression/test_upstream_circle.py` | upstream Circle の条件と対称性・内向き収束 |
 | `tests/test_simulator_smoke.py` | ORCA skeleton の 1 エージェント前進確認 |
@@ -351,7 +356,6 @@ obstacles:
 現時点の主要な未実装事項は以下。
 
 - 複数アルゴリズム登録
-- upstream 準拠の obstacle topology
 - upstream 準拠の obstacle constraint 移植
 - agent-agent / solver の完全一致監査
 - 回帰 suite のさらなる拡張

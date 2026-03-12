@@ -13,7 +13,7 @@ from cmis_ca.core.agent import AgentProfile
 from cmis_ca.core.geometry import Vector2
 from cmis_ca.core.neighbor_search import AgentNeighbor, NeighborSet, ObstacleNeighbor
 from cmis_ca.core.state import AgentState
-from cmis_ca.core.world import ObstacleSegment, SnapshotAgent, WorldSnapshot
+from cmis_ca.core.world import SnapshotAgent, WorldSnapshot, build_obstacle_chain
 
 
 def _agent(index: int, position: Vector2, velocity: Vector2 = Vector2()) -> SnapshotAgent:
@@ -82,7 +82,7 @@ def test_build_obstacle_constraints_non_collision_case() -> None:
         global_time=0.0,
         time_step=0.1,
         agents=(_agent(0, Vector2(0.0, 0.0)),),
-        obstacles=(ObstacleSegment(start=Vector2(2.0, -1.0), end=Vector2(2.0, 1.0)),),
+        obstacles=build_obstacle_chain((Vector2(2.0, -1.0), Vector2(2.0, 1.0))),
     )
     neighbors = NeighborSet(obstacle_neighbors=(ObstacleNeighbor(index=0, distance=2.0),))
 
@@ -109,7 +109,7 @@ def test_build_obstacle_constraints_collision_case() -> None:
         global_time=0.0,
         time_step=0.1,
         agents=(_agent(0, Vector2(0.0, 0.0)),),
-        obstacles=(ObstacleSegment(start=Vector2(0.2, -1.0), end=Vector2(0.2, 1.0)),),
+        obstacles=build_obstacle_chain((Vector2(0.2, -1.0), Vector2(0.2, 1.0))),
     )
     neighbors = NeighborSet(obstacle_neighbors=(ObstacleNeighbor(index=0, distance=0.2),))
 

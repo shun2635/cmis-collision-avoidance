@@ -33,8 +33,10 @@ def test_load_scenario_reads_yaml_with_agents_and_obstacles(tmp_path) -> None:
                 "      x: 1.0",
                 "      y: 0.0",
                 "obstacles:",
-                "  - start: [1.0, -1.0]",
-                "    end: [1.0, 1.0]",
+                "  - closed: false",
+                "    vertices:",
+                "      - [1.0, -1.0]",
+                "      - [1.0, 1.0]",
             ]
         ),
         encoding="utf-8",
@@ -55,8 +57,10 @@ def test_load_scenario_reads_yaml_with_agents_and_obstacles(tmp_path) -> None:
     assert scenario.agents[0].goal_position is not None
     assert scenario.agents[0].goal_position.x == pytest.approx(2.0)
     assert scenario.agents[0].preferred_speed == pytest.approx(0.75)
-    assert len(scenario.obstacles) == 1
-    assert scenario.obstacles[0].start.x == pytest.approx(1.0)
+    assert len(scenario.obstacles) == 2
+    assert scenario.obstacles[0].point.x == pytest.approx(1.0)
+    assert scenario.obstacles[0].next_index == 1
+    assert scenario.obstacles[1].next_index is None
 
 
 def test_load_scenario_reads_json_and_uses_filename_as_default_name(tmp_path) -> None:

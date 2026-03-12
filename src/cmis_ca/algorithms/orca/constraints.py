@@ -4,7 +4,7 @@ Derived from: https://github.com/snape/RVO2
 Original license: Apache License 2.0
 Modified for the CMIS Collision Avoidance project.
 Summary of changes: rewrote agent-agent ORCA constraint generation in Python
-and adapted obstacle handling to the current `ObstacleSegment` model using a
+and adapted obstacle handling to the current linked obstacle topology using a
 closest-point approximation.
 """
 
@@ -14,7 +14,7 @@ from cmis_ca.algorithms.orca.parameters import ORCAParameters
 from cmis_ca.core.constraints import LineConstraint
 from cmis_ca.core.geometry import Vector2
 from cmis_ca.core.neighbor_search import NeighborSet
-from cmis_ca.core.world import ObstacleSegment, SnapshotAgent, WorldSnapshot
+from cmis_ca.core.world import SnapshotAgent, WorldSnapshot, obstacle_segment
 
 
 def build_obstacle_constraints(
@@ -25,18 +25,20 @@ def build_obstacle_constraints(
 ) -> list[LineConstraint]:
     """Build ORCA constraints against static obstacle segments.
 
-    The current repository represents obstacles as independent segments, not as
-    the convex linked obstacle graph used by upstream RVO2. To stay consistent
-    with that model, each segment is approximated via the closest point on the
-    segment and converted into a full-responsibility ORCA line.
+    The current repository now stores upstream-style obstacle topology as
+    linked vertices. The actual ORCA obstacle line logic is still approximated
+    via the closest point on each outgoing obstacle edge.
     """
 
     agent = _find_agent(snapshot, agent_index)
     constraints = []
 
     for obstacle_neighbor in neighbors.obstacle_neighbors:
-        obstacle = snapshot.obstacles[obstacle_neighbor.index]
-        closest_point = _closest_point_on_segment(agent.state.position, obstacle)
+        closest_point = _closest_point_on_segment(
+            agent.state.position,
+            snapshot.obstacles,
+            obstacle_neighbor.index,
+        )
         constraints.append(
             _build_orca_constraint(
                 relative_position=closest_point - agent.state.position,
@@ -148,15 +150,16 @@ def _find_agent(snapshot: WorldSnapshot, agent_index: int) -> SnapshotAgent:
     raise ValueError(f"agent index {agent_index} is not present in the snapshot")
 
 
-def _closest_point_on_segment(point: Vector2, obstacle: ObstacleSegment) -> Vector2:
-    segment = obstacle.end - obstacle.start
+def _closest_point_on_segment(point: Vector2, obstacles, obstacle_index: int) -> Vector2:
+    segment_start, segment_end = obstacle_segment(obstacles, obstacle_index)
+    segment = segment_end - segment_start
     segment_length_sq = segment.abs_sq()
     if segment_length_sq == 0.0:
-        return obstacle.start
+        return segment_start
 
-    projection = (point - obstacle.start).dot(segment) / segment_length_sq
+    projection = (point - segment_start).dot(segment) / segment_length_sq
     clamped_projection = max(0.0, min(1.0, projection))
-    return obstacle.start + clamped_projection * segment
+    return segment_start + clamped_projection * segment
 
 
 def _clockwise_perpendicular(vector: Vector2) -> Vector2:

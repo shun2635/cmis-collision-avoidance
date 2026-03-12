@@ -43,6 +43,10 @@ cmis-ca run --algorithm cnav --scenario scenarios/circle.yaml
   - `radius`, `max_speed`, `neighbor_dist`, `max_neighbors`, `time_horizon`, `time_horizon_obst`
 - `AgentState`
   - 現在位置、現在速度、希望速度
+- `ObstaclePath`
+  - scenario file 上の障害物 path 定義
+- `ObstacleVertex`
+  - 前後リンク、方向、凸性を含む runtime 障害物 vertex
 - `Scenario`
   - 初期配置、障害物、タイムステップ、総ステップ数
 - `WorldSnapshot`
@@ -115,10 +119,17 @@ result = simulator.run()
   - 任意: `name`, `profile`, `initial_position`, `initial_velocity`, `preferred_velocity`, `goal_position`, `preferred_speed`
   - `profile` の任意項目: `radius`, `max_speed`, `neighbor_dist`, `max_neighbors`, `time_horizon`, `time_horizon_obst`
 - `obstacles[*]`:
-  - 必須: `start`, `end`
+  - 正規 schema:
+    - 必須: `vertices`
+    - 任意: `closed`
+  - 互換 schema:
+    - `start`, `end`
 - ベクトル表現:
   - `[x, y]`
   - `{x: ..., y: ...}`
+
+loader は `vertices + closed` を `ObstaclePath` として受け取り、runtime では linked な `ObstacleVertex` 列へ展開する。  
+`start` / `end` は移行のための互換入力であり、内部では `closed: false` の 2 点 chain として扱う。
 
 CLI の `--steps` を指定した場合は、シナリオファイル中の `steps` より CLI 引数を優先する。
 

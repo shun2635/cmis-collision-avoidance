@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Protocol
 
 from cmis_ca.core.geometry import Vector2
-from cmis_ca.core.world import ObstacleSegment, SnapshotAgent, WorldSnapshot
+from cmis_ca.core.world import SnapshotAgent, WorldSnapshot, obstacle_edges, obstacle_segment
 
 
 @dataclass(frozen=True)
@@ -86,8 +86,8 @@ class NaiveNeighborSearch:
                 agent_candidates.append(AgentNeighbor(index=other.index, distance=distance))
 
         obstacle_candidates = []
-        for obstacle_index, obstacle in enumerate(snapshot.obstacles):
-            distance = _distance_to_obstacle(origin, obstacle)
+        for obstacle_index in obstacle_edges(snapshot.obstacles):
+            distance = _distance_to_obstacle(origin, snapshot.obstacles, obstacle_index)
             if distance <= neighbor_dist:
                 obstacle_candidates.append(ObstacleNeighbor(index=obstacle_index, distance=distance))
 
@@ -107,13 +107,18 @@ def _find_agent(snapshot: WorldSnapshot, agent_index: int) -> SnapshotAgent:
     raise ValueError(f"agent index {agent_index} is not present in the snapshot")
 
 
-def _distance_to_obstacle(point: Vector2, obstacle: ObstacleSegment) -> float:
-    segment = obstacle.end - obstacle.start
+def _distance_to_obstacle(
+    point: Vector2,
+    obstacles,
+    obstacle_index: int,
+) -> float:
+    segment_start, segment_end = obstacle_segment(obstacles, obstacle_index)
+    segment = segment_end - segment_start
     segment_length_sq = segment.abs_sq()
     if segment_length_sq == 0.0:
-        return point.distance_to(obstacle.start)
+        return point.distance_to(segment_start)
 
-    projection = (point - obstacle.start).dot(segment) / segment_length_sq
+    projection = (point - segment_start).dot(segment) / segment_length_sq
     clamped_projection = max(0.0, min(1.0, projection))
-    closest_point = obstacle.start + segment * clamped_projection
+    closest_point = segment_start + segment * clamped_projection
     return point.distance_to(closest_point)

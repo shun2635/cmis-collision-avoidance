@@ -24,10 +24,10 @@
 
 ## 残る主要ギャップ
 
-### 1. obstacle 表現
+### 1. obstacle constraint の厳密移植
 
-現在の障害物は `ObstacleSegment` 単体で、upstream の linked obstacle graph や凸性判定を持っていない。  
-このため obstacle ORCA line は closest-point 近似に留まっている。
+障害物 topology 自体は `ObstacleVertex` の linked model へ移行済みで、前後リンク、方向、凸性を保持できる。  
+一方で obstacle ORCA line 本体はまだ closest-point 近似に留まっており、upstream の分岐は未移植である。
 
 ### 2. agent / solver / neighbor semantics の差分
 
@@ -43,7 +43,7 @@ agent / simulator の主要 parameter と clock は監査済みだが、agent-ag
 
 1. `0012-orca-goal-model-and-pref-velocity-alignment` `completed`
 2. `0013-orca-agent-and-simulator-parity-audit` `completed`
-3. `0014-orca-obstacle-topology-model-port`
+3. `0014-orca-obstacle-topology-model-port` `completed`
 4. `0015-orca-obstacle-constraint-exact-port`
 5. `0016-orca-agent-constraint-and-solver-parity`
 6. `0017-orca-upstream-regression-suite-expansion`

@@ -10,7 +10,7 @@ import yaml
 
 from cmis_ca.core.agent import AgentConfig, AgentProfile
 from cmis_ca.core.geometry import Vector2
-from cmis_ca.core.world import ObstacleSegment, Scenario
+from cmis_ca.core.world import ObstaclePath, Scenario, build_obstacle_topology
 
 
 def load_scenario(path: str | Path) -> Scenario:
@@ -54,8 +54,8 @@ def _parse_scenario(document: dict[str, Any], path: Path) -> Scenario:
         time_step=_parse_float(document.get("time_step", 0.1), "time_step"),
         steps=_parse_int(document.get("steps", 1), "steps"),
         agents=tuple(_parse_agent(entry, index) for index, entry in enumerate(agents_raw)),
-        obstacles=tuple(
-            _parse_obstacle(entry, index) for index, entry in enumerate(obstacles_raw)
+        obstacles=build_obstacle_topology(
+            tuple(_parse_obstacle(entry, index) for index, entry in enumerate(obstacles_raw))
         ),
     )
 
@@ -124,12 +124,32 @@ def _parse_agent(entry: Any, index: int) -> AgentConfig:
     )
 
 
-def _parse_obstacle(entry: Any, index: int) -> ObstacleSegment:
+def _parse_obstacle(entry: Any, index: int) -> ObstaclePath:
     if not isinstance(entry, dict):
         raise ValueError(f"obstacle[{index}] must be a mapping")
-    return ObstacleSegment(
-        start=_parse_vector(entry.get("start"), f"obstacle[{index}].start"),
-        end=_parse_vector(entry.get("end"), f"obstacle[{index}].end"),
+    if "vertices" in entry:
+        vertices_raw = entry["vertices"]
+        if not isinstance(vertices_raw, list) or len(vertices_raw) < 2:
+            raise ValueError(f"obstacle[{index}].vertices must be a list with at least two points")
+        return ObstaclePath(
+            vertices=tuple(
+                _parse_vector(vertex, f"obstacle[{index}].vertices[{vertex_index}]")
+                for vertex_index, vertex in enumerate(vertices_raw)
+            ),
+            closed=_parse_bool(entry.get("closed", True), f"obstacle[{index}].closed"),
+        )
+
+    if "start" in entry and "end" in entry:
+        return ObstaclePath(
+            vertices=(
+                _parse_vector(entry["start"], f"obstacle[{index}].start"),
+                _parse_vector(entry["end"], f"obstacle[{index}].end"),
+            ),
+            closed=False,
+        )
+
+    raise ValueError(
+        f"obstacle[{index}] must define either 'vertices' or both 'start' and 'end'"
     )
 
 
@@ -172,4 +192,10 @@ def _parse_float(value: Any, field_name: str) -> float:
 def _parse_int(value: Any, field_name: str) -> int:
     if isinstance(value, bool) or not isinstance(value, int):
         raise ValueError(f"{field_name} must be an integer")
+    return value
+
+
+def _parse_bool(value: Any, field_name: str) -> bool:
+    if not isinstance(value, bool):
+        raise ValueError(f"{field_name} must be a boolean")
     return value

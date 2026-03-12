@@ -8,7 +8,7 @@ from cmis_ca.core.agent import AgentProfile
 from cmis_ca.core.geometry import Vector2
 from cmis_ca.core.neighbor_search import NaiveNeighborSearch
 from cmis_ca.core.state import AgentState
-from cmis_ca.core.world import ObstacleSegment, SnapshotAgent, WorldSnapshot
+from cmis_ca.core.world import ObstaclePath, SnapshotAgent, WorldSnapshot, build_obstacle_topology
 
 
 def _snapshot_agent(index: int, position: Vector2) -> SnapshotAgent:
@@ -75,21 +75,23 @@ def test_obstacle_neighbors_are_filtered_and_sorted_by_segment_distance() -> Non
         global_time=0.0,
         time_step=0.1,
         agents=(_snapshot_agent(0, Vector2(0.0, 0.0)),),
-        obstacles=(
-            ObstacleSegment(start=Vector2(5.0, 0.0), end=Vector2(5.0, 2.0)),
-            ObstacleSegment(start=Vector2(1.0, -1.0), end=Vector2(1.0, 1.0)),
-            ObstacleSegment(start=Vector2(3.0, -1.0), end=Vector2(3.0, 1.0)),
+        obstacles=build_obstacle_topology(
+            (
+                ObstaclePath(vertices=(Vector2(5.0, 0.0), Vector2(5.0, 2.0)), closed=False),
+                ObstaclePath(vertices=(Vector2(1.0, -1.0), Vector2(1.0, 1.0)), closed=False),
+                ObstaclePath(vertices=(Vector2(3.0, -1.0), Vector2(3.0, 1.0)), closed=False),
+            )
         ),
     )
 
     neighbors = NaiveNeighborSearch().find_neighbors(
         snapshot=snapshot,
         agent_index=0,
-        neighbor_dist=3.0,
+        neighbor_dist=3.1,
         max_neighbors=5,
     )
 
-    assert neighbors.obstacle_indices == (1, 2)
+    assert neighbors.obstacle_indices == (2, 4)
     assert tuple(neighbor.distance for neighbor in neighbors.obstacle_neighbors) == (1.0, 3.0)
 
 

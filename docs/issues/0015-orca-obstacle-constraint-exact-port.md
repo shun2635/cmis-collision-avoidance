@@ -43,4 +43,4 @@ obstacle ORCA constraint 生成を upstream の分岐に沿って移植し、ver
 
 ## 依存関係
 
-- [0014-orca-obstacle-topology-model-port.md](0014-orca-obstacle-topology-model-port.md): pending
+- [0014-orca-obstacle-topology-model-port.md](0014-orca-obstacle-topology-model-port.md): completed
