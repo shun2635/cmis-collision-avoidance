@@ -5,6 +5,8 @@
 この文書は、`external/RVO2/examples/Circle.cc` を参照して作成した比較用回帰基盤を記録する。  
 目的は upstream 完全一致を保証することではなく、将来の ORCA 実装変更で挙動が崩れていないかを継続的に確認できる入口を固定することである。
 
+obstacle を含む companion scenario については [upstream-blocks-regression.md](upstream-blocks-regression.md) を参照する。
+
 ## 2. 出典
 
 - 参照元: `external/RVO2/examples/Circle.cc`

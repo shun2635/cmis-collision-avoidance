@@ -16,4 +16,5 @@
 - `orca-agent-solver-parity.md`
 - `orca-obstacle-topology.md`
 - `python-skeleton-detailed-design.md`
+- `upstream-blocks-regression.md`
 - `upstream-circle-regression.md`

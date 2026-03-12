@@ -42,7 +42,7 @@ upstream である `snape/RVO2` を参照しつつ、研究室内で読みやす
 - 障害物 topology は upstream 寄りの linked vertex モデルへ移行済み
 - 障害物 ORCA 制約は、upstream `Agent.cc` の obstacle 分岐をベースに移植済み
 - agent-agent ORCA 制約と solver の主要分岐は upstream ベースで監査済み
-- upstream `Circle` 条件に基づく回帰シナリオと比較メトリクスの土台を追加済み
+- upstream `Circle` と `Blocks` 条件に基づく回帰シナリオと比較メトリクスの土台を追加済み
 
 実装済みの詳細仕様は [docs/specifications/python-skeleton-detailed-design.md](docs/specifications/python-skeleton-detailed-design.md) を参照してください。
 
@@ -110,6 +110,12 @@ cmis-ca run --algorithm cnav --scenario scenarios/circle.yaml
 - `scenarios/obstacle_demo.yaml`: 単一障害物付きの最小ケース
 - `scenarios/upstream_circle.yaml`: `external/RVO2/examples/Circle.cc` に基づく 250 体の比較用シナリオ
 
+upstream 由来の regression helper:
+
+- `scripts/compare_upstream_circle.py`: Circle の比較 metric を出力
+- `scripts/compare_upstream_blocks.py`: Blocks の比較 metric を出力
+- `Blocks` は repetitive な 100 体配置のため、現時点では YAML ではなく `src/cmis_ca/regression/upstream_blocks.py` で code-generated scenario として保持する
+
 ## 移行メモ
 
 既存の C++ スケルトンは、初期検討時の暫定実装として残しています。  
@@ -130,4 +136,5 @@ Poetry の仮想環境は [poetry.toml](poetry.toml) によりプロジェクト
 - ORCA agent / simulator parity 監査: [docs/specifications/orca-agent-simulator-parity.md](docs/specifications/orca-agent-simulator-parity.md)
 - ORCA agent / solver parity: [docs/specifications/orca-agent-solver-parity.md](docs/specifications/orca-agent-solver-parity.md)
 - ORCA obstacle topology: [docs/specifications/orca-obstacle-topology.md](docs/specifications/orca-obstacle-topology.md)
+- upstream Blocks 回帰基盤: [docs/specifications/upstream-blocks-regression.md](docs/specifications/upstream-blocks-regression.md)
 - upstream Circle 回帰基盤: [docs/specifications/upstream-circle-regression.md](docs/specifications/upstream-circle-regression.md)

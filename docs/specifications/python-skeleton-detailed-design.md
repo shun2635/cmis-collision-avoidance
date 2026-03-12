@@ -40,7 +40,8 @@
 | 共通 core | `src/cmis_ca/core/` | 幾何、状態、ワールド、近傍探索、制約表現、共通ソルバ、実行ループ |
 | ORCA 固有実装 | `src/cmis_ca/algorithms/orca/` | ORCA 固有パラメータ、制約生成、ステップ判断 |
 | 補助スクリプト | `scripts/smoke_run.py` | 最小実行確認 |
-| 回帰スクリプト | `scripts/compare_upstream_circle.py` | upstream Circle 条件の比較メトリクスを出力 |
+| 回帰 helper | `src/cmis_ca/regression/` | upstream 由来 scenario の builder と metric 集計 |
+| 回帰スクリプト | `scripts/compare_upstream_circle.py`, `scripts/compare_upstream_blocks.py` | upstream 条件の比較メトリクスを出力 |
 | テスト | `tests/` | core の単体テストとスモークテスト |
 | upstream 参照 | `external/RVO2/` | 比較・参照用の外部コード |
 
@@ -215,6 +216,7 @@ agent=<index> position=(<x>, <y>) velocity=(<vx>, <vy>)
 | `poetry.toml` | Poetry 仮想環境を `.venv/` に作る設定 |
 | `scenarios/*.yaml` | 共通シナリオ定義 |
 | `scenarios/upstream_circle.yaml` | upstream `Circle.cc` 由来の比較用シナリオ |
+| `src/cmis_ca/regression/upstream_blocks.py` | upstream `Blocks.cc` 由来の code-generated scenario と metric |
 | `docs/algorithms/orca.md` | ORCA の責務境界と設計方針 |
 
 現時点で `configs/` は未使用だが、`scenarios/` は CLI から利用する。
@@ -270,6 +272,14 @@ poetry run pytest
 4. 目標ベクトル長が `preferred_speed` を超えるときは正規化して速度をそろえ、近傍なら goal までの残差ベクトルをそのまま使う
 5. ORCA パラメータは各 agent の `profile.neighbor_dist=15`, `profile.max_neighbors=10`, `profile.time_horizon=10`, `profile.time_horizon_obst=10` を使う
 6. 実行後は平均半径、最短 pair 距離、重心ずれ、goal 距離、速度上限、antipodal 対称性を比較メトリクスとして集計する
+
+### 6.6 upstream Blocks 回帰の現行ロジック
+
+1. `src/cmis_ca/regression/upstream_blocks.py` が `external/RVO2/examples/Blocks.cc` に対応する `Scenario` を code-generated で構築する
+2. 100 体の agent を 4 隅へ 25 体ずつ配置し、対角側 goal を与える
+3. 4 個の polygon obstacle を upstream と同じ頂点順で配置する
+4. `Simulator.refresh_preferred_velocities_from_goals()` が各 step の直前に goal 方向へ希望速度を更新する
+5. 実行後は average goal distance、goal distance reduction、最短 pair 距離、重心ずれ、速度上限、central agent count を集計する
 
 ### 6.2 ORCA 1 ステップの現状ロジック
 
@@ -339,6 +349,7 @@ obstacles:
 | `tests/core/test_state.py` | `AgentState` `AgentCommand` `SimulationResult` |
 | `tests/core/test_world.py` | `Scenario` `ObstaclePath` `ObstacleVertex` `WorldSnapshot` `LineConstraint` |
 | `tests/io/test_scenario_loader.py` | YAML / JSON ローダ、スキーマ違反 |
+| `tests/regression/test_upstream_blocks.py` | upstream Blocks の条件と障害物付き進捗確認 |
 | `tests/regression/test_upstream_circle.py` | upstream Circle の条件と対称性・内向き収束 |
 | `tests/test_simulator_smoke.py` | ORCA skeleton の 1 エージェント前進確認 |
 

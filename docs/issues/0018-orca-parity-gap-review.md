@@ -41,4 +41,4 @@ ORCA の残差を監査し、未解決項目と妥協点を一覧化して、次
 
 ## 依存関係
 
-- [0017-orca-upstream-regression-suite-expansion.md](0017-orca-upstream-regression-suite-expansion.md): pending
+- [0017-orca-upstream-regression-suite-expansion.md](0017-orca-upstream-regression-suite-expansion.md): completed
