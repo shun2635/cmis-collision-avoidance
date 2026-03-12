@@ -42,6 +42,7 @@ upstream である `snape/RVO2` を参照しつつ、研究室内で読みやす
 - 障害物 topology は upstream 寄りの linked vertex モデルへ移行済み
 - 障害物 ORCA 制約は、upstream `Agent.cc` の obstacle 分岐をベースに移植済み
 - agent-agent ORCA 制約と solver の主要分岐は upstream ベースで監査済み
+- neighbor search は upstream ベースの range / boundary / insertion semantics に追従済み
 - upstream `Circle` と `Blocks` 条件に基づく回帰シナリオと比較メトリクスの土台を追加済み
 
 実装済みの詳細仕様は [docs/specifications/python-skeleton-detailed-design.md](docs/specifications/python-skeleton-detailed-design.md) を参照してください。
@@ -134,6 +135,7 @@ Poetry の仮想環境は [poetry.toml](poetry.toml) によりプロジェクト
 - 由来コードの取り扱い方針: [docs/policies/source-file-policy.md](docs/policies/source-file-policy.md)
 - 現行実装の詳細設計書: [docs/specifications/python-skeleton-detailed-design.md](docs/specifications/python-skeleton-detailed-design.md)
 - ORCA agent / simulator parity 監査: [docs/specifications/orca-agent-simulator-parity.md](docs/specifications/orca-agent-simulator-parity.md)
+- ORCA neighbor search parity: [docs/specifications/orca-neighbor-search-parity.md](docs/specifications/orca-neighbor-search-parity.md)
 - ORCA agent / solver parity: [docs/specifications/orca-agent-solver-parity.md](docs/specifications/orca-agent-solver-parity.md)
 - ORCA obstacle topology: [docs/specifications/orca-obstacle-topology.md](docs/specifications/orca-obstacle-topology.md)
 - ORCA parity gap review: [docs/specifications/orca-parity-gap-review.md](docs/specifications/orca-parity-gap-review.md)

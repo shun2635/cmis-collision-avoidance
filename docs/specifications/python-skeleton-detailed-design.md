@@ -26,6 +26,7 @@
 - 共通ソルバは `LineConstraint + speed limit` に対する基準実装まで完了
 - upstream の agent / simulator 主要 parameter と clock を Python 側へ反映済み
 - agent-agent ORCA line と solver の主要分岐を upstream ベースで監査済み
+- neighbor search の主要 semantics を upstream ベースで監査済み
 - C++ 側のコードは履歴的な足場または比較用として残置
 
 ## 3. コンポーネント構成と役割
@@ -73,9 +74,11 @@
 - 各要素は `index` と `distance` を持つ距離付き結果である
 - 互換性のため、`agent_indices` と `obstacle_indices` を property として残す
 - `NaiveNeighborSearch` は `agent_index` を `WorldSnapshot.agents` の tuple 位置ではなく agent ID として解決する
-- エージェント近傍は `neighbor_dist` 以内かつ距離順で返し、`max_neighbors` で件数制限する
-- 障害物近傍は点と線分の最短距離が `neighbor_dist` 以内のものだけを、距離順で返す
-- `neighbor_dist < 0` または `max_neighbors < 0` は `ValueError` とする
+- エージェント近傍は `neighbor_dist^2` を strict `<` で比較し、stable insertion で距離順を保つ
+- `max_neighbors` 到達後は末尾距離で agent range を縮め、upstream `insertAgentNeighbor()` と同様に打ち切る
+- 障害物近傍は `obstacle_range` を別引数で受け取れ、未指定時だけ `neighbor_dist` を使う
+- 障害物近傍は directed edge の右側にある agent だけを対象にし、線分距離の strict `<` で採用する
+- `neighbor_dist < 0`、`max_neighbors < 0`、`obstacle_range < 0` は `ValueError` とする
 
 ### 3.4 `solver.py` の現行仕様
 
@@ -100,6 +103,7 @@
 - `NaiveNeighborSearch`、ORCA 制約生成、共通 solver をまとめて 1 ステップへ統合している
 - `AgentProfile` の `neighbor_dist`, `max_neighbors`, `time_horizon`, `time_horizon_obst` を既定値として参照する
 - `ORCAParameters` は algorithm 側の optional override として扱う
+- obstacle range は `time_horizon_obst * max_speed + radius` として計算し、agent range と分離して近傍探索へ渡す
 - obstacle 制約は先頭へまとめ、solver の `protected_constraint_count` に渡す
 - `AgentCommand` へ変換された速度指令を返す
 
@@ -283,9 +287,9 @@ poetry run pytest
 
 ### 6.2 ORCA 1 ステップの現状ロジック
 
-1. `NaiveNeighborSearch` が距離ベースで近傍エージェントを列挙する
-2. 同時に、linked obstacle topology のうち `next_index` を持つ outgoing edge を対象に、点と線分の最短距離に基づいて `neighbor_dist` 以内の障害物辺を列挙する
-3. どちらも距離順に整列し、エージェント近傍のみ `max_neighbors` で制限する
+1. `NaiveNeighborSearch` が agent range と obstacle range を分けて受け取り、strict 境界で近傍エージェントを列挙する
+2. linked obstacle topology のうち `next_index` を持つ outgoing edge を対象に、directed edge の右側だけを obstacle 近傍候補にする
+3. どちらも stable insertion で距離順を保ち、エージェント近傍のみ `max_neighbors` と更新済み range で制限する
 4. `build_obstacle_constraints()` が static obstacle edge から ORCA 制約を生成する
 5. `build_agent_constraints()` が近傍エージェントから reciprocal avoidance 制約を生成する
 6. `solve_linear_constraints()` が obstacle 制約数を `protected_constraint_count` として受け取り、速度上限円付きの制約付き速度選択を行う

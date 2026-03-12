@@ -48,6 +48,49 @@ def test_agent_neighbors_are_distance_sorted_and_capped() -> None:
     assert tuple(neighbor.distance for neighbor in neighbors.agent_neighbors) == (1.0, 2.0)
 
 
+def test_agent_neighbors_exclude_exact_distance_boundary() -> None:
+    snapshot = WorldSnapshot(
+        step_index=0,
+        global_time=0.0,
+        time_step=0.1,
+        agents=(
+            _snapshot_agent(10, Vector2(0.0, 0.0)),
+            _snapshot_agent(20, Vector2(3.0, 0.0)),
+        ),
+    )
+
+    neighbors = NaiveNeighborSearch().find_neighbors(
+        snapshot=snapshot,
+        agent_index=10,
+        neighbor_dist=3.0,
+        max_neighbors=2,
+    )
+
+    assert neighbors.agent_indices == ()
+
+
+def test_agent_neighbors_keep_snapshot_order_for_ties() -> None:
+    snapshot = WorldSnapshot(
+        step_index=0,
+        global_time=0.0,
+        time_step=0.1,
+        agents=(
+            _snapshot_agent(10, Vector2(0.0, 0.0)),
+            _snapshot_agent(40, Vector2(1.0, 0.0)),
+            _snapshot_agent(30, Vector2(-1.0, 0.0)),
+        ),
+    )
+
+    neighbors = NaiveNeighborSearch().find_neighbors(
+        snapshot=snapshot,
+        agent_index=10,
+        neighbor_dist=2.0,
+        max_neighbors=1,
+    )
+
+    assert neighbors.agent_indices == (40,)
+
+
 def test_agent_index_is_resolved_from_snapshot_ids() -> None:
     snapshot = WorldSnapshot(
         step_index=0,
@@ -77,9 +120,9 @@ def test_obstacle_neighbors_are_filtered_and_sorted_by_segment_distance() -> Non
         agents=(_snapshot_agent(0, Vector2(0.0, 0.0)),),
         obstacles=build_obstacle_topology(
             (
-                ObstaclePath(vertices=(Vector2(5.0, 0.0), Vector2(5.0, 2.0)), closed=False),
-                ObstaclePath(vertices=(Vector2(1.0, -1.0), Vector2(1.0, 1.0)), closed=False),
-                ObstaclePath(vertices=(Vector2(3.0, -1.0), Vector2(3.0, 1.0)), closed=False),
+                ObstaclePath(vertices=(Vector2(5.0, 2.0), Vector2(5.0, 0.0)), closed=False),
+                ObstaclePath(vertices=(Vector2(1.0, 1.0), Vector2(1.0, -1.0)), closed=False),
+                ObstaclePath(vertices=(Vector2(3.0, 1.0), Vector2(3.0, -1.0)), closed=False),
             )
         ),
     )
@@ -93,6 +136,53 @@ def test_obstacle_neighbors_are_filtered_and_sorted_by_segment_distance() -> Non
 
     assert neighbors.obstacle_indices == (2, 4)
     assert tuple(neighbor.distance for neighbor in neighbors.obstacle_neighbors) == (1.0, 3.0)
+
+
+def test_obstacle_neighbors_exclude_left_side_of_directed_edge() -> None:
+    snapshot = WorldSnapshot(
+        step_index=0,
+        global_time=0.0,
+        time_step=0.1,
+        agents=(_snapshot_agent(0, Vector2(0.0, 0.0)),),
+        obstacles=build_obstacle_topology(
+            (
+                ObstaclePath(vertices=(Vector2(1.0, 1.0), Vector2(1.0, -1.0)), closed=False),
+                ObstaclePath(vertices=(Vector2(3.0, -1.0), Vector2(3.0, 1.0)), closed=False),
+            )
+        ),
+    )
+
+    neighbors = NaiveNeighborSearch().find_neighbors(
+        snapshot=snapshot,
+        agent_index=0,
+        neighbor_dist=4.0,
+        max_neighbors=5,
+    )
+
+    assert neighbors.obstacle_indices == (0,)
+
+
+def test_obstacle_neighbors_use_dedicated_obstacle_range() -> None:
+    snapshot = WorldSnapshot(
+        step_index=0,
+        global_time=0.0,
+        time_step=0.1,
+        agents=(_snapshot_agent(0, Vector2(0.0, 0.0)),),
+        obstacles=build_obstacle_topology(
+            (ObstaclePath(vertices=(Vector2(4.0, 1.0), Vector2(4.0, -1.0)), closed=False),)
+        ),
+    )
+
+    neighbors = NaiveNeighborSearch().find_neighbors(
+        snapshot=snapshot,
+        agent_index=0,
+        neighbor_dist=2.0,
+        max_neighbors=5,
+        obstacle_range=4.1,
+    )
+
+    assert neighbors.agent_neighbors == ()
+    assert neighbors.obstacle_indices == (0,)
 
 
 def test_zero_max_neighbors_returns_no_agent_neighbors() -> None:
@@ -133,3 +223,12 @@ def test_invalid_arguments_raise() -> None:
 
     with pytest.raises(ValueError):
         search.find_neighbors(snapshot=snapshot, agent_index=999, neighbor_dist=1.0, max_neighbors=1)
+
+    with pytest.raises(ValueError):
+        search.find_neighbors(
+            snapshot=snapshot,
+            agent_index=0,
+            neighbor_dist=1.0,
+            max_neighbors=1,
+            obstacle_range=-1.0,
+        )

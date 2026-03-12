@@ -36,6 +36,10 @@ class ORCAAlgorithm:
                 agent_index=agent.index,
                 neighbor_dist=resolved_parameters.neighbor_dist,
                 max_neighbors=resolved_parameters.max_neighbors,
+                obstacle_range=(
+                    resolved_parameters.time_horizon_obst * agent.profile.max_speed
+                    + agent.profile.radius
+                ),
             )
             obstacle_constraints = build_obstacle_constraints(
                 snapshot=snapshot,

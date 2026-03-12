@@ -46,10 +46,10 @@
 ## 5. 現時点で残す差分
 
 - Python 実装はゼロ長ベクトルで NaN を出さないため、`_normalized_or()` に fallback を持つ
-- `NaiveNeighborSearch` は kd-tree ではないため、neighbor 採用順の境界ケースは upstream と完全一致を保証しない
+- `NaiveNeighborSearch` は kd-tree ではないため、完全同率ケースの探索順は upstream と完全一致を保証しない
 - solver の public API は中立名へ再構成しており、upstream の関数境界そのものではない
 
 ## 6. 結論
 
 agent-agent constraint と solver の主要分岐は、現時点で upstream の式と分岐構造に概ね追従している。  
-残る主要 gap は、neighbor semantics を含む実測比較の拡張と、複数 scenario での upstream 回帰強化である。
+残る主要 gap は、roadmap を含む upstream 回帰の強化と、完全同率ケースをどう扱うかの整理である。

@@ -1,6 +1,6 @@
 # Issue 0019: ORCA の neighbor search parity を監査する
 
-- ステータス: open
+- ステータス: completed
 - 優先度: high
 - 関連文書:
   - [docs/specifications/orca-parity-gap-review.md](../specifications/orca-parity-gap-review.md)
@@ -34,3 +34,11 @@ neighbor semantics を upstream と比較し、どこまで合わせるか、ど
 - neighbor search の差分が docs に整理されている
 - ORCA の回帰に効く近傍ケースがテスト化されている
 - `NaiveNeighborSearch` を残す理由または置き換える理由が説明できる
+
+## 実施メモ
+
+- `NeighborSearch.find_neighbors()` に `obstacle_range` を追加し、agent range と obstacle range を分離した
+- `NaiveNeighborSearch` の agent 採用を strict 境界と stable insertion に変更した
+- obstacle 採用を directed edge の右側だけへ絞り、strict 境界と stable insertion に変更した
+- `ORCAAlgorithm.step()` で obstacle range を `time_horizon_obst * max_speed + radius` として渡すようにした
+- 回帰テストを追加し、結果を [../specifications/orca-neighbor-search-parity.md](../specifications/orca-neighbor-search-parity.md) に記録した

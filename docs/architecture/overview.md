@@ -54,7 +54,7 @@
 - obstacle topology の再設計 `completed`
 - obstacle ORCA 制約の厳密移植 `completed`
 - agent / solver の差分監査 `completed`
-- neighbor semantics の差分監査
+- neighbor semantics の差分監査 `completed`
 - upstream scenario を用いた回帰 suite の拡張 `completed`
 
 ### Phase 4: 関連アルゴリズムの追加
@@ -98,5 +98,5 @@ tests/              自動テスト
 現時点の正規実装は Python 側の `src/cmis_ca/` である。  
 `core/` と `algorithms/orca/` の責務分離、Poetry 環境、最小 CLI、スモークテスト、共通コアの基準型を先行して整備している。
 
-一方で、neighbor semantics の厳密監査と、`Roadmap.cc` のような次段階回帰の扱いは未完了である。  
+一方で、`Roadmap.cc` のような次段階回帰の扱いは未完了である。  
 この未完了部分を含む現状仕様は [../specifications/python-skeleton-detailed-design.md](../specifications/python-skeleton-detailed-design.md) で管理し、優先順位は [orca-reproduction-roadmap.md](orca-reproduction-roadmap.md) に整理する。

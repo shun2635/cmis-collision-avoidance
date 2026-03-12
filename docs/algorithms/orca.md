@@ -73,9 +73,10 @@ ORCA は、全エージェントのうち必要な相手だけを見て制約を
 現時点の参照実装では、`core/neighbor_search.py` が以下を担当する。
 
 - 問い合わせ対象エージェントを `agent_index` で特定する
-- `neighbor_dist` 以内のエージェントを距離順で返す
-- `max_neighbors` でエージェント数だけを制限する
-- `neighbor_dist` 以内の障害物線分を、点と線分の最短距離で距離順に返す
+- agent range と obstacle range を別々に受け取る
+- エージェント近傍を `neighbor_dist^2` の strict 境界と stable insertion で返す
+- `max_neighbors` 到達後は末尾距離で agent range を縮める
+- 障害物線分は directed edge の右側だけを対象にし、専用 obstacle range で返す
 
 一方で、どの距離閾値を使うか、何体まで見るか、返ってきた近傍を制約生成でどう解釈するかは ORCA 側に残す。
 
@@ -93,7 +94,7 @@ ORCA は、全エージェントのうち必要な相手だけを見て制約を
 
 現時点の Python 実装では、障害物 topology は `ObstacleVertex` の linked model として保持している。  
 障害物 ORCA 制約そのものも、`external/RVO2/src/Agent.cc` の obstacle 分岐をベースに移植済みである。  
-現在の差分は主に `NaiveNeighborSearch`、open chain の一般化、obstacle kd-tree 未実装のような周辺機構に残っている。
+現在の差分は主に `NaiveNeighborSearch` のデータ構造差分、open chain の一般化、obstacle kd-tree 未実装のような周辺機構に残っている。
 
 ### 4. エージェント間 ORCA 制約の生成
 
@@ -126,6 +127,7 @@ ORCA では「希望速度に最も近い点」を選ぶが、将来のアルゴ
 
 現時点では、この層は `core/solver.py` に `solve_linear_constraints()` と `choose_preferred_velocity()` として実装済みである。  
 また、ORCA 側の agent-agent / obstacle 制約生成も `algorithms/orca/constraints.py` に実装済みであり、`ORCAAlgorithm.step()` では obstacle line 数を `protected_constraint_count` として solver へ渡す統合まで完了している。
+近傍探索に渡す obstacle range も、`time_horizon_obst * max_speed + radius` として ORCA 側で解決してから `NeighborSearch` へ渡している。
 
 ### 6. 状態更新
 
