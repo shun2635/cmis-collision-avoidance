@@ -10,7 +10,9 @@ agents:
     initial_velocity: [0.0, 0.0]
     preferred_velocity: [1.0, 0.0]
 obstacles:
-  - closed: false
+  - closed: true
     vertices:
-      - [0.6, -1.0]
-      - [0.6, 1.0]
+      - [0.3, -1.0]
+      - [0.3, 1.0]
+      - [0.7, 1.0]
+      - [0.7, -1.0]

@@ -57,16 +57,16 @@ obstacles:
 - `core/neighbor_search.py`
   - `next_index` を持つ vertex のみを obstacle edge として距離計算する
 - `algorithms/orca/constraints.py`
-  - linked vertex から edge を取得し、現時点では closest-point 近似で obstacle constraint を作る
+  - linked vertex から edge を取得し、upstream obstacle line 分岐を Python へ移植して使う
 - `io/scenario_loader.py`
   - `vertices + closed` から topology を構築する
 
 ## 6. 未対応事項
 
-- obstacle ORCA line の upstream 分岐そのものはまだ未移植
 - obstacle kd-tree は未対応
 - loader は互換のため `start` / `end` 2 点定義も受け付けるが、正規 schema は `vertices` 形式とする
+- open chain は研究室都合の拡張であり、endpoint 周りの意味は upstream の閉 polygon と完全には一致しない
 
 ## 7. 次段階
 
-次の issue は [../issues/0015-orca-obstacle-constraint-exact-port.md](../issues/0015-orca-obstacle-constraint-exact-port.md) であり、この topology を使って obstacle ORCA constraint を upstream 準拠へ置き換える。
+obstacle topology の次段階は、[../issues/0016-orca-agent-constraint-and-solver-parity.md](../issues/0016-orca-agent-constraint-and-solver-parity.md) に進み、agent-agent 側と solver 側の upstream 差分を詰めることになる。

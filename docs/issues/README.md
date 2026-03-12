@@ -51,7 +51,7 @@ ORCA 完全再現を優先する。順序は [../architecture/orca-reproduction-
 1. [0012-orca-goal-model-and-pref-velocity-alignment.md](0012-orca-goal-model-and-pref-velocity-alignment.md) `completed`
 2. [0013-orca-agent-and-simulator-parity-audit.md](0013-orca-agent-and-simulator-parity-audit.md) `completed`
 3. [0014-orca-obstacle-topology-model-port.md](0014-orca-obstacle-topology-model-port.md) `completed`
-4. [0015-orca-obstacle-constraint-exact-port.md](0015-orca-obstacle-constraint-exact-port.md)
+4. [0015-orca-obstacle-constraint-exact-port.md](0015-orca-obstacle-constraint-exact-port.md) `completed`
 5. [0016-orca-agent-constraint-and-solver-parity.md](0016-orca-agent-constraint-and-solver-parity.md)
 6. [0017-orca-upstream-regression-suite-expansion.md](0017-orca-upstream-regression-suite-expansion.md)
 7. [0018-orca-parity-gap-review.md](0018-orca-parity-gap-review.md)

@@ -40,7 +40,7 @@ upstream である `snape/RVO2` を参照しつつ、研究室内で読みやす
 - ORCA 制約生成は基準実装まで完了
 - 共通ソルバは `LineConstraint + speed limit` の基準実装まで完了
 - 障害物 topology は upstream 寄りの linked vertex モデルへ移行済み
-- 障害物 ORCA 制約は、現在は linked obstacle edge 上の closest-point 近似で扱う
+- 障害物 ORCA 制約は、upstream `Agent.cc` の obstacle 分岐をベースに移植済み
 - upstream `Circle` 条件に基づく回帰シナリオと比較メトリクスの土台を追加済み
 
 実装済みの詳細仕様は [docs/specifications/python-skeleton-detailed-design.md](docs/specifications/python-skeleton-detailed-design.md) を参照してください。

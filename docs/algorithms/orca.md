@@ -92,8 +92,8 @@ ORCA は、全エージェントのうち必要な相手だけを見て制約を
 したがって、制約生成ロジック自体は ORCA 固有差分として扱う。
 
 現時点の Python 実装では、障害物 topology は `ObstacleVertex` の linked model として保持している。  
-ただし、障害物 ORCA 制約そのものはまだ upstream 分岐を完全移植しておらず、「各 outgoing edge 上の最近点を静的障害物点としてみなす closest-point 近似」で実装している。  
-つまり obstacle model は upstream 寄りへ進んだが、constraint logic はまだ暫定段階にある。
+障害物 ORCA 制約そのものも、`external/RVO2/src/Agent.cc` の obstacle 分岐をベースに移植済みである。  
+現在の差分は主に `NaiveNeighborSearch`、open chain の一般化、obstacle kd-tree 未実装のような周辺機構に残っている。
 
 ### 4. エージェント間 ORCA 制約の生成
 

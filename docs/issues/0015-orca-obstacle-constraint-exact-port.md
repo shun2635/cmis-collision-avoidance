@@ -1,6 +1,6 @@
 # Issue 0015: ORCA の obstacle constraint 生成を upstream 準拠で移植する
 
-- ステータス: open
+- ステータス: completed
 - 優先度: high
 - 関連文書:
   - [docs/architecture/orca-reproduction-roadmap.md](../architecture/orca-reproduction-roadmap.md)
@@ -9,8 +9,8 @@
 
 ## 背景
 
-現行の obstacle ORCA line は current obstacle model に合わせた closest-point 近似であり、upstream 完全再現ではない。  
-obstacle topology を upstream 寄りに持てるようにした後は、この近似を撤去する必要がある。
+issue 着手時点では、obstacle topology は linked vertex 化されていたが、obstacle ORCA line 本体は closest-point 近似のままだった。  
+upstream 完全再現を進めるには、`Agent.cc` の obstacle 分岐を直接移植する必要があった。
 
 ## 目的
 
@@ -44,3 +44,11 @@ obstacle ORCA constraint 生成を upstream の分岐に沿って移植し、ver
 ## 依存関係
 
 - [0014-orca-obstacle-topology-model-port.md](0014-orca-obstacle-topology-model-port.md): completed
+
+## 実施メモ
+
+- `algorithms/orca/constraints.py` の obstacle 側を upstream `Agent.cc` の分岐に沿って移植した
+- `alreadyCovered` 判定、vertex collision、segment collision、leg projection、foreign leg の扱いを反映した
+- open chain endpoint は `previous_index` / `next_index` の有無で分岐し、研究室拡張として保守的に扱う
+- obstacle 系の unit test を polygon ベースへ更新し、collision / non-collision / foreign leg を固定した
+- `scenarios/obstacle_demo.yaml` も polygon 例へ更新した

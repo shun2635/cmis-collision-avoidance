@@ -4,8 +4,7 @@ Derived from: https://github.com/snape/RVO2
 Original license: Apache License 2.0
 Modified for the CMIS Collision Avoidance project.
 Summary of changes: rewrote agent-agent ORCA constraint generation in Python
-and adapted obstacle handling to the current linked obstacle topology using a
-closest-point approximation.
+and ported obstacle constraint generation to the linked obstacle topology.
 """
 
 from __future__ import annotations
@@ -14,7 +13,9 @@ from cmis_ca.algorithms.orca.parameters import ORCAParameters
 from cmis_ca.core.constraints import LineConstraint
 from cmis_ca.core.geometry import Vector2
 from cmis_ca.core.neighbor_search import NeighborSet
-from cmis_ca.core.world import SnapshotAgent, WorldSnapshot, obstacle_segment
+from cmis_ca.core.world import ObstacleVertex, SnapshotAgent, WorldSnapshot
+
+EPSILON = 1e-5
 
 
 def build_obstacle_constraints(
@@ -23,33 +24,27 @@ def build_obstacle_constraints(
     neighbors: NeighborSet,
     parameters: ORCAParameters,
 ) -> list[LineConstraint]:
-    """Build ORCA constraints against static obstacle segments.
-
-    The current repository now stores upstream-style obstacle topology as
-    linked vertices. The actual ORCA obstacle line logic is still approximated
-    via the closest point on each outgoing obstacle edge.
-    """
+    """Build ORCA constraints against static obstacles."""
 
     agent = _find_agent(snapshot, agent_index)
-    constraints = []
+    if parameters.time_horizon_obst <= 0.0:
+        raise ValueError("time_horizon_obst must be positive")
+
+    constraints: list[LineConstraint] = []
+    inv_time_horizon_obst = 1.0 / parameters.time_horizon_obst
 
     for obstacle_neighbor in neighbors.obstacle_neighbors:
-        closest_point = _closest_point_on_segment(
-            agent.state.position,
-            snapshot.obstacles,
-            obstacle_neighbor.index,
+        line = _build_single_obstacle_constraint(
+            obstacles=snapshot.obstacles,
+            obstacle_index=obstacle_neighbor.index,
+            position=agent.state.position,
+            velocity=agent.state.velocity,
+            radius=agent.profile.radius,
+            inv_time_horizon_obst=inv_time_horizon_obst,
+            existing_constraints=constraints,
         )
-        constraints.append(
-            _build_orca_constraint(
-                relative_position=closest_point - agent.state.position,
-                relative_velocity=agent.state.velocity,
-                combined_radius=agent.profile.radius,
-                current_velocity=agent.state.velocity,
-                time_horizon=parameters.time_horizon_obst,
-                time_step=snapshot.time_step,
-                responsibility=1.0,
-            )
-        )
+        if line is not None:
+            constraints.append(line)
 
     return constraints
 
@@ -150,16 +145,249 @@ def _find_agent(snapshot: WorldSnapshot, agent_index: int) -> SnapshotAgent:
     raise ValueError(f"agent index {agent_index} is not present in the snapshot")
 
 
-def _closest_point_on_segment(point: Vector2, obstacles, obstacle_index: int) -> Vector2:
-    segment_start, segment_end = obstacle_segment(obstacles, obstacle_index)
-    segment = segment_end - segment_start
-    segment_length_sq = segment.abs_sq()
-    if segment_length_sq == 0.0:
-        return segment_start
+def _build_single_obstacle_constraint(
+    *,
+    obstacles: tuple[ObstacleVertex, ...],
+    obstacle_index: int,
+    position: Vector2,
+    velocity: Vector2,
+    radius: float,
+    inv_time_horizon_obst: float,
+    existing_constraints: list[LineConstraint],
+) -> LineConstraint | None:
+    obstacle1_index = obstacle_index
+    obstacle1 = obstacles[obstacle1_index]
+    if obstacle1.next_index is None:
+        return None
 
-    projection = (point - segment_start).dot(segment) / segment_length_sq
-    clamped_projection = max(0.0, min(1.0, projection))
-    return segment_start + clamped_projection * segment
+    obstacle2_index = obstacle1.next_index
+    obstacle2 = obstacles[obstacle2_index]
+
+    relative_position1 = obstacle1.point - position
+    relative_position2 = obstacle2.point - position
+
+    if _is_obstacle_already_covered(
+        existing_constraints=existing_constraints,
+        relative_position1=relative_position1,
+        relative_position2=relative_position2,
+        inv_time_horizon_obst=inv_time_horizon_obst,
+        radius=radius,
+    ):
+        return None
+
+    dist_sq1 = relative_position1.abs_sq()
+    dist_sq2 = relative_position2.abs_sq()
+    radius_sq = radius * radius
+
+    obstacle_vector = obstacle2.point - obstacle1.point
+    obstacle_length_sq = obstacle_vector.abs_sq()
+    if obstacle_length_sq == 0.0:
+        return None
+
+    s = (-relative_position1).dot(obstacle_vector) / obstacle_length_sq
+    dist_sq_line = (-relative_position1 - s * obstacle_vector).abs_sq()
+
+    if s < 0.0 and dist_sq1 <= radius_sq:
+        if obstacle1.is_convex:
+            return LineConstraint(
+                point=Vector2(),
+                direction=_normalized_or(
+                    Vector2(-relative_position1.y, relative_position1.x),
+                    _clockwise_perpendicular(obstacle1.direction),
+                ),
+            )
+        return None
+
+    if s > 1.0 and dist_sq2 <= radius_sq:
+        if obstacle2.is_convex and (
+            obstacle2.next_index is None or relative_position2.det(obstacle2.direction) >= 0.0
+        ):
+            return LineConstraint(
+                point=Vector2(),
+                direction=_normalized_or(
+                    Vector2(-relative_position2.y, relative_position2.x),
+                    _clockwise_perpendicular(obstacle1.direction),
+                ),
+            )
+        return None
+
+    if 0.0 <= s <= 1.0 and dist_sq_line <= radius_sq:
+        return LineConstraint(
+            point=Vector2(),
+            direction=-obstacle1.direction,
+        )
+
+    left_obstacle = obstacle1
+    right_obstacle = obstacle2
+    left_obstacle_index = obstacle1_index
+    right_obstacle_index = obstacle2_index
+
+    if s < 0.0 and dist_sq_line <= radius_sq:
+        if not obstacle1.is_convex:
+            return None
+
+        right_obstacle = obstacle1
+        right_obstacle_index = obstacle1_index
+
+        leg1 = _sqrt_nonnegative(dist_sq1 - radius_sq)
+        left_leg_direction = Vector2(
+            relative_position1.x * leg1 - relative_position1.y * radius,
+            relative_position1.x * radius + relative_position1.y * leg1,
+        ) / dist_sq1
+        right_leg_direction = Vector2(
+            relative_position1.x * leg1 + relative_position1.y * radius,
+            -relative_position1.x * radius + relative_position1.y * leg1,
+        ) / dist_sq1
+    elif s > 1.0 and dist_sq_line <= radius_sq:
+        if not obstacle2.is_convex:
+            return None
+
+        left_obstacle = obstacle2
+        left_obstacle_index = obstacle2_index
+
+        leg2 = _sqrt_nonnegative(dist_sq2 - radius_sq)
+        left_leg_direction = Vector2(
+            relative_position2.x * leg2 - relative_position2.y * radius,
+            relative_position2.x * radius + relative_position2.y * leg2,
+        ) / dist_sq2
+        right_leg_direction = Vector2(
+            relative_position2.x * leg2 + relative_position2.y * radius,
+            -relative_position2.x * radius + relative_position2.y * leg2,
+        ) / dist_sq2
+    else:
+        if left_obstacle.is_convex:
+            leg1 = _sqrt_nonnegative(dist_sq1 - radius_sq)
+            left_leg_direction = Vector2(
+                relative_position1.x * leg1 - relative_position1.y * radius,
+                relative_position1.x * radius + relative_position1.y * leg1,
+            ) / dist_sq1
+        else:
+            left_leg_direction = -left_obstacle.direction
+
+        if right_obstacle.is_convex:
+            leg2 = _sqrt_nonnegative(dist_sq2 - radius_sq)
+            right_leg_direction = Vector2(
+                relative_position2.x * leg2 + relative_position2.y * radius,
+                -relative_position2.x * radius + relative_position2.y * leg2,
+            ) / dist_sq2
+        else:
+            right_leg_direction = left_obstacle.direction
+
+    is_left_leg_foreign = False
+    is_right_leg_foreign = False
+
+    if left_obstacle.previous_index is not None and left_obstacle.is_convex:
+        left_neighbor = obstacles[left_obstacle.previous_index]
+        if left_leg_direction.det(-left_neighbor.direction) >= 0.0:
+            left_leg_direction = -left_neighbor.direction
+            is_left_leg_foreign = True
+
+    if right_obstacle.next_index is not None and right_obstacle.is_convex:
+        if right_leg_direction.det(right_obstacle.direction) <= 0.0:
+            right_leg_direction = right_obstacle.direction
+            is_right_leg_foreign = True
+
+    left_cutoff = inv_time_horizon_obst * (left_obstacle.point - position)
+    right_cutoff = inv_time_horizon_obst * (right_obstacle.point - position)
+    cutoff_vector = right_cutoff - left_cutoff
+
+    if left_obstacle_index == right_obstacle_index:
+        t = 0.5
+    else:
+        t = (velocity - left_cutoff).dot(cutoff_vector) / cutoff_vector.abs_sq()
+
+    t_left = (velocity - left_cutoff).dot(left_leg_direction)
+    t_right = (velocity - right_cutoff).dot(right_leg_direction)
+
+    if (t < 0.0 and t_left < 0.0) or (
+        left_obstacle_index == right_obstacle_index and t_left < 0.0 and t_right < 0.0
+    ):
+        unit_w = _normalized_or(velocity - left_cutoff, _fallback_normal(left_cutoff))
+        return LineConstraint(
+            point=left_cutoff + radius * inv_time_horizon_obst * unit_w,
+            direction=_clockwise_perpendicular(unit_w),
+        )
+
+    if t > 1.0 and t_right < 0.0:
+        unit_w = _normalized_or(velocity - right_cutoff, _fallback_normal(right_cutoff))
+        return LineConstraint(
+            point=right_cutoff + radius * inv_time_horizon_obst * unit_w,
+            direction=_clockwise_perpendicular(unit_w),
+        )
+
+    if t < 0.0 or t > 1.0 or left_obstacle_index == right_obstacle_index:
+        dist_sq_cutoff = float("inf")
+    else:
+        dist_sq_cutoff = (velocity - (left_cutoff + t * cutoff_vector)).abs_sq()
+
+    if t_left < 0.0:
+        dist_sq_left = float("inf")
+    else:
+        dist_sq_left = (velocity - (left_cutoff + t_left * left_leg_direction)).abs_sq()
+
+    if t_right < 0.0:
+        dist_sq_right = float("inf")
+    else:
+        dist_sq_right = (velocity - (right_cutoff + t_right * right_leg_direction)).abs_sq()
+
+    if dist_sq_cutoff <= dist_sq_left and dist_sq_cutoff <= dist_sq_right:
+        direction = -left_obstacle.direction
+        return LineConstraint(
+            point=left_cutoff + radius * inv_time_horizon_obst * _left_perpendicular(direction),
+            direction=direction,
+        )
+
+    if dist_sq_left <= dist_sq_right:
+        if is_left_leg_foreign:
+            return None
+        return LineConstraint(
+            point=left_cutoff
+            + radius * inv_time_horizon_obst * _left_perpendicular(left_leg_direction),
+            direction=left_leg_direction,
+        )
+
+    if is_right_leg_foreign:
+        return None
+
+    direction = -right_leg_direction
+    return LineConstraint(
+        point=right_cutoff + radius * inv_time_horizon_obst * _left_perpendicular(direction),
+        direction=direction,
+    )
+
+
+def _is_obstacle_already_covered(
+    *,
+    existing_constraints: list[LineConstraint],
+    relative_position1: Vector2,
+    relative_position2: Vector2,
+    inv_time_horizon_obst: float,
+    radius: float,
+) -> bool:
+    margin = inv_time_horizon_obst * radius
+    test_point1 = inv_time_horizon_obst * relative_position1
+    test_point2 = inv_time_horizon_obst * relative_position2
+
+    for line in existing_constraints:
+        if (
+            _offset_side(test_point1, line) - margin >= -EPSILON
+            and _offset_side(test_point2, line) - margin >= -EPSILON
+        ):
+            return True
+
+    return False
+
+
+def _offset_side(point: Vector2, line: LineConstraint) -> float:
+    return (point - line.point).det(line.direction)
+
+
+def _sqrt_nonnegative(value: float) -> float:
+    return max(0.0, value) ** 0.5
+
+
+def _left_perpendicular(vector: Vector2) -> Vector2:
+    return Vector2(-vector.y, vector.x)
 
 
 def _clockwise_perpendicular(vector: Vector2) -> Vector2:

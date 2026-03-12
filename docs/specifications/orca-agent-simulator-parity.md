@@ -46,4 +46,4 @@
 ## 6. 現時点の結論
 
 agent / simulator semantics については、ORCA 再現に直結する主要 parameter と clock は Python 側へ反映済みである。  
-次段階の主要 gap は obstacle topology と obstacle constraint の upstream 準拠化である。
+次段階の主要 gap は agent-agent constraint と solver の upstream 差分監査である。

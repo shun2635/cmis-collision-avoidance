@@ -86,7 +86,7 @@
 ### 3.5 `algorithms/orca/constraints.py` の現行仕様
 
 - `build_agent_constraints()` は upstream の agent-agent ORCA line 生成をベースに、エージェント間の reciprocal avoidance 制約を作る
-- `build_obstacle_constraints()` は linked obstacle topology の outgoing edge に対して、線分最近点を使う closest-point 近似で静的障害物制約を作る
+- `build_obstacle_constraints()` は linked obstacle topology の outgoing edge に対して、upstream `Agent.cc` の obstacle 分岐を移植した ORCA 制約を作る
 - エージェント間制約は回避責任を `0.5` ずつ分担する
 - 障害物制約は静的障害物として agent 側が全責任を負う
 - どちらも `LineConstraint` を返し、ORCA 固有の意味付けは `algorithms/orca/` に閉じ込める
@@ -311,10 +311,12 @@ agents:
     initial_velocity: [0.0, 0.0]
     preferred_velocity: [1.0, 0.0]
 obstacles:
-  - closed: false
+  - closed: true
     vertices:
-      - [0.6, -1.0]
-      - [0.6, 1.0]
+      - [0.3, -1.0]
+      - [0.3, 1.0]
+      - [0.7, 1.0]
+      - [0.7, -1.0]
 ```
 
 ## 7. テスト方針
@@ -325,7 +327,7 @@ obstacles:
 | --- | --- |
 | `tests/algorithms/test_orca.py` | ORCA step の単独・head-on・障害物ケース |
 | `tests/cli/test_main.py` | `--scenario` 読込と `--steps` 上書き |
-| `tests/algorithms/test_orca_constraints.py` | agent-agent / obstacle 制約の非衝突・衝突ケース |
+| `tests/algorithms/test_orca_constraints.py` | agent-agent / obstacle 制約の非衝突・衝突・foreign leg ケース |
 | `tests/core/test_agent.py` | `AgentProfile` の navigation parameter と ORCA override 解決 |
 | `tests/core/test_geometry.py` | `Vector2` の演算、正規化、距離、例外 |
 | `tests/core/test_neighbor_search.py` | 距離順、`max_neighbors`、障害物近傍、入力検証 |
@@ -356,7 +358,6 @@ obstacles:
 現時点の主要な未実装事項は以下。
 
 - 複数アルゴリズム登録
-- upstream 準拠の obstacle constraint 移植
 - agent-agent / solver の完全一致監査
 - 回帰 suite のさらなる拡張
 - 結果保存、可視化
