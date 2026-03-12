@@ -45,6 +45,7 @@
 - [0018-orca-parity-gap-review.md](0018-orca-parity-gap-review.md)
 - [0019-orca-neighbor-search-parity-audit.md](0019-orca-neighbor-search-parity-audit.md)
 - [0020-orca-roadmap-regression-support.md](0020-orca-roadmap-regression-support.md)
+- [0021-fast-simulation-visualization.md](0021-fast-simulation-visualization.md)
 
 ## 現在の優先順
 

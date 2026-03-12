@@ -43,6 +43,7 @@
 | 補助スクリプト | `scripts/smoke_run.py` | 最小実行確認 |
 | 回帰 helper | `src/cmis_ca/regression/` | upstream 由来 scenario の builder と metric 集計 |
 | 回帰スクリプト | `scripts/compare_upstream_circle.py`, `scripts/compare_upstream_blocks.py`, `scripts/compare_upstream_roadmap.py` | upstream 条件の比較メトリクスを出力 |
+| 可視化 | `src/cmis_ca/visualization/` | simulation history を viewer 向け trace へ変換し、PyQtGraph で再生する |
 | テスト | `tests/` | core の単体テストとスモークテスト |
 | upstream 参照 | `external/RVO2/` | 比較・参照用の外部コード |
 
@@ -59,6 +60,7 @@
 | `constraints.py` | 中立な半平面制約 `LineConstraint` |
 | `solver.py` | 制約付き速度選択の共通ソルバ |
 | `simulation.py` | アルゴリズムに依存しないステップ更新ループ |
+| `visualization/` | 可視化 trace model、trace builder、PyQtGraph viewer |
 
 ### 3.2 `algorithms/orca/` の責務
 
@@ -130,13 +132,14 @@
 
 ### 4.1 CLI 入力仕様
 
-現時点で実装されているコマンドは `run` のみ。
+現時点で実装されているコマンドは `run` と `visualize` である。
 
 | 引数 | 型 | 既定値 | 現在の仕様 |
 | --- | --- | --- | --- |
 | `--algorithm` | `str` | `orca` | `algorithms/registry.py` の登録名から選択 |
 | `--steps` | `int \| None` | `None` | 指定時のみステップ数を上書き。未指定時は内蔵デモは `1`、外部シナリオはファイル記述値を使う |
 | `--scenario` | `str \| None` | `None` | YAML / JSON シナリオを読み込む |
+| `--fps` | `float` | `30.0` | `visualize` でのみ使用。viewer の再生速度 |
 
 ### 4.2 Python API 入力仕様
 
@@ -149,6 +152,7 @@
 | `Scenario` | `agents`, `obstacles`, `time_step`, `steps`, `name` | シミュレーション入力全体 |
 | `WorldSnapshot` | `step_index`, `global_time`, `time_step`, `agents`, `obstacles` | 1 ステップごとの読み取り専用入力 |
 | `NeighborSet` | `agent_neighbors`, `obstacle_neighbors` | 距離付き近傍探索結果 |
+| `VisualizationTrace` | `frames`, `obstacles`, `initial_positions`, `agent_names` | 可視化 viewer 向けの再生データ |
 
 現在の入力バリデーション:
 
@@ -222,6 +226,7 @@ agent=<index> position=(<x>, <y>) velocity=(<vx>, <vy>)
 | `scenarios/upstream_circle.yaml` | upstream `Circle.cc` 由来の比較用シナリオ |
 | `src/cmis_ca/regression/upstream_blocks.py` | upstream `Blocks.cc` 由来の code-generated scenario と metric |
 | `src/cmis_ca/regression/upstream_roadmap.py` | upstream `Roadmap.cc` 由来の code-generated scenario、visibility graph、metric |
+| `src/cmis_ca/visualization/pyqtgraph_viewer.py` | PyQtGraph viewer backend |
 | `docs/algorithms/orca.md` | ORCA の責務境界と設計方針 |
 
 現時点で `configs/` は未使用だが、`scenarios/` は CLI から利用する。
@@ -239,6 +244,7 @@ poetry install
 ```bash
 poetry run cmis-ca run --algorithm orca --steps 1
 poetry run cmis-ca run --algorithm orca --scenario scenarios/head_on.yaml
+poetry run cmis-ca visualize --algorithm orca --scenario scenarios/head_on.yaml
 ```
 
 補助スクリプト:
@@ -260,7 +266,7 @@ poetry run pytest
 1. CLI で `cmis-ca run` を受け付ける
 2. `algorithms/registry.py` から指定アルゴリズムを生成する
 3. `--scenario` があれば `io/scenario_loader.py` が YAML / JSON を `Scenario` へ変換する
-4. `--scenario` がなければ `cli/run.py` が内蔵の 1 エージェントシナリオを構築する
+4. `--scenario` がなければ `cli/run.py` が内蔵の circle scenario を構築する
 5. `Simulator` が `Scenario` から内部 `AgentState` を初期化する
 6. goal を持つ agent がいれば、各 step の直前に `goal_position - current_position` から preferred velocity を更新する
 7. `Simulator.snapshot()` が `global_time` を含む `WorldSnapshot` を作る
@@ -268,6 +274,8 @@ poetry run pytest
 9. `Simulator.step()` が返却された `AgentCommand` を速度制限付きで適用し、位置を更新する
 10. `Simulator` は `global_time += time_step` を進める
 11. `Simulator.run()` が履歴をまとめて `SimulationResult` を返す
+12. `visualize` 導線では `visualization/trace_builder.py` が `Scenario` と `SimulationResult` を `VisualizationTrace` へ変換する
+13. `visualization/pyqtgraph_viewer.py` が障害物、初期位置、現在位置、軌跡を再生表示する
 
 ### 6.5 upstream Circle 回帰の現行ロジック
 
@@ -303,25 +311,26 @@ poetry run pytest
 4. `build_obstacle_constraints()` が static obstacle edge から ORCA 制約を生成する
 5. `build_agent_constraints()` が近傍エージェントから reciprocal avoidance 制約を生成する
 6. `solve_linear_constraints()` が obstacle 制約数を `protected_constraint_count` として受け取り、速度上限円付きの制約付き速度選択を行う
-7. 現時点の smoke シナリオは 1 エージェントなので、実行時には制約列が空のまま進む
+7. 現時点の built-in demo は 8 エージェントの circle なので、エージェント間制約が最初の step から発生し得る
 8. `Simulator.step()` が `position += velocity * time_step` で更新する
 
 したがって、現時点の ORCA 実装は「責務分離を保ったまま、近傍探索・制約生成・共通 solver まで統合した最小構成」である。
 
 ### 6.3 内蔵デモシナリオ
 
-`cli/run.py` の `run_demo()` は、以下の 1 エージェントシナリオを内蔵する。
+`cli/run.py` の `run_demo()` は、以下の built-in circle scenario を内蔵する。
 
-- 名前: `minimal-demo`
-- エージェント数: 1
-- 半径: `0.4`
-- 最大速度: `1.0`
-- 初期位置: `(0.0, 0.0)`
-- 初期速度: `(0.0, 0.0)`
-- 希望速度: `(1.0, 0.0)`
+- 名前: `circle-demo`
+- エージェント数: 8
+- 配置半径: `8.0`
+- 各 agent の半径: `0.4`
+- 各 agent の最大速度: `1.0`
+- goal: antipodal point
+- preferred speed: `1.0`
 - `time_step`: `0.5`
+- 既定 step 数: `100`
 
-このため、制約が空の現在実装では 1 ステップ後に `x = 0.5` まで前進する。
+このため、`run` と `visualize` の既定挙動でも複数 agent の相互作用を確認できる。
 
 ### 6.4 外部シナリオファイルの最小スキーマ
 

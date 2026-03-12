@@ -84,12 +84,20 @@ Poetry 環境の作成:
 poetry install
 ```
 
+可視化 viewer 依存の `pyqtgraph` / `PySide6` / `numpy` は Python `>=3.9,<3.15` の範囲で解決されます。  
+`numpy` は Python バージョンごとに互換のある系列へ固定しています。  
+Python `>=3.15` では数値実行は維持し、`visualize` 導線は未対応です。
+
 CLI の最小形:
 
 ```bash
 poetry run cmis-ca run --algorithm orca --steps 1
 poetry run cmis-ca run --algorithm orca --scenario scenarios/head_on.yaml
+poetry run cmis-ca visualize --algorithm orca --scenario scenarios/head_on.yaml
 ```
+
+`--scenario` を省略した場合の既定は、軽量な built-in `circle-demo` です。  
+既定 step 数は `100` です。
 
 最小スケルトンの実行確認:
 
@@ -133,9 +141,11 @@ Poetry の仮想環境は [poetry.toml](poetry.toml) によりプロジェクト
 - ORCA 完全再現ロードマップ: [docs/architecture/orca-reproduction-roadmap.md](docs/architecture/orca-reproduction-roadmap.md)
 - リポジトリ構造: [docs/architecture/repository-structure.md](docs/architecture/repository-structure.md)
 - API 設計: [docs/architecture/api.md](docs/architecture/api.md)
+- 可視化基盤設計: [docs/architecture/visualization-design.md](docs/architecture/visualization-design.md)
 - 実装同期ポリシー: [docs/policies/documentation-sync-policy.md](docs/policies/documentation-sync-policy.md)
 - 由来コードの取り扱い方針: [docs/policies/source-file-policy.md](docs/policies/source-file-policy.md)
 - 現行実装の詳細設計書: [docs/specifications/python-skeleton-detailed-design.md](docs/specifications/python-skeleton-detailed-design.md)
+- PyQtGraph 可視化基盤: [docs/specifications/pyqtgraph-visualization.md](docs/specifications/pyqtgraph-visualization.md)
 - ORCA agent / simulator parity 監査: [docs/specifications/orca-agent-simulator-parity.md](docs/specifications/orca-agent-simulator-parity.md)
 - ORCA neighbor search parity: [docs/specifications/orca-neighbor-search-parity.md](docs/specifications/orca-neighbor-search-parity.md)
 - ORCA agent / solver parity: [docs/specifications/orca-agent-solver-parity.md](docs/specifications/orca-agent-solver-parity.md)
