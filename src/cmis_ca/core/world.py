@@ -63,11 +63,14 @@ class WorldSnapshot:
     """Read-only world state delivered to an algorithm."""
 
     step_index: int
+    global_time: float
     time_step: float
     agents: tuple[SnapshotAgent, ...]
     obstacles: tuple[ObstacleSegment, ...] = ()
 
     def __post_init__(self) -> None:
+        if self.global_time < 0.0:
+            raise ValueError("global_time must be non-negative")
         if self.time_step <= 0.0:
             raise ValueError("time_step must be positive")
         indices = [agent.index for agent in self.agents]

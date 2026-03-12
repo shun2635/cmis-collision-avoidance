@@ -43,7 +43,7 @@ def test_world_snapshot_requires_unique_indices() -> None:
     )
 
     with pytest.raises(ValueError):
-        WorldSnapshot(step_index=0, time_step=0.1, agents=duplicated_agents)
+        WorldSnapshot(step_index=0, global_time=0.0, time_step=0.1, agents=duplicated_agents)
 
 
 def test_line_constraint_normalizes_direction_and_computes_signed_distance() -> None:
@@ -57,3 +57,11 @@ def test_line_constraint_normalizes_direction_and_computes_signed_distance() -> 
 def test_line_constraint_rejects_zero_direction() -> None:
     with pytest.raises(ValueError):
         LineConstraint(direction=Vector2())
+
+
+def test_world_snapshot_rejects_negative_global_time() -> None:
+    agent_state = AgentState(position=Vector2(), velocity=Vector2(), preferred_velocity=Vector2())
+    agent = SnapshotAgent(index=0, name="a", profile=AgentProfile(), state=agent_state)
+
+    with pytest.raises(ValueError):
+        WorldSnapshot(step_index=0, global_time=-0.1, time_step=0.1, agents=(agent,))

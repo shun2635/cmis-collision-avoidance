@@ -15,8 +15,8 @@
 
 | 種別 | パス | 内容 |
 | --- | --- | --- |
-| 比較用シナリオ | `scenarios/upstream_circle.yaml` | 250 体を半径 200 の円周上へ等間隔配置 |
-| 回帰 helper | `src/cmis_ca/regression/upstream_circle.py` | scenario-defined goals を使って metric を集計 |
+| 比較用シナリオ | `scenarios/upstream_circle.yaml` | 250 体を半径 200 の円周上へ等間隔配置し、profile に ORCA defaults を保持 |
+| 回帰 helper | `src/cmis_ca/regression/upstream_circle.py` | scenario-defined goals と profile defaults を使って metric を集計 |
 | 実行スクリプト | `scripts/compare_upstream_circle.py` | metric の出力 |
 | 回帰テスト | `tests/regression/test_upstream_circle.py` | 条件確認と定性的回帰チェック |
 
@@ -33,6 +33,7 @@
 - `time_horizon_obst = 10`
 - agent 半径 `1.5`
 - agent 最大速度 `2.0`
+- 上記 ORCA defaults は各 agent の `profile` に記述する
 - goal は各 agent の初期位置の antipodal point
 - `scenarios/upstream_circle.yaml` に `goal_position` と `preferred_speed=1.0` を明示する
 - preferred velocity は `Simulator` が各 step で goal 方向へ再計算する

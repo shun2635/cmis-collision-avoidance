@@ -35,6 +35,7 @@ def test_simulator_updates_preferred_velocity_from_goal_before_step() -> None:
     assert state.preferred_velocity.y == pytest.approx(0.0)
     assert state.velocity.x == pytest.approx(1.5)
     assert state.position.x == pytest.approx(0.75)
+    assert simulator.global_time == pytest.approx(0.5)
 
 
 def test_simulator_caps_goal_preferred_velocity_when_close_to_goal() -> None:
@@ -62,3 +63,16 @@ def test_simulator_caps_goal_preferred_velocity_when_close_to_goal() -> None:
 def test_agent_config_rejects_negative_preferred_speed() -> None:
     with pytest.raises(ValueError):
         AgentConfig(preferred_speed=-0.1)
+
+
+def test_simulator_snapshot_exposes_global_time() -> None:
+    scenario = Scenario(
+        agents=(AgentConfig(profile=AgentProfile()),),
+        time_step=0.25,
+        steps=2,
+    )
+    simulator = Simulator(scenario=scenario, algorithm=create_algorithm("orca"))
+
+    assert simulator.snapshot().global_time == pytest.approx(0.0)
+    simulator.step()
+    assert simulator.snapshot().global_time == pytest.approx(0.25)

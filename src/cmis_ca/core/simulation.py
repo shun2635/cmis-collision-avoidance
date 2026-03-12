@@ -19,6 +19,7 @@ class Simulator:
         self._scenario = scenario
         self._algorithm = algorithm
         self._step_index = 0
+        self._global_time = 0.0
         self._states = [
             AgentState(
                 position=config.initial_position,
@@ -36,6 +37,10 @@ class Simulator:
     def step_index(self) -> int:
         return self._step_index
 
+    @property
+    def global_time(self) -> float:
+        return self._global_time
+
     def snapshot(self) -> WorldSnapshot:
         agents = tuple(
             SnapshotAgent(
@@ -48,6 +53,7 @@ class Simulator:
         )
         return WorldSnapshot(
             step_index=self._step_index,
+            global_time=self._global_time,
             time_step=self._scenario.time_step,
             agents=agents,
             obstacles=self._scenario.obstacles,
@@ -93,6 +99,7 @@ class Simulator:
 
         self._states = next_states
         self._step_index += 1
+        self._global_time += self._scenario.time_step
         return self.states
 
     def run(self, steps: int | None = None) -> SimulationResult:

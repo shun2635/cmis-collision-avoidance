@@ -1,6 +1,6 @@
 # Issue 0013: ORCA の agent 設定と simulator 振る舞いの差分を監査する
 
-- ステータス: open
+- ステータス: completed
 - 優先度: high
 - 関連文書:
   - [docs/architecture/orca-reproduction-roadmap.md](../architecture/orca-reproduction-roadmap.md)
@@ -46,3 +46,11 @@ ORCA の完全再現を優先するなら、upstream が前提にしている ag
 ## 依存関係
 
 - [0012-orca-goal-model-and-pref-velocity-alignment.md](0012-orca-goal-model-and-pref-velocity-alignment.md): completed
+
+## 作業メモ
+
+- `AgentProfile` に upstream 寄りの per-agent parameter を追加した
+- `ORCAParameters` は agent profile を上書きする optional override に変更した
+- `Simulator.global_time` と `WorldSnapshot.global_time` を追加した
+- scenario loader が navigation parameter を profile へ読み込むようにした
+- 差分表は `docs/specifications/orca-agent-simulator-parity.md` に整理した

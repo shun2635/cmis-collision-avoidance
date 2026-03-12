@@ -6,6 +6,8 @@ from cmis_ca.core.geometry import Vector2
 from cmis_ca.core.state import AgentCommand, AgentState, SimulationResult
 
 
+
+
 def test_agent_state_with_preferred_velocity() -> None:
     state = AgentState(
         position=Vector2(1.0, 2.0),

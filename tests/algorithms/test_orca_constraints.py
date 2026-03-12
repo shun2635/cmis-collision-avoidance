@@ -32,6 +32,7 @@ def _agent(index: int, position: Vector2, velocity: Vector2 = Vector2()) -> Snap
 def test_build_agent_constraints_non_collision_case() -> None:
     snapshot = WorldSnapshot(
         step_index=0,
+        global_time=0.0,
         time_step=0.1,
         agents=(
             _agent(0, Vector2(0.0, 0.0)),
@@ -55,6 +56,7 @@ def test_build_agent_constraints_non_collision_case() -> None:
 def test_build_agent_constraints_collision_case() -> None:
     snapshot = WorldSnapshot(
         step_index=0,
+        global_time=0.0,
         time_step=0.1,
         agents=(
             _agent(0, Vector2(0.0, 0.0)),
@@ -77,6 +79,7 @@ def test_build_agent_constraints_collision_case() -> None:
 def test_build_obstacle_constraints_non_collision_case() -> None:
     snapshot = WorldSnapshot(
         step_index=0,
+        global_time=0.0,
         time_step=0.1,
         agents=(_agent(0, Vector2(0.0, 0.0)),),
         obstacles=(ObstacleSegment(start=Vector2(2.0, -1.0), end=Vector2(2.0, 1.0)),),
@@ -103,6 +106,7 @@ def test_build_obstacle_constraints_non_collision_case() -> None:
 def test_build_obstacle_constraints_collision_case() -> None:
     snapshot = WorldSnapshot(
         step_index=0,
+        global_time=0.0,
         time_step=0.1,
         agents=(_agent(0, Vector2(0.0, 0.0)),),
         obstacles=(ObstacleSegment(start=Vector2(0.2, -1.0), end=Vector2(0.2, 1.0)),),

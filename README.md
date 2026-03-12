@@ -36,6 +36,7 @@ upstream である `snape/RVO2` を参照しつつ、研究室内で読みやす
 - 利用可能なアルゴリズムは `orca` のみ
 - `--scenario` による YAML / JSON シナリオ読込に対応
 - goal / preferred velocity の scenario 記述と step 前自動更新に対応
+- upstream 寄りの per-agent ORCA defaults と `global_time` を Python 側へ反映済み
 - ORCA 制約生成は基準実装まで完了
 - 共通ソルバは `LineConstraint + speed limit` の基準実装まで完了
 - 障害物 ORCA 制約は、現在の `ObstacleSegment` モデルに合わせて closest-point 近似で扱う
@@ -124,4 +125,5 @@ Poetry の仮想環境は [poetry.toml](poetry.toml) によりプロジェクト
 - 実装同期ポリシー: [docs/policies/documentation-sync-policy.md](docs/policies/documentation-sync-policy.md)
 - 由来コードの取り扱い方針: [docs/policies/source-file-policy.md](docs/policies/source-file-policy.md)
 - 現行実装の詳細設計書: [docs/specifications/python-skeleton-detailed-design.md](docs/specifications/python-skeleton-detailed-design.md)
+- ORCA agent / simulator parity 監査: [docs/specifications/orca-agent-simulator-parity.md](docs/specifications/orca-agent-simulator-parity.md)
 - upstream Circle 回帰基盤: [docs/specifications/upstream-circle-regression.md](docs/specifications/upstream-circle-regression.md)

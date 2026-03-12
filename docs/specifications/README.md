@@ -12,5 +12,6 @@
 
 ## 現在の仕様書
 
+- `orca-agent-simulator-parity.md`
 - `python-skeleton-detailed-design.md`
 - `upstream-circle-regression.md`

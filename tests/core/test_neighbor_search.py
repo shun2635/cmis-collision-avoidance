@@ -27,6 +27,7 @@ def _snapshot_agent(index: int, position: Vector2) -> SnapshotAgent:
 def test_agent_neighbors_are_distance_sorted_and_capped() -> None:
     snapshot = WorldSnapshot(
         step_index=0,
+        global_time=0.0,
         time_step=0.1,
         agents=(
             _snapshot_agent(10, Vector2(0.0, 0.0)),
@@ -50,6 +51,7 @@ def test_agent_neighbors_are_distance_sorted_and_capped() -> None:
 def test_agent_index_is_resolved_from_snapshot_ids() -> None:
     snapshot = WorldSnapshot(
         step_index=0,
+        global_time=0.0,
         time_step=0.1,
         agents=(
             _snapshot_agent(5, Vector2(0.0, 0.0)),
@@ -70,6 +72,7 @@ def test_agent_index_is_resolved_from_snapshot_ids() -> None:
 def test_obstacle_neighbors_are_filtered_and_sorted_by_segment_distance() -> None:
     snapshot = WorldSnapshot(
         step_index=0,
+        global_time=0.0,
         time_step=0.1,
         agents=(_snapshot_agent(0, Vector2(0.0, 0.0)),),
         obstacles=(
@@ -93,6 +96,7 @@ def test_obstacle_neighbors_are_filtered_and_sorted_by_segment_distance() -> Non
 def test_zero_max_neighbors_returns_no_agent_neighbors() -> None:
     snapshot = WorldSnapshot(
         step_index=0,
+        global_time=0.0,
         time_step=0.1,
         agents=(
             _snapshot_agent(0, Vector2(0.0, 0.0)),
@@ -113,6 +117,7 @@ def test_zero_max_neighbors_returns_no_agent_neighbors() -> None:
 def test_invalid_arguments_raise() -> None:
     snapshot = WorldSnapshot(
         step_index=0,
+        global_time=0.0,
         time_step=0.1,
         agents=(_snapshot_agent(0, Vector2(0.0, 0.0)),),
     )

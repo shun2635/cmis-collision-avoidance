@@ -45,4 +45,4 @@ agent-agent ORCA line と solver 周辺の差分を洗い出して埋め、upstr
 
 ## 依存関係
 
-- [0013-orca-agent-and-simulator-parity-audit.md](0013-orca-agent-and-simulator-parity-audit.md): pending
+- [0013-orca-agent-and-simulator-parity-audit.md](0013-orca-agent-and-simulator-parity-audit.md): completed

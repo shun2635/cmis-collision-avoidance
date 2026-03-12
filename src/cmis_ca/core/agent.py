@@ -13,6 +13,24 @@ class AgentProfile:
 
     radius: float = 0.5
     max_speed: float = 1.0
+    neighbor_dist: float = 5.0
+    max_neighbors: int = 10
+    time_horizon: float = 5.0
+    time_horizon_obst: float = 5.0
+
+    def __post_init__(self) -> None:
+        if self.radius < 0.0:
+            raise ValueError("radius must be non-negative")
+        if self.max_speed < 0.0:
+            raise ValueError("max_speed must be non-negative")
+        if self.neighbor_dist < 0.0:
+            raise ValueError("neighbor_dist must be non-negative")
+        if self.max_neighbors < 0:
+            raise ValueError("max_neighbors must be non-negative")
+        if self.time_horizon <= 0.0:
+            raise ValueError("time_horizon must be positive")
+        if self.time_horizon_obst <= 0.0:
+            raise ValueError("time_horizon_obst must be positive")
 
 
 @dataclass(frozen=True)

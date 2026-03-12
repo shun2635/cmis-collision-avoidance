@@ -84,6 +84,22 @@ def _parse_agent(entry: Any, index: int) -> AgentConfig:
                 profile_raw.get("max_speed", 1.0),
                 f"agent[{index}].profile.max_speed",
             ),
+            neighbor_dist=_parse_float(
+                profile_raw.get("neighbor_dist", 5.0),
+                f"agent[{index}].profile.neighbor_dist",
+            ),
+            max_neighbors=_parse_int(
+                profile_raw.get("max_neighbors", 10),
+                f"agent[{index}].profile.max_neighbors",
+            ),
+            time_horizon=_parse_float(
+                profile_raw.get("time_horizon", 5.0),
+                f"agent[{index}].profile.time_horizon",
+            ),
+            time_horizon_obst=_parse_float(
+                profile_raw.get("time_horizon_obst", 5.0),
+                f"agent[{index}].profile.time_horizon_obst",
+            ),
         ),
         initial_position=_parse_vector(
             entry.get("initial_position", [0.0, 0.0]),

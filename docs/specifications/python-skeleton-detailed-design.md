@@ -24,6 +24,7 @@
 - 外部シナリオファイル読込は YAML / JSON の最小ローダまで実装済み
 - ORCA 制約生成は基準実装まで完了
 - 共通ソルバは `LineConstraint + speed limit` に対する基準実装まで完了
+- upstream の agent / simulator 主要 parameter と clock を Python 側へ反映済み
 - C++ 側のコードは履歴的な足場または比較用として残置
 
 ## 3. コンポーネント構成と役割
@@ -47,7 +48,7 @@
 | モジュール | 役割 |
 | --- | --- |
 | `geometry.py` | `Vector2` と基本的な 2D 幾何演算 |
-| `agent.py` | `AgentProfile` と `AgentConfig` の定義、goal 情報の保持 |
+| `agent.py` | `AgentProfile` と `AgentConfig` の定義、goal 情報と upstream 寄り navigation parameter の保持 |
 | `state.py` | `AgentState` `AgentCommand` `SimulationResult` の定義 |
 | `scenario.py` | draft API 互換のため `Scenario` を再公開 |
 | `world.py` | `Scenario` `ObstacleSegment` `SnapshotAgent` `WorldSnapshot` の定義 |
@@ -93,6 +94,8 @@
 ### 3.6 `ORCAAlgorithm.step()` の現行仕様
 
 - `NaiveNeighborSearch`、ORCA 制約生成、共通 solver をまとめて 1 ステップへ統合している
+- `AgentProfile` の `neighbor_dist`, `max_neighbors`, `time_horizon`, `time_horizon_obst` を既定値として参照する
+- `ORCAParameters` は algorithm 側の optional override として扱う
 - obstacle 制約は先頭へまとめ、solver の `protected_constraint_count` に渡す
 - `AgentCommand` へ変換された速度指令を返す
 
@@ -104,6 +107,7 @@
 - `name` 未指定時はファイル名 stem を使う
 - `obstacles` は省略可能で、指定時は `start` `end` を必須とする
 - ベクトルは `[x, y]` または `{x: ..., y: ...}` の 2 形式を受け付ける
+- `agent.profile` では `radius`, `max_speed`, `neighbor_dist`, `max_neighbors`, `time_horizon`, `time_horizon_obst` を受け付ける
 - `agent.goal_position` は任意で、指定時は vector として読み込む
 - `agent.preferred_speed` は任意で、既定値は `1.0`
 - `--steps` が CLI から与えられた場合は、読み込んだ `Scenario.steps` を上書きする
@@ -131,10 +135,10 @@
 
 | 型 | 主なフィールド | 用途 |
 | --- | --- | --- |
-| `AgentProfile` | `radius`, `max_speed` | エージェントの固定物理属性 |
+| `AgentProfile` | `radius`, `max_speed`, `neighbor_dist`, `max_neighbors`, `time_horizon`, `time_horizon_obst` | エージェントの固定属性と ORCA 既定 parameter |
 | `AgentConfig` | `name`, `profile`, `initial_position`, `initial_velocity`, `preferred_velocity`, `goal_position`, `preferred_speed` | シナリオ投入時の初期設定 |
 | `Scenario` | `agents`, `obstacles`, `time_step`, `steps`, `name` | シミュレーション入力全体 |
-| `WorldSnapshot` | `step_index`, `time_step`, `agents`, `obstacles` | 1 ステップごとの読み取り専用入力 |
+| `WorldSnapshot` | `step_index`, `global_time`, `time_step`, `agents`, `obstacles` | 1 ステップごとの読み取り専用入力 |
 | `NeighborSet` | `agent_neighbors`, `obstacle_neighbors` | 距離付き近傍探索結果 |
 
 現在の入力バリデーション:
@@ -142,7 +146,14 @@
 - `Scenario.time_step` は正数
 - `Scenario.steps` は 0 以上
 - `Scenario.agents` は 1 体以上必須
+- `AgentProfile.radius` は 0 以上
+- `AgentProfile.max_speed` は 0 以上
+- `AgentProfile.neighbor_dist` は 0 以上
+- `AgentProfile.max_neighbors` は 0 以上
+- `AgentProfile.time_horizon` は正数
+- `AgentProfile.time_horizon_obst` は正数
 - `ObstacleSegment` は長さ 0 を禁止
+- `WorldSnapshot.global_time` は 0 以上
 - `WorldSnapshot.agents` の `index` は一意
 - `LineConstraint.direction` はゼロベクトルを禁止
 - `AgentConfig.preferred_speed` は 0 以上
@@ -239,10 +250,11 @@ poetry run pytest
 4. `--scenario` がなければ `cli/run.py` が内蔵の 1 エージェントシナリオを構築する
 5. `Simulator` が `Scenario` から内部 `AgentState` を初期化する
 6. goal を持つ agent がいれば、各 step の直前に `goal_position - current_position` から preferred velocity を更新する
-7. 各ステップで `Simulator.snapshot()` が `WorldSnapshot` を作る
-8. `ORCAAlgorithm.step()` が近傍探索、制約生成、速度選択を行う
+7. `Simulator.snapshot()` が `global_time` を含む `WorldSnapshot` を作る
+8. `ORCAAlgorithm.step()` が各 agent の `AgentProfile` を既定値として ORCA parameter を解決し、近傍探索、制約生成、速度選択を行う
 9. `Simulator.step()` が返却された `AgentCommand` を速度制限付きで適用し、位置を更新する
-10. `Simulator.run()` が履歴をまとめて `SimulationResult` を返す
+10. `Simulator` は `global_time += time_step` を進める
+11. `Simulator.run()` が履歴をまとめて `SimulationResult` を返す
 
 ### 6.5 upstream Circle 回帰の現行ロジック
 
@@ -250,7 +262,7 @@ poetry run pytest
 2. `external/RVO2/examples/Circle.cc` と同じく、各 agent の goal は `goal_position` に antipodal point として記述する
 3. `Simulator.refresh_preferred_velocities_from_goals()` が各 step の直前に `goal - current_position` から希望速度を再計算する
 4. 目標ベクトル長が `preferred_speed` を超えるときは正規化して速度をそろえ、近傍なら goal までの残差ベクトルをそのまま使う
-5. ORCA パラメータは `neighbor_dist=15`, `max_neighbors=10`, `time_horizon=10`, `time_horizon_obst=10` を使う
+5. ORCA パラメータは各 agent の `profile.neighbor_dist=15`, `profile.max_neighbors=10`, `profile.time_horizon=10`, `profile.time_horizon_obst=10` を使う
 6. 実行後は平均半径、最短 pair 距離、重心ずれ、goal 距離、速度上限、antipodal 対称性を比較メトリクスとして集計する
 
 ### 6.2 ORCA 1 ステップの現状ロジック
@@ -309,6 +321,7 @@ obstacles:
 | `tests/algorithms/test_orca.py` | ORCA step の単独・head-on・障害物ケース |
 | `tests/cli/test_main.py` | `--scenario` 読込と `--steps` 上書き |
 | `tests/algorithms/test_orca_constraints.py` | agent-agent / obstacle 制約の非衝突・衝突ケース |
+| `tests/core/test_agent.py` | `AgentProfile` の navigation parameter と ORCA override 解決 |
 | `tests/core/test_geometry.py` | `Vector2` の演算、正規化、距離、例外 |
 | `tests/core/test_neighbor_search.py` | 距離順、`max_neighbors`、障害物近傍、入力検証 |
 | `tests/core/test_simulation.py` | goal ベースの preferred velocity 自動更新 |
@@ -337,9 +350,11 @@ obstacles:
 
 現時点の主要な未実装事項は以下。
 
-- 外部シナリオローダ
 - 複数アルゴリズム登録
-- 結果保存、可視化、メトリクス計算
-- upstream 比較用の回帰基盤
+- upstream 準拠の obstacle topology
+- upstream 準拠の obstacle constraint 移植
+- agent-agent / solver の完全一致監査
+- 回帰 suite のさらなる拡張
+- 結果保存、可視化
 
 これらが実装されたら、本書を更新して skeleton 状態の記述を置き換える。

@@ -19,6 +19,10 @@ def test_upstream_circle_scenario_matches_expected_setup() -> None:
     assert scenario.agents[0].goal_position is not None
     assert scenario.agents[0].goal_position.x == pytest.approx(-200.0)
     assert scenario.agents[0].preferred_speed == pytest.approx(1.0)
+    assert scenario.agents[0].profile.neighbor_dist == pytest.approx(15.0)
+    assert scenario.agents[0].profile.max_neighbors == 10
+    assert scenario.agents[0].profile.time_horizon == pytest.approx(10.0)
+    assert scenario.agents[0].profile.time_horizon_obst == pytest.approx(10.0)
     assert scenario.agents[125].initial_position.x == pytest.approx(-200.0)
 
 

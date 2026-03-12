@@ -30,23 +30,24 @@ class ORCAAlgorithm:
         commands = []
 
         for agent in snapshot.agents:
+            resolved_parameters = self.parameters.resolve(agent.profile)
             neighbors = self.neighbor_search.find_neighbors(
                 snapshot=snapshot,
                 agent_index=agent.index,
-                neighbor_dist=self.parameters.neighbor_dist,
-                max_neighbors=self.parameters.max_neighbors,
+                neighbor_dist=resolved_parameters.neighbor_dist,
+                max_neighbors=resolved_parameters.max_neighbors,
             )
             obstacle_constraints = build_obstacle_constraints(
                 snapshot=snapshot,
                 agent_index=agent.index,
                 neighbors=neighbors,
-                parameters=self.parameters,
+                parameters=resolved_parameters,
             )
             agent_constraints = build_agent_constraints(
                 snapshot=snapshot,
                 agent_index=agent.index,
                 neighbors=neighbors,
-                parameters=self.parameters,
+                parameters=resolved_parameters,
             )
             constraints = [*obstacle_constraints, *agent_constraints]
             commands.append(

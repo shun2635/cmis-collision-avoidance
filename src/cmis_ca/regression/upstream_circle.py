@@ -44,14 +44,7 @@ def run_upstream_circle_regression(
     scenario = load_scenario(scenario_path)
     simulator = Simulator(
         scenario=scenario,
-        algorithm=ORCAAlgorithm(
-            parameters=ORCAParameters(
-                neighbor_dist=15.0,
-                max_neighbors=10,
-                time_horizon=10.0,
-                time_horizon_obst=10.0,
-            )
-        ),
+        algorithm=ORCAAlgorithm(parameters=ORCAParameters()),
     )
     goals = tuple(agent.goal_position for agent in scenario.agents)
     if any(goal is None for goal in goals):

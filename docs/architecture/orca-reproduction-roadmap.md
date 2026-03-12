@@ -31,7 +31,7 @@
 
 ### 2. agent / solver / neighbor semantics の差分
 
-agent-agent 制約生成と solver は移植済みだが、upstream との完全一致を保証する監査はまだない。  
+agent / simulator の主要 parameter と clock は監査済みだが、agent-agent 制約生成と solver の完全一致監査はまだ終わっていない。  
 近傍採用条件、分岐の細部、境界ケースを詰める必要がある。
 
 ### 3. 回帰 suite の薄さ
@@ -42,7 +42,7 @@ agent-agent 制約生成と solver は移植済みだが、upstream との完全
 ## ORCA 優先 issue 順
 
 1. `0012-orca-goal-model-and-pref-velocity-alignment` `completed`
-2. `0013-orca-agent-and-simulator-parity-audit`
+2. `0013-orca-agent-and-simulator-parity-audit` `completed`
 3. `0014-orca-obstacle-topology-model-port`
 4. `0015-orca-obstacle-constraint-exact-port`
 5. `0016-orca-agent-constraint-and-solver-parity`

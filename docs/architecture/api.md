@@ -39,12 +39,15 @@ cmis-ca run --algorithm cnav --scenario scenarios/circle.yaml
   - `AgentConfig` の互換 alias
 - `AgentConfig`
   - 半径、最大速度、初期位置、初期速度、希望速度、goal などの設定
+- `AgentProfile`
+  - `radius`, `max_speed`, `neighbor_dist`, `max_neighbors`, `time_horizon`, `time_horizon_obst`
 - `AgentState`
   - 現在位置、現在速度、希望速度
 - `Scenario`
   - 初期配置、障害物、タイムステップ、総ステップ数
 - `WorldSnapshot`
   - 1 ステップ分の読み取り専用ワールド状態
+  - `global_time` を含む
 - `SimulationResult`
   - 実行結果、最終状態、履歴
 
@@ -110,7 +113,7 @@ result = simulator.run()
 - goal 更新は `Simulator.step()` の前に自動適用される
 - `agents[*]`:
   - 任意: `name`, `profile`, `initial_position`, `initial_velocity`, `preferred_velocity`, `goal_position`, `preferred_speed`
-  - `profile` の任意項目: `radius`, `max_speed`
+  - `profile` の任意項目: `radius`, `max_speed`, `neighbor_dist`, `max_neighbors`, `time_horizon`, `time_horizon_obst`
 - `obstacles[*]`:
   - 必須: `start`, `end`
 - ベクトル表現:
