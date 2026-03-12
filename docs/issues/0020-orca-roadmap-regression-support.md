@@ -1,6 +1,6 @@
 # Issue 0020: upstream Roadmap scenario を回帰比較へ追加する
 
-- ステータス: open
+- ステータス: completed
 - 優先度: medium
 - 関連文書:
   - [docs/specifications/orca-parity-gap-review.md](../specifications/orca-parity-gap-review.md)
@@ -32,3 +32,10 @@
 
 - `Roadmap.cc` の扱い方針が docs にある
 - ORCA regression suite の次の拡張候補が明確になっている
+
+## 実施メモ
+
+- `src/cmis_ca/regression/upstream_roadmap.py` を追加し、scenario、visibility graph、Dijkstra 距離表、preferred velocity 更新を regression helper に閉じ込めた
+- `scripts/compare_upstream_roadmap.py` と `tests/regression/test_upstream_roadmap.py` を追加した
+- public な roadmap planner は追加せず、regression-local な visibility helper と deterministic perturbation で比較条件を固定した
+- 結果を [../specifications/upstream-roadmap-regression.md](../specifications/upstream-roadmap-regression.md) に記録した

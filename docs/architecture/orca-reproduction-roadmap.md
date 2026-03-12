@@ -20,16 +20,16 @@
 - シナリオローダ
 - obstacle topology の linked vertex 化
 - obstacle ORCA constraint の upstream ベース移植
-- upstream `Circle` と `Blocks` に基づく初期回帰基盤
+- upstream `Circle`、`Blocks`、`Roadmap` に基づく回帰基盤
 
-詳細は [../specifications/python-skeleton-detailed-design.md](../specifications/python-skeleton-detailed-design.md)、[../specifications/upstream-circle-regression.md](../specifications/upstream-circle-regression.md)、[../specifications/upstream-blocks-regression.md](../specifications/upstream-blocks-regression.md) を参照する。
+詳細は [../specifications/python-skeleton-detailed-design.md](../specifications/python-skeleton-detailed-design.md)、[../specifications/upstream-circle-regression.md](../specifications/upstream-circle-regression.md)、[../specifications/upstream-blocks-regression.md](../specifications/upstream-blocks-regression.md)、[../specifications/upstream-roadmap-regression.md](../specifications/upstream-roadmap-regression.md) を参照する。
 
 ## 残る主要ギャップ
 
-### 1. regression suite の薄さ
+### 1. regression の厳密度
 
-現在の upstream 比較は `Circle` と `Blocks` まで増えたが、まだ定性的な確認が中心である。  
-今後は scenario をさらに増やし、より厳密な回帰条件を整備する必要がある。
+現在の upstream 比較は `Circle`、`Blocks`、`Roadmap` まで増えたが、まだ定性的な確認が中心である。  
+今後は step-by-step 比較や長時間実行の評価など、より厳密な回帰条件を整備する余地がある。
 
 ### 2. obstacle 周辺の残課題
 
@@ -51,7 +51,7 @@ neighbor semantics 自体は upstream ベースで揃えたが、実装は依然
 6. `0017-orca-upstream-regression-suite-expansion` `completed`
 7. `0018-orca-parity-gap-review` `completed`
 8. `0019-orca-neighbor-search-parity-audit` `completed`
-9. `0020-orca-roadmap-regression-support`
+9. `0020-orca-roadmap-regression-support` `completed`
 
 ## 後回しにするもの
 

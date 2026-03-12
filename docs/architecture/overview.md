@@ -98,5 +98,5 @@ tests/              自動テスト
 現時点の正規実装は Python 側の `src/cmis_ca/` である。  
 `core/` と `algorithms/orca/` の責務分離、Poetry 環境、最小 CLI、スモークテスト、共通コアの基準型を先行して整備している。
 
-一方で、`Roadmap.cc` のような次段階回帰の扱いは未完了である。  
-この未完了部分を含む現状仕様は [../specifications/python-skeleton-detailed-design.md](../specifications/python-skeleton-detailed-design.md) で管理し、優先順位は [orca-reproduction-roadmap.md](orca-reproduction-roadmap.md) に整理する。
+現在は `Roadmap.cc` 相当の regression helper まで追加済みであり、残る差分は parity gap review に記録した accepted / medium の論点が中心である。  
+現状仕様は [../specifications/python-skeleton-detailed-design.md](../specifications/python-skeleton-detailed-design.md) で管理し、優先順位は [orca-reproduction-roadmap.md](orca-reproduction-roadmap.md) に整理する。

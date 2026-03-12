@@ -42,7 +42,7 @@
 | ORCA 固有実装 | `src/cmis_ca/algorithms/orca/` | ORCA 固有パラメータ、制約生成、ステップ判断 |
 | 補助スクリプト | `scripts/smoke_run.py` | 最小実行確認 |
 | 回帰 helper | `src/cmis_ca/regression/` | upstream 由来 scenario の builder と metric 集計 |
-| 回帰スクリプト | `scripts/compare_upstream_circle.py`, `scripts/compare_upstream_blocks.py` | upstream 条件の比較メトリクスを出力 |
+| 回帰スクリプト | `scripts/compare_upstream_circle.py`, `scripts/compare_upstream_blocks.py`, `scripts/compare_upstream_roadmap.py` | upstream 条件の比較メトリクスを出力 |
 | テスト | `tests/` | core の単体テストとスモークテスト |
 | upstream 参照 | `external/RVO2/` | 比較・参照用の外部コード |
 
@@ -221,6 +221,7 @@ agent=<index> position=(<x>, <y>) velocity=(<vx>, <vy>)
 | `scenarios/*.yaml` | 共通シナリオ定義 |
 | `scenarios/upstream_circle.yaml` | upstream `Circle.cc` 由来の比較用シナリオ |
 | `src/cmis_ca/regression/upstream_blocks.py` | upstream `Blocks.cc` 由来の code-generated scenario と metric |
+| `src/cmis_ca/regression/upstream_roadmap.py` | upstream `Roadmap.cc` 由来の code-generated scenario、visibility graph、metric |
 | `docs/algorithms/orca.md` | ORCA の責務境界と設計方針 |
 
 現時点で `configs/` は未使用だが、`scenarios/` は CLI から利用する。
@@ -284,6 +285,15 @@ poetry run pytest
 3. 4 個の polygon obstacle を upstream と同じ頂点順で配置する
 4. `Simulator.refresh_preferred_velocities_from_goals()` が各 step の直前に goal 方向へ希望速度を更新する
 5. 実行後は average goal distance、goal distance reduction、最短 pair 距離、重心ずれ、速度上限、central agent count を集計する
+
+### 6.7 upstream Roadmap 回帰の現行ロジック
+
+1. `src/cmis_ca/regression/upstream_roadmap.py` が `external/RVO2/examples/Roadmap.cc` に対応する `Scenario`、roadmap vertex、goal index を code-generated で構築する
+2. obstacle は `Blocks` と同じ 4 polygon を使い、goal vertex 4 個と obstacle 周辺 vertex 16 個で visibility graph を作る
+3. visibility graph は regression helper 内の segment intersection と clearance 判定を使って構築し、goal までの距離表は Dijkstra で求める
+4. 実行時は static `goal_position` を使わず、各 step の直前に「可視な roadmap vertex のうち最短経路上で最も良いもの」へ向かう preferred velocity を更新する
+5. upstream の微小 perturbation は deterministic seed で再現し、回帰の再現性を優先する
+6. 実行後は goal distance reduction、最短 pair 距離、重心ずれ、速度上限、goal 到達数を集計する
 
 ### 6.2 ORCA 1 ステップの現状ロジック
 

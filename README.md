@@ -44,6 +44,7 @@ upstream である `snape/RVO2` を参照しつつ、研究室内で読みやす
 - agent-agent ORCA 制約と solver の主要分岐は upstream ベースで監査済み
 - neighbor search は upstream ベースの range / boundary / insertion semantics に追従済み
 - upstream `Circle` と `Blocks` 条件に基づく回帰シナリオと比較メトリクスの土台を追加済み
+- upstream `Roadmap` 条件に基づく visibility-guided 回帰 helper を追加済み
 
 実装済みの詳細仕様は [docs/specifications/python-skeleton-detailed-design.md](docs/specifications/python-skeleton-detailed-design.md) を参照してください。
 
@@ -115,7 +116,8 @@ upstream 由来の regression helper:
 
 - `scripts/compare_upstream_circle.py`: Circle の比較 metric を出力
 - `scripts/compare_upstream_blocks.py`: Blocks の比較 metric を出力
-- `Blocks` は repetitive な 100 体配置のため、現時点では YAML ではなく `src/cmis_ca/regression/upstream_blocks.py` で code-generated scenario として保持する
+- `scripts/compare_upstream_roadmap.py`: Roadmap の比較 metric を出力
+- `Blocks` と `Roadmap` は repetitive な 100 体配置や roadmap graph を含むため、現時点では YAML ではなく `src/cmis_ca/regression/` の code-generated setup として保持する
 
 ## 移行メモ
 
@@ -141,3 +143,4 @@ Poetry の仮想環境は [poetry.toml](poetry.toml) によりプロジェクト
 - ORCA parity gap review: [docs/specifications/orca-parity-gap-review.md](docs/specifications/orca-parity-gap-review.md)
 - upstream Blocks 回帰基盤: [docs/specifications/upstream-blocks-regression.md](docs/specifications/upstream-blocks-regression.md)
 - upstream Circle 回帰基盤: [docs/specifications/upstream-circle-regression.md](docs/specifications/upstream-circle-regression.md)
+- upstream Roadmap 回帰基盤: [docs/specifications/upstream-roadmap-regression.md](docs/specifications/upstream-roadmap-regression.md)

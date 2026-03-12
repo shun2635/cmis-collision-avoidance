@@ -58,7 +58,7 @@ ORCA 完全再現を優先する。順序は [../architecture/orca-reproduction-
 6. [0017-orca-upstream-regression-suite-expansion.md](0017-orca-upstream-regression-suite-expansion.md) `completed`
 7. [0018-orca-parity-gap-review.md](0018-orca-parity-gap-review.md) `completed`
 8. [0019-orca-neighbor-search-parity-audit.md](0019-orca-neighbor-search-parity-audit.md) `completed`
-9. [0020-orca-roadmap-regression-support.md](0020-orca-roadmap-regression-support.md)
+9. [0020-orca-roadmap-regression-support.md](0020-orca-roadmap-regression-support.md) `completed`
 
 ## 後回しメモ
 
