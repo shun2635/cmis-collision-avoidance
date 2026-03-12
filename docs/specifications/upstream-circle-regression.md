@@ -16,7 +16,7 @@
 | 種別 | パス | 内容 |
 | --- | --- | --- |
 | 比較用シナリオ | `scenarios/upstream_circle.yaml` | 250 体を半径 200 の円周上へ等間隔配置 |
-| 回帰 helper | `src/cmis_ca/regression/upstream_circle.py` | step ごとの goal 更新と metric 集計 |
+| 回帰 helper | `src/cmis_ca/regression/upstream_circle.py` | scenario-defined goals を使って metric を集計 |
 | 実行スクリプト | `scripts/compare_upstream_circle.py` | metric の出力 |
 | 回帰テスト | `tests/regression/test_upstream_circle.py` | 条件確認と定性的回帰チェック |
 
@@ -34,7 +34,8 @@
 - agent 半径 `1.5`
 - agent 最大速度 `2.0`
 - goal は各 agent の初期位置の antipodal point
-- preferred velocity は各 step で goal 方向へ再計算し、長さ `1` で正規化する
+- `scenarios/upstream_circle.yaml` に `goal_position` と `preferred_speed=1.0` を明示する
+- preferred velocity は `Simulator` が各 step で goal 方向へ再計算する
 
 ## 5. 現在の比較観点
 
@@ -71,6 +72,6 @@
 
 ## 8. 制約
 
-- 現在は dedicated helper で goal 更新を行っており、汎用 scenario schema に goal API はまだない
+- goal API は scenario schema と `Simulator` に導入済みである
 - 比較は upstream 完全一致ではなく、早期ステップの定性的挙動固定にとどまる
 - 近傍探索は `NaiveNeighborSearch` のため、大規模 step 数では計算量が大きい

@@ -24,29 +24,24 @@
 
 ## 残る主要ギャップ
 
-### 1. goal / preferred velocity モデル
-
-現在の一般シナリオ schema には upstream で暗黙に使われる goal 概念が十分入っていない。  
-`Circle` では専用 helper で補っているため、これを一般モデルへ戻す必要がある。
-
-### 2. obstacle 表現
+### 1. obstacle 表現
 
 現在の障害物は `ObstacleSegment` 単体で、upstream の linked obstacle graph や凸性判定を持っていない。  
 このため obstacle ORCA line は closest-point 近似に留まっている。
 
-### 3. agent / solver / neighbor semantics の差分
+### 2. agent / solver / neighbor semantics の差分
 
 agent-agent 制約生成と solver は移植済みだが、upstream との完全一致を保証する監査はまだない。  
 近傍採用条件、分岐の細部、境界ケースを詰める必要がある。
 
-### 4. 回帰 suite の薄さ
+### 3. 回帰 suite の薄さ
 
 現在の upstream 比較は `Circle` に限定され、しかも定性的な確認が中心である。  
 今後は scenario を増やし、より厳密な回帰条件を整備する必要がある。
 
 ## ORCA 優先 issue 順
 
-1. `0012-orca-goal-model-and-pref-velocity-alignment`
+1. `0012-orca-goal-model-and-pref-velocity-alignment` `completed`
 2. `0013-orca-agent-and-simulator-parity-audit`
 3. `0014-orca-obstacle-topology-model-port`
 4. `0015-orca-obstacle-constraint-exact-port`

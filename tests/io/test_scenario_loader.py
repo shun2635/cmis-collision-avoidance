@@ -23,6 +23,8 @@ def test_load_scenario_reads_yaml_with_agents_and_obstacles(tmp_path) -> None:
                 "      radius: 0.4",
                 "      max_speed: 1.2",
                 "    initial_position: [0.0, 0.0]",
+                "    goal_position: [2.0, 0.0]",
+                "    preferred_speed: 0.75",
                 "    preferred_velocity:",
                 "      x: 1.0",
                 "      y: 0.0",
@@ -42,6 +44,9 @@ def test_load_scenario_reads_yaml_with_agents_and_obstacles(tmp_path) -> None:
     assert len(scenario.agents) == 1
     assert scenario.agents[0].profile.max_speed == pytest.approx(1.2)
     assert scenario.agents[0].preferred_velocity.x == pytest.approx(1.0)
+    assert scenario.agents[0].goal_position is not None
+    assert scenario.agents[0].goal_position.x == pytest.approx(2.0)
+    assert scenario.agents[0].preferred_speed == pytest.approx(0.75)
     assert len(scenario.obstacles) == 1
     assert scenario.obstacles[0].start.x == pytest.approx(1.0)
 

@@ -57,7 +57,25 @@ class Simulator:
         current = self._states[agent_index]
         self._states[agent_index] = replace(current, preferred_velocity=preferred_velocity)
 
+    def refresh_preferred_velocities_from_goals(self) -> None:
+        next_states = []
+        for config, state in zip(self._scenario.agents, self._states):
+            if config.goal_position is None:
+                next_states.append(state)
+                continue
+
+            goal_vector = config.goal_position - state.position
+            if goal_vector.abs_sq() <= config.preferred_speed * config.preferred_speed:
+                preferred_velocity = goal_vector
+            else:
+                preferred_velocity = goal_vector.normalized() * config.preferred_speed
+
+            next_states.append(state.with_preferred_velocity(preferred_velocity))
+
+        self._states = next_states
+
     def step(self) -> tuple[AgentState, ...]:
+        self.refresh_preferred_velocities_from_goals()
         commands = self._algorithm.step(self.snapshot())
         if len(commands) != len(self._states):
             raise ValueError("algorithm returned a command count that does not match the agent count")

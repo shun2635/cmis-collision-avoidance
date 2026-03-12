@@ -35,6 +35,7 @@ upstream である `snape/RVO2` を参照しつつ、研究室内で読みやす
 
 - 利用可能なアルゴリズムは `orca` のみ
 - `--scenario` による YAML / JSON シナリオ読込に対応
+- goal / preferred velocity の scenario 記述と step 前自動更新に対応
 - ORCA 制約生成は基準実装まで完了
 - 共通ソルバは `LineConstraint + speed limit` の基準実装まで完了
 - 障害物 ORCA 制約は、現在の `ObstacleSegment` モデルに合わせて closest-point 近似で扱う

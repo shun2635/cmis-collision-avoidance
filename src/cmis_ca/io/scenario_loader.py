@@ -97,6 +97,14 @@ def _parse_agent(entry: Any, index: int) -> AgentConfig:
             entry.get("preferred_velocity", [0.0, 0.0]),
             f"agent[{index}].preferred_velocity",
         ),
+        goal_position=_parse_optional_vector(
+            entry.get("goal_position"),
+            f"agent[{index}].goal_position",
+        ),
+        preferred_speed=_parse_float(
+            entry.get("preferred_speed", 1.0),
+            f"agent[{index}].preferred_speed",
+        ),
     )
 
 
@@ -131,6 +139,12 @@ def _parse_optional_string(value: Any, field_name: str) -> str:
     if not isinstance(value, str):
         raise ValueError(f"{field_name} must be a string")
     return value
+
+
+def _parse_optional_vector(value: Any, field_name: str) -> Vector2 | None:
+    if value is None:
+        return None
+    return _parse_vector(value, field_name)
 
 
 def _parse_float(value: Any, field_name: str) -> float:

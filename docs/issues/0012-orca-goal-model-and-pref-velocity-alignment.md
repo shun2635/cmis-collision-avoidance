@@ -1,6 +1,6 @@
 # Issue 0012: ORCA の goal モデルと preferred velocity 更新を一般化する
 
-- ステータス: open
+- ステータス: completed
 - 優先度: high
 - 関連文書:
   - [docs/architecture/orca-reproduction-roadmap.md](../architecture/orca-reproduction-roadmap.md)
@@ -48,3 +48,11 @@ goal / destination を scenario schema と simulator の正規機能として導
 ## 依存関係
 
 - [0010-upstream-circle-scenario-regression.md](0010-upstream-circle-scenario-regression.md): completed
+
+## 作業メモ
+
+- `AgentConfig` に `goal_position` と `preferred_speed` を追加した
+- `io/scenario_loader.py` が goal 情報を scenario file から読み込むようにした
+- `Simulator.step()` の前に goal ベースの preferred velocity 更新を自動適用するようにした
+- `scenarios/upstream_circle.yaml` は goal を明示的に保持する形へ更新した
+- `upstream_circle.py` は scenario-defined goals を使う形に変更した

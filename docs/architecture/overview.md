@@ -50,7 +50,7 @@
 
 ### Phase 3: ORCA 完全再現
 
-- goal / preferred velocity モデルの一般化
+- goal / preferred velocity モデルの一般化 `completed`
 - obstacle topology の再設計
 - obstacle ORCA 制約の厳密移植
 - agent / solver / neighbor semantics の差分監査
@@ -97,5 +97,5 @@ tests/              自動テスト
 現時点の正規実装は Python 側の `src/cmis_ca/` である。  
 `core/` と `algorithms/orca/` の責務分離、Poetry 環境、最小 CLI、スモークテスト、共通コアの基準型を先行して整備している。
 
-一方で、goal モデル、upstream 準拠の obstacle 表現、ORCA 再現度の監査と回帰拡張は未完了である。  
+一方で、upstream 準拠の obstacle 表現、ORCA 再現度の監査と回帰拡張は未完了である。  
 この未完了部分を含む現状仕様は [../specifications/python-skeleton-detailed-design.md](../specifications/python-skeleton-detailed-design.md) で管理し、優先順位は [orca-reproduction-roadmap.md](orca-reproduction-roadmap.md) に整理する。

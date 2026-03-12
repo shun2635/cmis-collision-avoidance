@@ -45,4 +45,4 @@ ORCA の完全再現を優先するなら、upstream が前提にしている ag
 
 ## 依存関係
 
-- [0012-orca-goal-model-and-pref-velocity-alignment.md](0012-orca-goal-model-and-pref-velocity-alignment.md): pending
+- [0012-orca-goal-model-and-pref-velocity-alignment.md](0012-orca-goal-model-and-pref-velocity-alignment.md): completed
