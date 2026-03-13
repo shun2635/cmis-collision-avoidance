@@ -1,6 +1,6 @@
 # Issue 0023: CNav 向けに ORCA の per-agent solve helper を抽出する
 
-- ステータス: todo
+- ステータス: completed
 - 優先度: high
 - 関連文書:
   - [docs/algorithms/cnav.md](../algorithms/cnav.md)
@@ -43,3 +43,9 @@ ORCA の per-agent solve を helper として切り出し、`optimization_veloci
 
 - helper 名は ORCA 専用であることが分かるものにする
 - CNav 以外からも再利用しやすいが、抽象化しすぎて `core/` へ移す必要はない
+
+## 実施メモ
+
+- `src/cmis_ca/algorithms/orca/agent_solver.py` に `compute_orca_velocity(...)` を追加した
+- `ORCAAlgorithm.step()` は helper を使う形へ置き換えた
+- arbitrary `optimization_velocity` を受け取れることと、既存 `step()` との一致を `tests/algorithms/test_orca.py` に追加した
