@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from cmis_ca.algorithms.cnav.algorithm import CNavAlgorithm
 from cmis_ca.algorithms.orca.algorithm import ORCAAlgorithm
 
 
@@ -11,6 +12,7 @@ class AlgorithmRegistry:
     """Factory registry used by the CLI and the public API."""
 
     _builders = {
+        "cnav": CNavAlgorithm,
         "orca": ORCAAlgorithm,
     }
 

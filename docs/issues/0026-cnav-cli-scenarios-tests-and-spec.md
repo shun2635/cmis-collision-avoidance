@@ -1,6 +1,6 @@
 # Issue 0026: CNav の CLI・scenario・tests・仕様書を仕上げる
 
-- ステータス: todo
+- ステータス: completed
 - 優先度: medium
 - 関連文書:
   - [docs/algorithms/cnav.md](../algorithms/cnav.md)
@@ -50,3 +50,11 @@ CNav を repo の利用可能アルゴリズムとして露出し、最小 scena
 
 - 初回は比較 metrics ではなく smoke と単体 test を優先する
 - README では「実験的導入」か「利用可能」かの表現を実装状態に合わせる
+
+## 実施メモ
+
+- `AlgorithmRegistry` に `cnav` を登録した
+- `scenarios/cnav_queue.yaml` を追加し、CLI から直接実行できる最小外部 scenario を用意した
+- `tests/cli/test_main.py` に `--algorithm cnav` の CLI test を追加した
+- `tests/test_simulator_smoke.py` に `create_algorithm("cnav")` の smoke test を追加した
+- `docs/specifications/cnav-initial-implementation.md` を追加し、README と詳細設計書を `cnav` 対応へ更新した

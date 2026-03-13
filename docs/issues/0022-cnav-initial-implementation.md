@@ -1,6 +1,6 @@
 # Issue 0022: CNav 初期実装の親 issue を整理する
 
-- ステータス: todo
+- ステータス: completed
 - 優先度: medium
 - 関連文書:
   - [docs/algorithms/cnav.md](../algorithms/cnav.md)
@@ -99,3 +99,10 @@ neighbor の intended velocity 通信、constrained neighbor ranking、短期 si
 - goal が未設定の scenario では constrained neighbor ranking が定義しにくいので、初回実装では `全 agent に goal_position 必須` とする
 - simulation-based 評価では self と neighbor の一時 state が必要になるため、runtime 専用の軽量 dataclass を `algorithms/cnav/` 側に閉じ込める
 - 可視化比較は初期実装の完了条件に含めない
+
+## 実施メモ
+
+- issue `0023` で ORCA の per-agent solve helper を抽出した
+- issue `0024` で CNav の parameter、action set、intent cache、algorithm 雛形を追加した
+- issue `0025` で constrained neighbor ranking と short-horizon action evaluation を実装した
+- issue `0026` で registry、CLI、scenario、tests、仕様書、README を更新し、初期導入を完了した

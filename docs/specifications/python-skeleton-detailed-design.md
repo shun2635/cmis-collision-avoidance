@@ -20,7 +20,7 @@
 
 - 正規実装言語は Python
 - 実装本体は `src/cmis_ca/`
-- 利用可能なアルゴリズムは `orca` のみ
+- 利用可能なアルゴリズムは `orca` と `cnav`
 - 外部シナリオファイル読込は YAML / JSON の最小ローダまで実装済み
 - ORCA 制約生成は基準実装まで完了
 - 共通ソルバは `LineConstraint + speed limit` に対する基準実装まで完了
@@ -40,6 +40,7 @@
 | アルゴリズムレジストリ | `src/cmis_ca/algorithms/registry.py` | アルゴリズム名から実装を生成 |
 | 共通 core | `src/cmis_ca/core/` | 幾何、状態、ワールド、近傍探索、制約表現、共通ソルバ、実行ループ |
 | ORCA 固有実装 | `src/cmis_ca/algorithms/orca/` | ORCA 固有パラメータ、制約生成、ステップ判断 |
+| CNav 固有実装 | `src/cmis_ca/algorithms/cnav/` | action set、intent cache、coordination evaluation、ORCA 再利用 |
 | 補助スクリプト | `scripts/smoke_run.py` | 最小実行確認 |
 | 回帰 helper | `src/cmis_ca/regression/` | upstream 由来 scenario の builder と metric 集計 |
 | 回帰スクリプト | `scripts/compare_upstream_circle.py`, `scripts/compare_upstream_blocks.py`, `scripts/compare_upstream_roadmap.py` | upstream 条件の比較メトリクスを出力 |
@@ -68,9 +69,19 @@
 | --- | --- |
 | `parameters.py` | `ORCAParameters` の定義 |
 | `constraints.py` | 障害物由来制約とエージェント間制約の生成 |
+| `agent_solver.py` | arbitrary optimization velocity に対する per-agent ORCA solve |
 | `algorithm.py` | 近傍探索、制約生成、ソルバ呼び出しをまとめた ORCA 1 ステップ |
 
-### 3.3 `neighbor_search.py` の現行仕様
+### 3.3 `algorithms/cnav/` の責務
+
+| モジュール | 役割 |
+| --- | --- |
+| `parameters.py` | `CNavParameters` の定義 |
+| `actions.py` | 論文既定の 8 action 生成 |
+| `coordination.py` | constrained neighbor ranking、short-horizon action evaluation、reward 計算 |
+| `algorithm.py` | intended velocity cache と ORCA 呼び出しをまとめた CNav 1 ステップ |
+
+### 3.4 `neighbor_search.py` の現行仕様
 
 - `NeighborSet` は `agent_neighbors` と `obstacle_neighbors` を持つ
 - 各要素は `index` と `distance` を持つ距離付き結果である
@@ -82,7 +93,7 @@
 - 障害物近傍は directed edge の右側にある agent だけを対象にし、線分距離の strict `<` で採用する
 - `neighbor_dist < 0`、`max_neighbors < 0`、`obstacle_range < 0` は `ValueError` とする
 
-### 3.4 `solver.py` の現行仕様
+### 3.5 `solver.py` の現行仕様
 
 - `solve_linear_constraints()` は半平面制約列と速度上限円に対する 2D ソルバである
 - `choose_preferred_velocity()` は「希望速度に最も近い点」を選ぶ wrapper である
@@ -91,7 +102,7 @@
 - `protected_constraint_count` により、先頭 N 本の制約を固定した fallback projection を扱える
 - `max_speed < 0` や不正な `protected_constraint_count` は `ValueError` とする
 
-### 3.5 `algorithms/orca/constraints.py` の現行仕様
+### 3.6 `algorithms/orca/constraints.py` の現行仕様
 
 - `build_agent_constraints()` は upstream の agent-agent ORCA line 生成をベースに、エージェント間の reciprocal avoidance 制約を作る
 - no-collision の cut-off circle / left leg / right leg と collision 分岐を upstream ベースで持つ
@@ -100,7 +111,7 @@
 - 障害物制約は静的障害物として agent 側が全責任を負う
 - どちらも `LineConstraint` を返し、ORCA 固有の意味付けは `algorithms/orca/` に閉じ込める
 
-### 3.6 `ORCAAlgorithm.step()` の現行仕様
+### 3.7 `ORCAAlgorithm.step()` の現行仕様
 
 - `NaiveNeighborSearch`、ORCA 制約生成、共通 solver をまとめて 1 ステップへ統合している
 - `AgentProfile` の `neighbor_dist`, `max_neighbors`, `time_horizon`, `time_horizon_obst` を既定値として参照する
@@ -109,7 +120,17 @@
 - obstacle 制約は先頭へまとめ、solver の `protected_constraint_count` に渡す
 - `AgentCommand` へ変換された速度指令を返す
 
-### 3.7 `io/scenario_loader.py` の現行仕様
+### 3.8 `CNavAlgorithm.step()` の現行仕様
+
+- `goal_position` が全 agent に必要
+- action 更新周期は `global_time` と `action_update_interval` で判定する
+- step 開始時点の intended velocity cache を communication 内容として固定参照する
+- `rank_constrained_neighbors()` で、`自分より goal に近い neighbor` を constraint 量で順位付けする
+- `select_best_action()` で、論文既定 8 action を `T=2` の short-horizon simulation で評価する
+- 選んだ intended velocity を `compute_orca_velocity()` に渡して最終速度を得る
+- 現時点では communication 遅延や action set の一般化は未実装
+
+### 3.9 `io/scenario_loader.py` の現行仕様
 
 - `.yaml` `.yml` `.json` を受け付ける
 - トップレベルは mapping のみを受け付ける
@@ -125,10 +146,11 @@
 - `agent.auto_update_preferred_velocity_from_goal` は現時点では scenario loader 非対応で、コード生成 scenario だけで使う
 - `--steps` が CLI から与えられた場合は、読み込んだ scenario の停止条件より CLI の固定 step 指定を優先する
 
-### 3.8 既存構成上の制約
+### 3.10 既存構成上の制約
 
-- `algorithms/registry.py` に登録されているアルゴリズムは `orca` のみ
+- `algorithms/registry.py` に登録されているアルゴリズムは `orca` と `cnav`
 - goal モデルは導入済みだが、更新規則は現在 `goal_position` への直線追従に限る
+- CNav は `goal_position` を必須とするが、scenario loader 自体は依然として goal 省略を許す
 
 ## 4. 入力仕様、出力仕様、DB スキーマ対応
 
@@ -138,7 +160,7 @@
 
 | 引数 | 型 | 既定値 | 現在の仕様 |
 | --- | --- | --- | --- |
-| `--algorithm` | `str` | `orca` | `algorithms/registry.py` の登録名から選択 |
+| `--algorithm` | `str` | `orca` | `algorithms/registry.py` の登録名 (`orca`, `cnav`) から選択 |
 | `--steps` | `int \| None` | `None` | 指定時のみ固定 step 数を上書き。未指定時は内蔵デモは `100`、外部シナリオは file 記述の step / goal-stop 条件を使う |
 | `--scenario` | `str \| None` | `None` | YAML / JSON シナリオを読み込む |
 | `--fps` | `float` | `30.0` | `visualize` でのみ使用。viewer の再生速度 |
@@ -173,6 +195,7 @@
 - `ObstaclePath` は `closed: true` のとき先頭点の末尾再掲を禁止
 - `WorldSnapshot.global_time` は 0 以上
 - `WorldSnapshot.agents` の `index` は一意
+- `SnapshotAgent.goal_position` は algorithm によって必須になり得る
 - `LineConstraint.direction` はゼロベクトルを禁止
 - `AgentConfig.preferred_speed` は 0 以上
 - `AgentConfig.preferred_velocity_perturbation_scale` は 0 以上
@@ -248,7 +271,9 @@ poetry install
 ```bash
 poetry run cmis-ca run --algorithm orca --steps 1
 poetry run cmis-ca run --algorithm orca --scenario scenarios/head_on.yaml
+poetry run cmis-ca run --algorithm cnav --scenario scenarios/cnav_queue.yaml
 poetry run cmis-ca visualize --algorithm orca --scenario scenarios/head_on.yaml
+poetry run cmis-ca visualize --algorithm cnav --scenario scenarios/cnav_queue.yaml
 ```
 
 補助スクリプト:

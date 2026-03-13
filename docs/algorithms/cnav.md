@@ -2,7 +2,7 @@
 
 ## 位置付け
 
-CNav は、このリポジトリで `ORCA` の次に追加する候補アルゴリズムである。  
+CNav は、このリポジトリで `ORCA` の次に追加したアルゴリズムである。  
 ただし CNav は ORCA の代替ではなく、`離散 action から intended velocity を選ぶ上位の coordination layer` として扱う。  
 実際の collision-free velocity は、CNav が選んだ `v_intent` を入力として ORCA が計算する。
 

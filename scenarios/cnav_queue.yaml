@@ -1,0 +1,22 @@
+name: cnav-queue-demo
+time_step: 0.1
+steps: 8
+agents:
+  - name: rear
+    profile:
+      radius: 0.4
+      max_speed: 1.0
+    initial_position: [-1.0, 0.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [1.0, 0.0]
+    goal_position: [10.0, 0.0]
+    preferred_speed: 1.0
+  - name: front
+    profile:
+      radius: 0.4
+      max_speed: 1.0
+    initial_position: [0.0, 0.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [1.0, 0.0]
+    goal_position: [10.0, 0.0]
+    preferred_speed: 1.0

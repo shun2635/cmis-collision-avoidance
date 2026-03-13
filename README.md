@@ -33,7 +33,7 @@ upstream である `snape/RVO2` を参照しつつ、研究室内で読みやす
 
 現時点の実装制約:
 
-- 利用可能なアルゴリズムは `orca` のみ
+- 利用可能なアルゴリズムは `orca` と `cnav`
 - `--scenario` による YAML / JSON シナリオ読込に対応
 - goal / preferred velocity の scenario 記述と step 前自動更新に対応
 - scenario ごとの停止条件として `fixed steps` と `all goals reached` に対応
@@ -46,6 +46,12 @@ upstream である `snape/RVO2` を参照しつつ、研究室内で読みやす
 - neighbor search は upstream ベースの range / boundary / insertion semantics に追従済み
 - upstream `Circle` と `Blocks` 条件に基づく回帰シナリオと比較メトリクスの土台を追加済み
 - upstream `Roadmap` 条件に基づく visibility-guided 回帰 helper を追加済み
+- CNav の初期実装を追加し、論文既定 action set、intent cache、short-horizon action evaluation を ORCA 上へ統合済み
+
+補足:
+
+- `orca` は upstream 再現を主目的とする基準実装
+- `cnav` は初期導入段階であり、比較ベンチマークや広い論文 scenario 再現は未実装
 
 実装済みの詳細仕様は [docs/specifications/python-skeleton-detailed-design.md](docs/specifications/python-skeleton-detailed-design.md) を参照してください。
 
@@ -94,7 +100,9 @@ CLI の最小形:
 ```bash
 poetry run cmis-ca run --algorithm orca --steps 1
 poetry run cmis-ca run --algorithm orca --scenario scenarios/head_on.yaml
+poetry run cmis-ca run --algorithm cnav --scenario scenarios/cnav_queue.yaml
 poetry run cmis-ca visualize --algorithm orca --scenario scenarios/head_on.yaml
+poetry run cmis-ca visualize --algorithm cnav --scenario scenarios/cnav_queue.yaml
 ```
 
 `--scenario` を省略した場合の既定は、軽量な built-in `circle-demo` です。  
@@ -108,17 +116,17 @@ poetry run python scripts/smoke_run.py
 poetry run pytest
 ```
 
-将来的には以下のような実行形へ広げます。
+現在利用できる実行形の例:
 
 ```bash
 cmis-ca run --algorithm orca --scenario scenarios/head_on.yaml
-cmis-ca run --algorithm proxemic --scenario scenarios/circle.yaml
-cmis-ca run --algorithm cnav --scenario scenarios/circle.yaml
+cmis-ca run --algorithm cnav --scenario scenarios/cnav_queue.yaml
 ```
 
 現時点で同梱しているシナリオ例:
 
 - `scenarios/head_on.yaml`: 2 エージェントの正面衝突回避
+- `scenarios/cnav_queue.yaml`: 同一 goal へ向かう 2 エージェントの CNav 用最小ケース
 - `scenarios/obstacle_demo.yaml`: 単一障害物付きの最小ケース
 - `scenarios/upstream_circle.yaml`: `external/RVO2/examples/Circle.cc` に基づく 250 体の比較用シナリオ。`steps: 0` と `stop_when_all_agents_reach_goals: true` により、既定では goal 到達まで回す
 
@@ -157,3 +165,4 @@ Poetry の仮想環境は [poetry.toml](poetry.toml) によりプロジェクト
 - upstream Circle 回帰基盤: [docs/specifications/upstream-circle-regression.md](docs/specifications/upstream-circle-regression.md)
 - upstream Roadmap 回帰基盤: [docs/specifications/upstream-roadmap-regression.md](docs/specifications/upstream-roadmap-regression.md)
 - CNav アルゴリズム整理: [docs/algorithms/cnav.md](docs/algorithms/cnav.md)
+- CNav 初期実装仕様: [docs/specifications/cnav-initial-implementation.md](docs/specifications/cnav-initial-implementation.md)

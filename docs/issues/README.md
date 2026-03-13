@@ -70,5 +70,4 @@ ORCA 完全再現を優先する。順序は [../architecture/orca-reproduction-
 
 - `proxemic`
 - 多アルゴリズム比較の広い API 拡張
-- `cnav` の親 issue は [0022-cnav-initial-implementation.md](0022-cnav-initial-implementation.md)
-- 実装順は [0023-cnav-orca-per-agent-solve-helper.md](0023-cnav-orca-per-agent-solve-helper.md) → [0024-cnav-action-model-and-intent-cache.md](0024-cnav-action-model-and-intent-cache.md) → [0025-cnav-coordination-evaluation.md](0025-cnav-coordination-evaluation.md) → [0026-cnav-cli-scenarios-tests-and-spec.md](0026-cnav-cli-scenarios-tests-and-spec.md)
+- `cnav` の初期導入は [0022-cnav-initial-implementation.md](0022-cnav-initial-implementation.md) とその子 issue で完了した

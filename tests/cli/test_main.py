@@ -48,6 +48,24 @@ def test_cli_run_steps_override_external_scenario(capsys) -> None:
     assert "position=(0.950, 0.000)" in lines[1]
 
 
+def test_cli_run_accepts_cnav_external_scenario(capsys) -> None:
+    exit_code = main(
+        [
+            "run",
+            "--algorithm",
+            "cnav",
+            "--scenario",
+            "scenarios/cnav_queue.yaml",
+        ]
+    )
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "agent=0" in captured.out
+    assert "agent=1" in captured.out
+
+
 def test_cli_run_rejects_negative_steps() -> None:
     with pytest.raises(SystemExit) as exc_info:
         main(["run", "--algorithm", "orca", "--steps", "-1"])
