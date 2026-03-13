@@ -4,14 +4,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from cmis_ca.algorithms.cnav.actions import build_default_action_set
+from cmis_ca.algorithms.cnav.coordination import select_best_action
 from cmis_ca.algorithms.cnav.parameters import CNavParameters
 from cmis_ca.algorithms.orca.agent_solver import compute_orca_velocity
 from cmis_ca.algorithms.orca.parameters import ORCAParameters
 from cmis_ca.core.geometry import Vector2
 from cmis_ca.core.neighbor_search import NaiveNeighborSearch, NeighborSearch
 from cmis_ca.core.state import AgentCommand
-from cmis_ca.core.world import SnapshotAgent, WorldSnapshot
+from cmis_ca.core.world import WorldSnapshot
 
 
 @dataclass
@@ -43,10 +43,26 @@ class CNavAlgorithm:
             for agent_index, entry in self._intent_cache.items()
             if agent_index in active_indices
         }
+        communicated_intents = {
+            agent.index: self._intent_cache.get(
+                agent.index,
+                _IntentCacheEntry(
+                    intended_velocity=agent.state.preferred_velocity,
+                    last_update_time=snapshot.global_time - self.parameters.action_update_interval,
+                ),
+            ).intended_velocity
+            for agent in snapshot.agents
+        }
 
         commands = []
+        next_cache: dict[int, _IntentCacheEntry] = {}
         for agent in snapshot.agents:
-            intended_velocity = self._resolve_intended_velocity(snapshot, agent.index)
+            intended_velocity, cache_entry = self._resolve_intended_velocity(
+                snapshot,
+                agent.index,
+                communicated_intents,
+            )
+            next_cache[agent.index] = cache_entry
             commands.append(
                 AgentCommand(
                     velocity=compute_orca_velocity(
@@ -59,34 +75,34 @@ class CNavAlgorithm:
                 )
             )
 
+        self._intent_cache = next_cache
         return commands
 
-    def _resolve_intended_velocity(self, snapshot: WorldSnapshot, agent_index: int):
-        agent = _find_agent(snapshot, agent_index)
+    def _resolve_intended_velocity(
+        self,
+        snapshot: WorldSnapshot,
+        agent_index: int,
+        communicated_intents: dict[int, Vector2],
+    ) -> tuple[Vector2, _IntentCacheEntry]:
         cache_entry = self._intent_cache.get(agent_index)
         if cache_entry is None or self._should_update_action(snapshot.global_time, cache_entry):
-            intended_velocity = self._select_intended_velocity(agent.state.preferred_velocity)
-            self._intent_cache[agent_index] = _IntentCacheEntry(
-                intended_velocity=intended_velocity,
+            evaluation = select_best_action(
+                snapshot=snapshot,
+                agent_index=agent_index,
+                communicated_intents=communicated_intents,
+                parameters=self.parameters,
+                orca_parameters=self.orca_parameters,
+                neighbor_search=self.neighbor_search,
+            )
+            next_entry = _IntentCacheEntry(
+                intended_velocity=evaluation.intended_velocity,
                 last_update_time=snapshot.global_time,
             )
-            return intended_velocity
-        return cache_entry.intended_velocity
+            return evaluation.intended_velocity, next_entry
+        return cache_entry.intended_velocity, _IntentCacheEntry(
+            intended_velocity=cache_entry.intended_velocity,
+            last_update_time=cache_entry.last_update_time,
+        )
 
     def _should_update_action(self, global_time: float, entry: _IntentCacheEntry) -> bool:
         return global_time - entry.last_update_time >= self.parameters.action_update_interval
-
-    def _select_intended_velocity(self, goal_velocity: Vector2) -> Vector2:
-        actions = build_default_action_set(
-            goal_velocity,
-            action_speed=self.parameters.action_speed,
-            beta_degrees=self.parameters.beta_degrees,
-        )
-        return actions[0]
-
-
-def _find_agent(snapshot: WorldSnapshot, agent_index: int) -> SnapshotAgent:
-    for agent in snapshot.agents:
-        if agent.index == agent_index:
-            return agent
-    raise ValueError(f"agent index {agent_index} is not present in the snapshot")

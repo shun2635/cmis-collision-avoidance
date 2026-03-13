@@ -53,6 +53,7 @@ class Simulator:
                 name=config.name or f"agent_{index}",
                 profile=config.profile,
                 state=state,
+                goal_position=config.goal_position,
             )
             for index, (config, state) in enumerate(zip(self._scenario.agents, self._states))
         )

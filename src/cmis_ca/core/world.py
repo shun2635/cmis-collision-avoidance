@@ -169,6 +169,7 @@ class SnapshotAgent:
     name: str
     profile: AgentProfile
     state: AgentState
+    goal_position: Vector2 | None = None
 
 
 @dataclass(frozen=True)

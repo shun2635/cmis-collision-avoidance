@@ -1,6 +1,6 @@
 # Issue 0025: CNav の coordination evaluation を実装する
 
-- ステータス: todo
+- ステータス: completed
 - 優先度: high
 - 関連文書:
   - [docs/algorithms/cnav.md](../algorithms/cnav.md)
@@ -46,3 +46,11 @@ CNav の本体は、neighbor の constraint 状態を見て action を short-hor
 
 - runtime 専用 state は `algorithms/cnav/` に閉じ込める
 - 初回実装では top-k と gamma を parameter 化しつつ、default は論文寄りに寄せる
+
+## 実施メモ
+
+- `src/cmis_ca/algorithms/cnav/coordination.py` を追加し、`rank_constrained_neighbors(...)`、`evaluate_action(...)`、`select_best_action(...)` を実装した
+- constrained neighbor ranking は `自分の goal に対して自分より前にいる neighbor` のみを対象にし、`||v_intent - v_observed||` の大きい順に並べる
+- action evaluation は `T=2` の short-horizon simulation で `R_ga` と `R_ca` を計算し、`R_a` 最大の action を選ぶ
+- `WorldSnapshot` / `SnapshotAgent` へ `goal_position` を通し、CNav が goal 依存の判定をできるようにした
+- `tests/algorithms/test_cnav.py` に ranking と action evaluation の test を追加した
