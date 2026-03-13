@@ -1,6 +1,6 @@
 # Issue 0024: CNav の action model と intended velocity cache を追加する
 
-- ステータス: todo
+- ステータス: completed
 - 優先度: high
 - 関連文書:
   - [docs/algorithms/cnav.md](../algorithms/cnav.md)
@@ -46,3 +46,10 @@ CNav の parameter、action set 生成、intended velocity cache、algorithm 雛
 
 - 初期実装では `T=2`、8 action、goal 必須を前提にしてよい
 - 通信は cache で表現し、外部通信 abstraction は導入しない
+
+## 実施メモ
+
+- `src/cmis_ca/algorithms/cnav/` を追加し、`CNavParameters`、`build_default_action_set(...)`、`CNavAlgorithm` の雛形を実装した
+- `CNavAlgorithm` は `goal-oriented baseline` から 8 action を生成し、現段階では先頭 action を intended velocity として cache する
+- action 更新周期は `global_time` と `action_update_interval` で判定する
+- 最小 test は `tests/algorithms/test_cnav.py` に追加した
