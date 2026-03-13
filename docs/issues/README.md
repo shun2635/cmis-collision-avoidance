@@ -46,6 +46,11 @@
 - [0019-orca-neighbor-search-parity-audit.md](0019-orca-neighbor-search-parity-audit.md)
 - [0020-orca-roadmap-regression-support.md](0020-orca-roadmap-regression-support.md)
 - [0021-fast-simulation-visualization.md](0021-fast-simulation-visualization.md)
+- [0022-cnav-initial-implementation.md](0022-cnav-initial-implementation.md)
+- [0023-cnav-orca-per-agent-solve-helper.md](0023-cnav-orca-per-agent-solve-helper.md)
+- [0024-cnav-action-model-and-intent-cache.md](0024-cnav-action-model-and-intent-cache.md)
+- [0025-cnav-coordination-evaluation.md](0025-cnav-coordination-evaluation.md)
+- [0026-cnav-cli-scenarios-tests-and-spec.md](0026-cnav-cli-scenarios-tests-and-spec.md)
 
 ## 現在の優先順
 
@@ -61,8 +66,9 @@ ORCA 完全再現を優先する。順序は [../architecture/orca-reproduction-
 8. [0019-orca-neighbor-search-parity-audit.md](0019-orca-neighbor-search-parity-audit.md) `completed`
 9. [0020-orca-roadmap-regression-support.md](0020-orca-roadmap-regression-support.md) `completed`
 
-## 後回しメモ
+## ORCA 優先期間後の候補
 
 - `proxemic`
-- `cnav`
 - 多アルゴリズム比較の広い API 拡張
+- `cnav` の親 issue は [0022-cnav-initial-implementation.md](0022-cnav-initial-implementation.md)
+- 実装順は [0023-cnav-orca-per-agent-solve-helper.md](0023-cnav-orca-per-agent-solve-helper.md) → [0024-cnav-action-model-and-intent-cache.md](0024-cnav-action-model-and-intent-cache.md) → [0025-cnav-coordination-evaluation.md](0025-cnav-coordination-evaluation.md) → [0026-cnav-cli-scenarios-tests-and-spec.md](0026-cnav-cli-scenarios-tests-and-spec.md)

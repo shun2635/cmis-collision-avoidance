@@ -156,3 +156,4 @@ Poetry の仮想環境は [poetry.toml](poetry.toml) によりプロジェクト
 - upstream Blocks 回帰基盤: [docs/specifications/upstream-blocks-regression.md](docs/specifications/upstream-blocks-regression.md)
 - upstream Circle 回帰基盤: [docs/specifications/upstream-circle-regression.md](docs/specifications/upstream-circle-regression.md)
 - upstream Roadmap 回帰基盤: [docs/specifications/upstream-roadmap-regression.md](docs/specifications/upstream-roadmap-regression.md)
+- CNav アルゴリズム整理: [docs/algorithms/cnav.md](docs/algorithms/cnav.md)
