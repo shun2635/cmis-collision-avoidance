@@ -19,10 +19,20 @@ from cmis_ca.core.world import SnapshotAgent, WorldSnapshot
 class ActionEvaluation:
     """Reward breakdown for one candidate CNav action."""
 
+    action_index: int
     intended_velocity: Vector2
     goal_progress_reward: float
     constrained_reduction_reward: float
     total_reward: float
+
+
+@dataclass(frozen=True)
+class ActionSelection:
+    """Full action-selection result for one agent at one update point."""
+
+    ranked_neighbors: tuple[int, ...]
+    evaluations: tuple[ActionEvaluation, ...]
+    best_evaluation: ActionEvaluation
 
 
 @dataclass
@@ -85,6 +95,27 @@ def select_best_action(
 ) -> ActionEvaluation:
     """Evaluate the action set and return the best intended velocity."""
 
+    return evaluate_action_set(
+        snapshot=snapshot,
+        agent_index=agent_index,
+        communicated_intents=communicated_intents,
+        parameters=parameters,
+        orca_parameters=orca_parameters,
+        neighbor_search=neighbor_search,
+    ).best_evaluation
+
+
+def evaluate_action_set(
+    *,
+    snapshot: WorldSnapshot,
+    agent_index: int,
+    communicated_intents: dict[int, Vector2],
+    parameters: CNavParameters,
+    orca_parameters: ORCAParameters,
+    neighbor_search: NeighborSearch,
+) -> ActionSelection:
+    """Evaluate the full action set and return all candidate rewards."""
+
     agent = _find_agent(snapshot, agent_index)
     goal_velocity = _goal_velocity(agent)
     actions = build_default_action_set(
@@ -100,16 +131,13 @@ def select_best_action(
         neighbor_search=neighbor_search,
     )
 
-    best = ActionEvaluation(
-        intended_velocity=actions[0],
-        goal_progress_reward=float("-inf"),
-        constrained_reduction_reward=float("-inf"),
-        total_reward=float("-inf"),
-    )
-    for action in actions:
+    evaluations: list[ActionEvaluation] = []
+    best: ActionEvaluation | None = None
+    for action_index, action in enumerate(actions):
         evaluation = evaluate_action(
             snapshot=snapshot,
             agent_index=agent_index,
+            action_index=action_index,
             intended_velocity=action,
             ranked_neighbors=ranked_neighbors,
             communicated_intents=communicated_intents,
@@ -117,16 +145,24 @@ def select_best_action(
             orca_parameters=orca_parameters,
             neighbor_search=neighbor_search,
         )
-        if evaluation.total_reward > best.total_reward:
+        evaluations.append(evaluation)
+        if best is None or evaluation.total_reward > best.total_reward:
             best = evaluation
 
-    return best
+    if best is None:
+        raise ValueError("CNav action set must contain at least one action")
+    return ActionSelection(
+        ranked_neighbors=ranked_neighbors,
+        evaluations=tuple(evaluations),
+        best_evaluation=best,
+    )
 
 
 def evaluate_action(
     *,
     snapshot: WorldSnapshot,
     agent_index: int,
+    action_index: int = -1,
     intended_velocity: Vector2,
     ranked_neighbors: tuple[int, ...],
     communicated_intents: dict[int, Vector2],
@@ -216,6 +252,7 @@ def evaluate_action(
         + parameters.coordination_factor * constrained_reduction_reward
     )
     return ActionEvaluation(
+        action_index=action_index,
         intended_velocity=intended_velocity,
         goal_progress_reward=goal_progress_reward,
         constrained_reduction_reward=constrained_reduction_reward,

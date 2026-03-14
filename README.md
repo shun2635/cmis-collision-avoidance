@@ -105,6 +105,7 @@ poetry run cmis-ca run --algorithm orca --scenario scenarios/head_on.yaml
 poetry run cmis-ca run --algorithm cnav --scenario scenarios/cnav_queue.yaml
 poetry run cmis-ca visualize --algorithm orca --scenario scenarios/head_on.yaml
 poetry run cmis-ca visualize --algorithm cnav --scenario scenarios/cnav_queue.yaml
+poetry run python scripts/dump_cnav_trace.py scenarios/cnav_queue_validation.yaml --steps 3
 ```
 
 `--scenario` を省略した場合の既定は、軽量な built-in `circle-demo` です。  
@@ -173,5 +174,6 @@ Poetry の仮想環境は [poetry.toml](poetry.toml) によりプロジェクト
 - CNav アルゴリズム整理: [docs/algorithms/cnav.md](docs/algorithms/cnav.md)
 - CNav MyStyle baseline 監査: [docs/specifications/cnav-my-style-baseline-audit.md](docs/specifications/cnav-my-style-baseline-audit.md)
 - CNav 初期実装仕様: [docs/specifications/cnav-initial-implementation.md](docs/specifications/cnav-initial-implementation.md)
+- CNav trace parity harness: [docs/specifications/cnav-trace-parity-harness.md](docs/specifications/cnav-trace-parity-harness.md)
 - CNav validation scenario 仕様: [docs/specifications/cnav-validation-scenarios.md](docs/specifications/cnav-validation-scenarios.md)
 - CNav legacy 比較の検証方針: [docs/issues/0027-cnav-my-style-validation.md](docs/issues/0027-cnav-my-style-validation.md)
