@@ -1,6 +1,6 @@
 # Issue 0028: `external/CNav_MyStyle` の baseline を監査して固定する
 
-- ステータス: todo
+- ステータス: completed
 - 優先度: high
 - 関連文書:
   - [docs/issues/0027-cnav-my-style-validation.md](0027-cnav-my-style-validation.md)
@@ -46,3 +46,11 @@
 
 - `forPaper` 系を優先候補にしつつ、`circle.cpp` の確率更新は別系統として扱う
 - `paper baseline` と `legacy experimental baseline` を混同しない
+
+## 実施メモ
+
+- `external/CNav_MyStyle/simulations/forPaper.cpp` を primary baseline に固定した
+- `external/CNav_MyStyle/simulations/crowdForPaper.cpp` を secondary baseline に固定した
+- `external/CNav_MyStyle/examples/circle.cpp` は確率更新を持つ旧系統として、legacy experimental baseline に分離した
+- `simulationDefs.h` のグローバル既定値は driver の `main()` / `mainLoop(...)` によって上書きされるため、baseline 判定には使わない方針を固定した
+- 監査結果を `docs/specifications/cnav-my-style-baseline-audit.md` と `docs/algorithms/cnav.md` に反映した

@@ -174,6 +174,20 @@ CNav は ALAN と完全に同じアルゴリズムではない。
 
 つまり、本リポジトリで実装する CNav は `ALAN をそのまま移植する` のではなく、`ALAN から action-selection の骨格を受け継ぎつつ、2020 C-Nav 論文の通信付き simulation-based 選択を再現する` ものとする。
 
+## legacy baseline の扱い
+
+`external/CNav_MyStyle` は、本 repo の Python 実装の出典ではなく、`過去に研究室で使っていた CNav 実装の比較元` として扱う。  
+このディレクトリには `forPaper.cpp`、`crowdForPaper.cpp`、`circle.cpp` など複数の driver があり、更新規則や既定パラメータが一致しない。
+
+そのため、legacy parity を議論するときは `simulationDefs.h` のグローバル既定値をそのまま正本にしない。  
+baseline は issue `0028` の監査結果に従って次のように固定する。
+
+- primary baseline: `external/CNav_MyStyle/simulations/forPaper.cpp`
+- secondary baseline: `external/CNav_MyStyle/simulations/crowdForPaper.cpp`
+- legacy experimental baseline: `external/CNav_MyStyle/examples/circle.cpp`
+
+固定理由と driver ごとの差分表は `docs/specifications/cnav-my-style-baseline-audit.md` を参照する。
+
 ## この repo での実装境界
 
 ### `core/` に残すもの

@@ -167,5 +167,6 @@ Poetry の仮想環境は [poetry.toml](poetry.toml) によりプロジェクト
 - upstream Circle 回帰基盤: [docs/specifications/upstream-circle-regression.md](docs/specifications/upstream-circle-regression.md)
 - upstream Roadmap 回帰基盤: [docs/specifications/upstream-roadmap-regression.md](docs/specifications/upstream-roadmap-regression.md)
 - CNav アルゴリズム整理: [docs/algorithms/cnav.md](docs/algorithms/cnav.md)
+- CNav MyStyle baseline 監査: [docs/specifications/cnav-my-style-baseline-audit.md](docs/specifications/cnav-my-style-baseline-audit.md)
 - CNav 初期実装仕様: [docs/specifications/cnav-initial-implementation.md](docs/specifications/cnav-initial-implementation.md)
 - CNav legacy 比較の検証方針: [docs/issues/0027-cnav-my-style-validation.md](docs/issues/0027-cnav-my-style-validation.md)
