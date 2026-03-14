@@ -1,4 +1,4 @@
-# Issue 0027: `external/CNav_MyStyle` を基準に CNav を再検証する
+# Issue 0027: `external/CNav_MyStyle` を基準に CNav を再検証し、比較用 scenario を追加する
 
 - ステータス: todo
 - 優先度: high
@@ -29,13 +29,16 @@
 - `CNav_MyStyle` の実挙動を再現しているのか
 - どちらでもない差分を持っているのか
 
-を切り分けられる検証手順を定義する。
+を切り分けられる検証手順を定義する。  
+あわせて、比較を再現可能にする最小 scenario 群とその設定方針を repo 内へ追加できる状態にする。
 
 ## スコープ
 
 - `external/CNav_MyStyle` 内の正本 entry point とパラメータの特定
 - action 更新周期、neighbor 選別、reward 計算、communication timing の比較観点固定
 - 小規模 scenario での trace 比較方針の策定
+- 比較用 scenario セットの定義と YAML / code-generated どちらで持つかの判断
+- CNav 検証専用 scenario の命名、停止条件、観測指標の固定
 - Python 側で追加すべきテスト / 計測 hook の整理
 
 ## 非スコープ
@@ -44,12 +47,15 @@
 - 大規模 benchmark の実施
 - GUI の見た目再現
 - どの差分も即座に Python 側へ取り込むこと
+- 大規模 crowd scenario を一度に全部移植すること
 
 ## 完了条件
 
 - `external/CNav_MyStyle` の生成物が `.gitignore` で無視される
 - 比較対象にする C++ driver と固定パラメータが文書化されている
 - unit / trace / scenario の 3 段階の検証手順が定義されている
+- 比較に使う最小 scenario セットと各 scenario の目的が定義されている
+- scenario ごとの初期配置、goal、停止条件、比較指標が定義されている
 - 現行 Python 実装との主要な差分仮説が列挙されている
 - 次の実装作業が `fix`, `intentional difference`, `legacy-only heuristic` のどれに当たるか判定できる
 
@@ -58,6 +64,28 @@
 - `.gitignore`
 - 本 issue 文書
 - 今後追加する比較用 scenario / trace dump / parity tests
+- `scenarios/` 配下の CNav 検証用 scenario 群
+
+## 具体的な作業手順
+
+1. `external/CNav_MyStyle` の driver とパラメータを監査し、どの実装を baseline にするか固定する
+2. baseline に対応する最小 validation scenario を `scenarios/` へ追加する
+3. Python / C++ の両側で、action・reward・velocity を比較できる trace 基盤を作る
+4. trace と scenario 結果から parity gap を分類し、`fix` / `intentional difference` / `legacy-only heuristic` を判定する
+5. 採用する差分だけ Python 実装へ反映し、tests / specs / README を同期する
+
+## 後続 issue
+
+1. [0028-cnav-my-style-baseline-audit.md](0028-cnav-my-style-baseline-audit.md)
+   - `external/CNav_MyStyle` の baseline driver、更新規則、主要パラメータを固定する
+2. [0029-cnav-validation-scenarios.md](0029-cnav-validation-scenarios.md)
+   - CNav 検証用 scenario を追加し、scenario ごとの目的と観測指標を固定する
+3. [0030-cnav-trace-parity-harness.md](0030-cnav-trace-parity-harness.md)
+   - Python / C++ 比較用の trace dump と parity test の土台を追加する
+4. [0031-cnav-legacy-parity-gap-review.md](0031-cnav-legacy-parity-gap-review.md)
+   - 比較結果を整理し、差分を分類して採用判断を文書化する
+5. [0032-cnav-parity-fixes-and-spec-sync.md](0032-cnav-parity-fixes-and-spec-sync.md)
+   - 採用した修正を Python 実装へ反映し、仕様書と README を同期する
 
 ## アルゴリズム検証方針
 
@@ -135,6 +163,42 @@ Python 側で最初に固定する確認項目:
 - 最小距離
 - collision 発生数
 
+### 5.1 scenario 設定方針
+
+比較用 scenario は、まず `scenarios/` に最小再現ケースとして追加する。  
+初手では可読性を優先し、YAML で素直に表現できるものから入る。
+
+優先して追加する候補:
+
+- `cnav_queue_validation.yaml`
+- `cnav_head_on_validation.yaml`
+- `cnav_crossing_validation.yaml`
+- `cnav_obstacle_validation.yaml`
+
+各 scenario に最低限持たせるもの:
+
+- `name`
+- `time_step`
+- `steps` または `stop_when_all_agents_reach_goals`
+- agent の初期位置、初期速度、preferred velocity、goal
+- 必要なら obstacle 定義
+
+scenario ごとに固定する観点:
+
+- 何を検証する scenario か
+- 比較対象の C++ driver
+- 期待する行動差分
+- trace で見るべき agent と step
+
+YAML で冗長になりすぎる大規模ケースだけ、後段で code-generated setup を検討する。
+
+### 5.2 scenario ごとの役割
+
+- queue: `goal に近い neighbor のみを見る` 分岐と譲り行動の確認
+- head-on: 対向時の action 選択と ORCA 通過後速度の確認
+- crossing: ranking と politeness の効き方の確認
+- obstacle: obstacle 制約と CNav の相互作用確認
+
 ### 6. 判定ルール
 
 比較の結果出た差分は、次の 3 種に分けて扱う。
@@ -153,9 +217,12 @@ Python 側で最初に固定する確認項目:
 - 現行 Python は `goal に近い neighbor のみ` を標準化しているが、legacy には `allNeigh` 分岐が残っている
 - 現行 Python の reward は論文式で正規化しているが、legacy は追加ヒューリスティクスと neighbor 上限制御を混ぜている
 - 現行 Python の tests は unit 寄りで、legacy との trace parity をまだ持っていない
+- 現行 repo の scenario は `scenarios/cnav_queue.yaml` の最小 smoke に寄っており、検証用途の scenario 分割がまだない
 
 ## 作業メモ
 
 - `external/CNav_MyStyle` は source reference と生成物が混在しているため、まず ignore を整理してから読む
 - 先に `paper baseline` と `my-style baseline` を分けて管理する
 - 比較結果は最終的に `docs/specifications/` へ固定し、Python 実装の仕様と分離する
+- scenario 追加時は smoke 用 scenario と validation 用 scenario を混同しない
+- 実装作業は親 issue にぶら下げず、上の後続 issue に切って進める
