@@ -14,6 +14,7 @@ upstream である `snape/RVO2` を参照しつつ、研究室内で読みやす
 - third-party code の詳細は [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) を参照してください。
 - この repo 全体のライセンスは [LICENSE](LICENSE) を参照してください。
 - `external/RVO2` は外部参照コードであり、研究室独自実装は `src/` 以下で管理します。
+- `external/CNav_MyStyle` は過去の CNav 実装を比較基準として保持する参照コードです。
 - upstream 由来コードには元のライセンス条件が適用されます。
 - 改変を含むファイルでは、改変事実を記録する方針です。詳細は [docs/policies/source-file-policy.md](docs/policies/source-file-policy.md) を参照してください。
 
@@ -65,6 +66,7 @@ upstream である `snape/RVO2` を参照しつつ、研究室内で読みやす
 │   ├── specifications/     # 実装同期用の仕様書
 │   ├── algorithms/         # アルゴリズム別文書
 │   └── issues/             # 作業単位の管理
+├── external/CNav_MyStyle/  # 過去の CNav 実装。比較検証用の参照コード
 ├── external/RVO2/          # upstream 参照用コード
 ├── src/cmis_ca/            # Python 実装本体
 ├── scripts/                # 最小サンプル実行
@@ -166,3 +168,4 @@ Poetry の仮想環境は [poetry.toml](poetry.toml) によりプロジェクト
 - upstream Roadmap 回帰基盤: [docs/specifications/upstream-roadmap-regression.md](docs/specifications/upstream-roadmap-regression.md)
 - CNav アルゴリズム整理: [docs/algorithms/cnav.md](docs/algorithms/cnav.md)
 - CNav 初期実装仕様: [docs/specifications/cnav-initial-implementation.md](docs/specifications/cnav-initial-implementation.md)
+- CNav legacy 比較の検証方針: [docs/issues/0027-cnav-my-style-validation.md](docs/issues/0027-cnav-my-style-validation.md)

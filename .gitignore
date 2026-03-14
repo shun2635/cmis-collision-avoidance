@@ -9,3 +9,14 @@ __pycache__/
 .ruff_cache/
 .venv/
 *.egg-info/
+
+# local artifacts under the legacy CNav reference drop
+external/CNav_MyStyle/build/
+external/CNav_MyStyle/executable/
+external/CNav_MyStyle/**/*.o
+external/CNav_MyStyle/**/*.a
+external/CNav_MyStyle/**/CMakeCache.txt
+external/CNav_MyStyle/**/cmake_install.cmake
+external/CNav_MyStyle/**/CMakeFiles/
+external/CNav_MyStyle/out.log
+external/CNav_MyStyle/src/errors.txt

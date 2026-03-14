@@ -1,0 +1,32 @@
+circle2の方をいじる
+SimulateVelの中が具体的なシミュレーション
+
+
+Indicate the algorithm, scenario, visualization option, number of iterations, coordination factor, type of neighbors considered in the politeness computation, number of neighbors considered in the politeness computation, and whether or not to use a following behavior.
+
+Algorithm:
+ 1.- ORCA
+ 2.- C-Nav
+Scenarios:
+ 1.- Crowd
+ 2.- Circle
+ 3.- Bidirectional
+ 4.- PerpCrossing
+ 5.- Congested
+ 6.- Crossing
+ 7.- Deadlock
+ 8.- Blocks
+ 9.- Line
+Visualization:
+ 0.-Off
+ 1.-On
+
+Number of iterations
+
+Coordination Factor
+
+Type of neighbors considered for politeness (1: all; 0: in front)
+
+ Number of neighbors considered in the politeness factor
+
+ Following behavior (0: disabled; 1: enabled)
