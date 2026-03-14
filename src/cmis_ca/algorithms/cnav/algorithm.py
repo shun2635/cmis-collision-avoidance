@@ -153,4 +153,6 @@ class CNavAlgorithm:
         ), None, False
 
     def _should_update_action(self, global_time: float, entry: _IntentCacheEntry) -> bool:
+        if self.parameters.update_every_step:
+            return True
         return global_time - entry.last_update_time >= self.parameters.action_update_interval

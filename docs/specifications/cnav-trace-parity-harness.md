@@ -63,10 +63,14 @@ trace は `step x agent` の flat record 列として保持する。
 `write_cnav_trace_jsonl(trace, path)` は、1 record 1 行の JSON Lines で書き出す。  
 `scripts/dump_cnav_trace.py` はこの writer を呼ぶ最小の補助 script である。
 
+比較用の named preset を script から選ぶため、`--profile {paper, legacy-forpaper-comparison}` を受け付ける。  
+`legacy-forpaper-comparison` は、mainline default を変えずに `forPaper` 系と近い cadence / horizon / coordination factor で trace を取るための補助設定である。
+
 実行例:
 
 ```bash
 poetry run python scripts/dump_cnav_trace.py scenarios/cnav_queue_validation.yaml --steps 3
+poetry run python scripts/dump_cnav_trace.py scenarios/cnav_queue_validation.yaml --steps 3 --profile legacy-forpaper-comparison
 poetry run python scripts/dump_cnav_trace.py scenarios/cnav_crossing_validation.yaml --output /tmp/cnav-trace.jsonl
 ```
 

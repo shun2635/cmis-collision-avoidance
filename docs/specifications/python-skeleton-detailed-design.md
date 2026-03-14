@@ -123,7 +123,8 @@
 ### 3.8 `CNavAlgorithm.step()` の現行仕様
 
 - `goal_position` が全 agent に必要
-- action 更新周期は `global_time` と `action_update_interval` で判定する
+- `update_every_step = false` のとき、action 更新周期は `global_time` と `action_update_interval` で判定する
+- `update_every_step = true` のとき、毎 step action を再評価する
 - step 開始時点の intended velocity cache を communication 内容として固定参照する
 - `rank_constrained_neighbors()` で、`自分より goal に近い neighbor` を constraint 量で順位付けする
 - `select_best_action()` で、論文既定 8 action を `T=2` の short-horizon simulation で評価する

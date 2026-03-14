@@ -11,7 +11,7 @@ from cmis_ca.algorithms.cnav.coordination import (
     rank_constrained_neighbors,
     select_best_action,
 )
-from cmis_ca.algorithms.cnav.parameters import CNavParameters
+from cmis_ca.algorithms.cnav.parameters import CNavParameters, create_cnav_parameters
 from cmis_ca.algorithms.orca.parameters import ORCAParameters
 from cmis_ca.core.agent import AgentConfig, AgentProfile
 from cmis_ca.core.geometry import Vector2
@@ -68,8 +68,18 @@ def test_cnav_parameters_validate_initial_defaults() -> None:
     assert parameters.coordination_factor == pytest.approx(0.8)
     assert parameters.simulation_horizon_steps == 2
     assert parameters.action_update_interval == pytest.approx(0.2)
+    assert parameters.update_every_step is False
     assert parameters.action_speed == pytest.approx(1.5)
     assert parameters.beta_degrees == pytest.approx(45.0)
+
+
+def test_create_cnav_parameters_supports_legacy_forpaper_comparison_profile() -> None:
+    parameters = create_cnav_parameters("legacy-forpaper-comparison")
+
+    assert parameters.coordination_factor == pytest.approx(0.9)
+    assert parameters.simulation_horizon_steps == 3
+    assert parameters.action_update_interval == pytest.approx(0.2)
+    assert parameters.update_every_step is True
 
 
 def test_cnav_algorithm_caches_goal_directed_intended_velocity_until_update_interval() -> None:
@@ -128,6 +138,33 @@ def test_cnav_algorithm_refreshes_intended_velocity_after_update_interval() -> N
     algorithm._intent_cache[0].intended_velocity = Vector2(-1.5, 0.0)
     simulator.step()
     simulator.step()
+    simulator.step()
+
+    assert algorithm._intent_cache[0].intended_velocity == Vector2(1.5, 0.0)
+
+
+def test_cnav_algorithm_can_force_action_update_every_step() -> None:
+    scenario = Scenario(
+        name="single-agent",
+        time_step=0.1,
+        steps=1,
+        agents=(
+            AgentConfig(
+                name="agent_0",
+                profile=AgentProfile(radius=0.4, max_speed=1.0),
+                initial_position=Vector2(0.0, 0.0),
+                initial_velocity=Vector2(0.0, 0.0),
+                preferred_velocity=Vector2(1.0, 0.0),
+                goal_position=Vector2(10.0, 0.0),
+            ),
+        ),
+    )
+
+    algorithm = CNavAlgorithm(parameters=CNavParameters(update_every_step=True))
+    simulator = Simulator(scenario=scenario, algorithm=algorithm)
+
+    algorithm.step(simulator.snapshot())
+    algorithm._intent_cache[0].intended_velocity = Vector2(-1.5, 0.0)
     simulator.step()
 
     assert algorithm._intent_cache[0].intended_velocity == Vector2(1.5, 0.0)

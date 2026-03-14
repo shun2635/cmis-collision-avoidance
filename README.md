@@ -106,6 +106,7 @@ poetry run cmis-ca run --algorithm cnav --scenario scenarios/cnav_queue.yaml
 poetry run cmis-ca visualize --algorithm orca --scenario scenarios/head_on.yaml
 poetry run cmis-ca visualize --algorithm cnav --scenario scenarios/cnav_queue.yaml
 poetry run python scripts/dump_cnav_trace.py scenarios/cnav_queue_validation.yaml --steps 3
+poetry run python scripts/dump_cnav_trace.py scenarios/cnav_queue_validation.yaml --steps 3 --profile legacy-forpaper-comparison
 ```
 
 `--scenario` を省略した場合の既定は、軽量な built-in `circle-demo` です。  

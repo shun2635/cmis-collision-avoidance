@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Literal
+
+
+CNavParameterProfile = Literal["paper", "legacy-forpaper-comparison"]
 
 
 @dataclass(frozen=True)
@@ -12,6 +16,7 @@ class CNavParameters:
     coordination_factor: float = 0.8
     simulation_horizon_steps: int = 2
     action_update_interval: float = 0.2
+    update_every_step: bool = False
     top_k_constrained_neighbors: int = 3
     action_speed: float = 1.5
     beta_degrees: float = 45.0
@@ -29,3 +34,18 @@ class CNavParameters:
             raise ValueError("action_speed must be non-negative")
         if self.beta_degrees < 0.0:
             raise ValueError("beta_degrees must be non-negative")
+
+
+def create_cnav_parameters(profile: CNavParameterProfile = "paper") -> CNavParameters:
+    """Create a named CNav parameter preset."""
+
+    if profile == "paper":
+        return CNavParameters()
+    if profile == "legacy-forpaper-comparison":
+        return CNavParameters(
+            coordination_factor=0.9,
+            simulation_horizon_steps=3,
+            action_update_interval=0.2,
+            update_every_step=True,
+        )
+    raise ValueError(f"unknown CNav parameter profile: {profile}")

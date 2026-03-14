@@ -11,7 +11,12 @@ SRC_ROOT = REPO_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from cmis_ca.algorithms.cnav import CNavAlgorithm, run_cnav_trace, write_cnav_trace_jsonl
+from cmis_ca.algorithms.cnav import (
+    CNavAlgorithm,
+    create_cnav_parameters,
+    run_cnav_trace,
+    write_cnav_trace_jsonl,
+)
 from cmis_ca.io import load_scenario
 
 
@@ -30,10 +35,20 @@ def main() -> None:
         default=None,
         help="Write JSONL output to this path instead of stdout.",
     )
+    parser.add_argument(
+        "--profile",
+        choices=("paper", "legacy-forpaper-comparison"),
+        default="paper",
+        help="Named CNav parameter preset used for trace capture.",
+    )
     args = parser.parse_args()
 
     scenario = load_scenario(args.scenario)
-    _, trace = run_cnav_trace(scenario, CNavAlgorithm(), steps=args.steps)
+    _, trace = run_cnav_trace(
+        scenario,
+        CNavAlgorithm(parameters=create_cnav_parameters(args.profile)),
+        steps=args.steps,
+    )
     if args.output is None:
         print(trace.to_jsonl())
         return

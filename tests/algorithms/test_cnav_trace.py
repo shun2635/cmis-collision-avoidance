@@ -6,7 +6,12 @@ from pathlib import Path
 
 import pytest
 
-from cmis_ca.algorithms.cnav import CNavAlgorithm, run_cnav_trace, write_cnav_trace_jsonl
+from cmis_ca.algorithms.cnav import (
+    CNavAlgorithm,
+    create_cnav_parameters,
+    run_cnav_trace,
+    write_cnav_trace_jsonl,
+)
 from cmis_ca.io import load_scenario
 
 
@@ -66,3 +71,16 @@ def test_write_cnav_trace_jsonl_emits_one_record_per_line(tmp_path) -> None:
     assert len(lines) == len(trace.records)
     assert '"step_index": 0' in lines[0]
     assert '"candidate_actions":' in lines[0]
+
+
+def test_run_cnav_trace_accepts_legacy_forpaper_comparison_profile() -> None:
+    scenario = load_scenario(Path("scenarios/cnav_queue_validation.yaml"))
+
+    _, trace = run_cnav_trace(
+        scenario,
+        CNavAlgorithm(parameters=create_cnav_parameters("legacy-forpaper-comparison")),
+        steps=3,
+    )
+
+    assert len(trace.records) == 6
+    assert all(record.action_updated for record in trace.records)
