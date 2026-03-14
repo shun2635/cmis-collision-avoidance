@@ -14,6 +14,7 @@
 
 - `cnav-my-style-baseline-audit.md`
 - `cnav-initial-implementation.md`
+- `cnav-validation-scenarios.md`
 - `orca-agent-simulator-parity.md`
 - `orca-agent-solver-parity.md`
 - `orca-obstacle-topology.md`

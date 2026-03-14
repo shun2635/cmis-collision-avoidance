@@ -1,0 +1,24 @@
+# Validation target: action selection and ORCA projection under two-agent counterflow.
+# Origin: simplified from legacy head-on style checks for issue 0029.
+name: cnav-head-on-validation
+time_step: 0.1
+steps: 16
+agents:
+  - name: left_to_right
+    profile:
+      radius: 0.4
+      max_speed: 1.0
+    initial_position: [-2.0, 0.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [1.0, 0.0]
+    goal_position: [2.0, 0.0]
+    preferred_speed: 1.0
+  - name: right_to_left
+    profile:
+      radius: 0.4
+      max_speed: 1.0
+    initial_position: [2.0, 0.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [-1.0, 0.0]
+    goal_position: [-2.0, 0.0]
+    preferred_speed: 1.0

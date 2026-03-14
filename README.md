@@ -129,6 +129,10 @@ cmis-ca run --algorithm cnav --scenario scenarios/cnav_queue.yaml
 
 - `scenarios/head_on.yaml`: 2 エージェントの正面衝突回避
 - `scenarios/cnav_queue.yaml`: 同一 goal へ向かう 2 エージェントの CNav 用最小ケース
+- `scenarios/cnav_queue_validation.yaml`: same-goal queue の CNav validation
+- `scenarios/cnav_head_on_validation.yaml`: head-on の CNav validation
+- `scenarios/cnav_crossing_validation.yaml`: 4-way crossing の CNav validation
+- `scenarios/cnav_obstacle_validation.yaml`: obstacle interaction の CNav validation
 - `scenarios/obstacle_demo.yaml`: 単一障害物付きの最小ケース
 - `scenarios/upstream_circle.yaml`: `external/RVO2/examples/Circle.cc` に基づく 250 体の比較用シナリオ。`steps: 0` と `stop_when_all_agents_reach_goals: true` により、既定では goal 到達まで回す
 
@@ -169,4 +173,5 @@ Poetry の仮想環境は [poetry.toml](poetry.toml) によりプロジェクト
 - CNav アルゴリズム整理: [docs/algorithms/cnav.md](docs/algorithms/cnav.md)
 - CNav MyStyle baseline 監査: [docs/specifications/cnav-my-style-baseline-audit.md](docs/specifications/cnav-my-style-baseline-audit.md)
 - CNav 初期実装仕様: [docs/specifications/cnav-initial-implementation.md](docs/specifications/cnav-initial-implementation.md)
+- CNav validation scenario 仕様: [docs/specifications/cnav-validation-scenarios.md](docs/specifications/cnav-validation-scenarios.md)
 - CNav legacy 比較の検証方針: [docs/issues/0027-cnav-my-style-validation.md](docs/issues/0027-cnav-my-style-validation.md)

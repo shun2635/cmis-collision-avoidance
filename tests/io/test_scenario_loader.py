@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -131,3 +132,26 @@ def test_load_scenario_rejects_goal_stop_without_agent_goals(tmp_path) -> None:
 
     with pytest.raises(ValueError, match="goal_position"):
         load_scenario(scenario_path)
+
+
+@pytest.mark.parametrize(
+    ("relative_path", "expected_agents", "expected_obstacle_vertices", "expected_steps"),
+    [
+        ("scenarios/cnav_queue_validation.yaml", 2, 0, 12),
+        ("scenarios/cnav_head_on_validation.yaml", 2, 0, 16),
+        ("scenarios/cnav_crossing_validation.yaml", 4, 0, 18),
+        ("scenarios/cnav_obstacle_validation.yaml", 2, 4, 20),
+    ],
+)
+def test_validation_scenarios_load_from_repo(
+    relative_path: str,
+    expected_agents: int,
+    expected_obstacle_vertices: int,
+    expected_steps: int,
+) -> None:
+    scenario = load_scenario(Path(relative_path))
+
+    assert len(scenario.agents) == expected_agents
+    assert all(agent.goal_position is not None for agent in scenario.agents)
+    assert scenario.steps == expected_steps
+    assert len(scenario.obstacles) == expected_obstacle_vertices

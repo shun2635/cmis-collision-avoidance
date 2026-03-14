@@ -1,0 +1,24 @@
+# Validation target: goal-nearer neighbor filtering and yielding in a same-goal queue.
+# Origin: simplified from the queue-like coordination cases tracked in issue 0029.
+name: cnav-queue-validation
+time_step: 0.1
+steps: 12
+agents:
+  - name: rear
+    profile:
+      radius: 0.4
+      max_speed: 1.0
+    initial_position: [-1.2, 0.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [1.0, 0.0]
+    goal_position: [8.0, 0.0]
+    preferred_speed: 1.0
+  - name: front
+    profile:
+      radius: 0.4
+      max_speed: 1.0
+    initial_position: [0.0, 0.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [1.0, 0.0]
+    goal_position: [8.0, 0.0]
+    preferred_speed: 1.0

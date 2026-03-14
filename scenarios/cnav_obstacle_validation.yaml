@@ -1,0 +1,31 @@
+# Validation target: interaction between CNav coordination and obstacle constraints.
+# Origin: simplified from the obstacle-heavy MyStyle paper-facing baselines.
+name: cnav-obstacle-validation
+time_step: 0.1
+steps: 20
+agents:
+  - name: lower_lane
+    profile:
+      radius: 0.4
+      max_speed: 1.0
+    initial_position: [-2.5, -0.7]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [1.0, 0.0]
+    goal_position: [2.5, -0.7]
+    preferred_speed: 1.0
+  - name: upper_lane
+    profile:
+      radius: 0.4
+      max_speed: 1.0
+    initial_position: [-2.5, 0.7]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [1.0, 0.0]
+    goal_position: [2.5, 0.7]
+    preferred_speed: 1.0
+obstacles:
+  - closed: true
+    vertices:
+      - [-0.4, -1.2]
+      - [-0.4, 1.2]
+      - [0.4, 1.2]
+      - [0.4, -1.2]
