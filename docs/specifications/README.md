@@ -14,6 +14,7 @@
 
 - `cnav-my-style-baseline-audit.md`
 - `cnav-initial-implementation.md`
+- `cnav-legacy-parity-gap-review.md`
 - `cnav-trace-parity-harness.md`
 - `cnav-validation-scenarios.md`
 - `orca-agent-simulator-parity.md`

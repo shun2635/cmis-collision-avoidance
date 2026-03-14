@@ -1,6 +1,6 @@
 # Issue 0031: CNav の legacy parity gap をレビューする
 
-- ステータス: todo
+- ステータス: completed
 - 優先度: medium
 - 関連文書:
   - [docs/issues/0027-cnav-my-style-validation.md](0027-cnav-my-style-validation.md)
@@ -44,3 +44,10 @@ CNav の parity gap を整理し、採用判断と修正優先度を文書化す
 
 - legacy に合わせること自体を目的にしない
 - 論文、legacy、現行 Python の 3 者を分けて書く
+
+## 実施メモ
+
+- `docs/specifications/cnav-legacy-parity-gap-review.md` を追加し、legacy baseline と現行 Python の主要差分を整理した
+- 差分を `fix` / `intentional difference` / `legacy-only heuristic` に分類した
+- validation scenario 上の Python trace 観測を review に反映した
+- 後続 `0032` で扱うべき項目と、別 issue に分けるべき項目を切り分けた

@@ -174,6 +174,7 @@ Poetry の仮想環境は [poetry.toml](poetry.toml) によりプロジェクト
 - CNav アルゴリズム整理: [docs/algorithms/cnav.md](docs/algorithms/cnav.md)
 - CNav MyStyle baseline 監査: [docs/specifications/cnav-my-style-baseline-audit.md](docs/specifications/cnav-my-style-baseline-audit.md)
 - CNav 初期実装仕様: [docs/specifications/cnav-initial-implementation.md](docs/specifications/cnav-initial-implementation.md)
+- CNav legacy parity gap review: [docs/specifications/cnav-legacy-parity-gap-review.md](docs/specifications/cnav-legacy-parity-gap-review.md)
 - CNav trace parity harness: [docs/specifications/cnav-trace-parity-harness.md](docs/specifications/cnav-trace-parity-harness.md)
 - CNav validation scenario 仕様: [docs/specifications/cnav-validation-scenarios.md](docs/specifications/cnav-validation-scenarios.md)
 - CNav legacy 比較の検証方針: [docs/issues/0027-cnav-my-style-validation.md](docs/issues/0027-cnav-my-style-validation.md)
