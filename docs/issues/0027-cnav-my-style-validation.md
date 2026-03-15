@@ -88,6 +88,12 @@
    - 採用した修正を Python 実装へ反映し、仕様書と README を同期する
 6. [0033-cnav-mystyle-direct-port-scenarios.md](0033-cnav-mystyle-direct-port-scenarios.md)
    - `forPaper.cpp` / `crowdForPaper.cpp` の setup をより忠実に持つ direct-port scenario を追加する
+7. [0034-cnav-legacy-cpp-trace-export-and-diff.md](0034-cnav-legacy-cpp-trace-export-and-diff.md)
+   - legacy C++ 側の trace export と Python 側との diff workflow を追加する
+8. [0035-cnav-forpaper-guidance-port.md](0035-cnav-forpaper-guidance-port.md)
+   - `forPaper.cpp` の temporary goal / `changeDest()` guidance を切り出して移植する
+9. [0036-cnav-legacy-decision-profile.md](0036-cnav-legacy-decision-profile.md)
+   - 17 action と legacy reward pipeline を opt-in profile として扱う方針を固める
 
 ## アルゴリズム検証方針
 

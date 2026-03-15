@@ -58,6 +58,9 @@
 - [0031-cnav-legacy-parity-gap-review.md](0031-cnav-legacy-parity-gap-review.md)
 - [0032-cnav-parity-fixes-and-spec-sync.md](0032-cnav-parity-fixes-and-spec-sync.md)
 - [0033-cnav-mystyle-direct-port-scenarios.md](0033-cnav-mystyle-direct-port-scenarios.md)
+- [0034-cnav-legacy-cpp-trace-export-and-diff.md](0034-cnav-legacy-cpp-trace-export-and-diff.md)
+- [0035-cnav-forpaper-guidance-port.md](0035-cnav-forpaper-guidance-port.md)
+- [0036-cnav-legacy-decision-profile.md](0036-cnav-legacy-decision-profile.md)
 
 ## 現在の優先順
 
@@ -79,4 +82,4 @@ ORCA 完全再現を優先する。順序は [../architecture/orca-reproduction-
 - 多アルゴリズム比較の広い API 拡張
 - `cnav` の初期導入は [0022-cnav-initial-implementation.md](0022-cnav-initial-implementation.md) とその子 issue で完了した
 - `cnav` の legacy 実装を基準にした再検証は [0027-cnav-my-style-validation.md](0027-cnav-my-style-validation.md) で扱う
-- `cnav` の legacy 再検証は [0028-cnav-my-style-baseline-audit.md](0028-cnav-my-style-baseline-audit.md) から [0033-cnav-mystyle-direct-port-scenarios.md](0033-cnav-mystyle-direct-port-scenarios.md) の順で進める
+- `cnav` の legacy 再検証は [0028-cnav-my-style-baseline-audit.md](0028-cnav-my-style-baseline-audit.md) から [0036-cnav-legacy-decision-profile.md](0036-cnav-legacy-decision-profile.md) までで段階管理する
