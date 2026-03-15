@@ -9,10 +9,10 @@
 #include <time.h>
 #include <string.h>
 #include <algorithm>
-#include "/Users/tamurashuntarou/laboratory_code/CNav_MyStyle/src/RVOSimulator.h"
-#include "/Users/tamurashuntarou/laboratory_code/CNav_MyStyle/src/Agent.h"
-#include "/Users/tamurashuntarou/laboratory_code/CNav_MyStyle/src/KdTree.h"
-#include "/Users/tamurashuntarou/laboratory_code/CNav_MyStyle/src/Obstacle.h"
+#include "../src/RVOSimulator.h"
+#include "../src/Agent.h"
+#include "../src/KdTree.h"
+#include "../src/Obstacle.h"
 
 #include <stack>
 #include <limits>
@@ -22,7 +22,8 @@
 #include <random>
 
 
-#include "/Users/tamurashuntarou/laboratory_code/CNav_MyStyle/src/RVO.h"
+#include "../src/RVO.h"
+#include "legacy_trace_export.h"
 
 #include <string>
 #include <sstream>
@@ -750,6 +751,59 @@ void setPreferredVelocities(RVO::RVOSimulator* sim, int algorithm, std::vector<b
 	}	
 }
 
+RVO::Vector2 computeTraceIntendedVelocity(
+	RVO::RVOSimulator *sim,
+	size_t agentIndex,
+	const std::vector<bool> &isInGoal,
+	const std::vector<RVO::Vector2> &temporaryGoals,
+	int actionIndex)
+{
+	if (isInGoal[agentIndex]) {
+		return RVO::Vector2(0.0f, 0.0f);
+	}
+
+	RVO::Vector2 myTemporaryGoalVector =
+		sim->getAgentMaxSpeed(agentIndex) *
+		RVO::normalize(temporaryGoals[agentIndex] - sim->getAgentPosition(agentIndex));
+	const float angle = ActionDirection[actionIndex];
+
+	return RVO::Vector2(
+		myTemporaryGoalVector.x() * std::cos(angle) + myTemporaryGoalVector.y() * std::sin(angle),
+		myTemporaryGoalVector.y() * std::cos(angle) + myTemporaryGoalVector.x() * -std::sin(angle));
+}
+
+std::vector<int> collectRankedNeighbors(int agentIndex)
+{
+	std::vector<int> rankedNeighbors;
+	for (int neighborIndex = 0; neighborIndex < totalConsideredNeighbors[agentIndex]; ++neighborIndex) {
+		rankedNeighbors.push_back(ascendingSimilarAgentIDList[agentIndex][neighborIndex]);
+	}
+	return rankedNeighbors;
+}
+
+std::vector<LegacyTraceCandidateAction> collectCandidateActions(
+	RVO::RVOSimulator *sim,
+	size_t agentIndex,
+	const std::vector<bool> &isInGoal,
+	const std::vector<RVO::Vector2> &temporaryGoals,
+	int numActions)
+{
+	std::vector<LegacyTraceCandidateAction> candidateActions;
+	if (isInGoal[agentIndex]) {
+		return candidateActions;
+	}
+
+	for (int actionIndex = 0; actionIndex < numActions; ++actionIndex) {
+		LegacyTraceCandidateAction candidate = {
+			actionIndex,
+			computeTraceIntendedVelocity(sim, agentIndex, isInGoal, temporaryGoals, actionIndex),
+			totalReward[agentIndex][actionIndex],
+		};
+		candidateActions.push_back(candidate);
+	}
+	return candidateActions;
+}
+
 void setupScenario(RVO::RVOSimulator* sim, int algorithm,
 					float coordFactor, int numActions, int numNeighbors) //Initialize the Simulation, positions of the obstacles and the agents
 {
@@ -950,11 +1004,16 @@ void mainLoop(int iterNum, float coordFactor, int numNeighbors, int lengthSimula
 {
     /* -------------Setting----------------- */
     
-    int algorithm = 2; /* 1.ORCA, 2.C-Nav */
+	int algorithm = 2; /* 1.ORCA, 2.C-Nav */
 	bool allNeigh = false; /* 全てのエージェント(1) or ゴールに近い側だけ(0) */
 	int contadourX = 1;
 	bool followNeighbors = false; /* 追従行動の有無(false:禁止, true:可能) */
-    srand(time(NULL));
+	LegacyTraceConfig traceConfig = loadLegacyTraceConfig();
+	if (traceConfig.enabled) {
+		srand(traceConfig.seed);
+	} else {
+		srand(time(NULL));
+	}
     ////////////////////////////////////////////////////////////////////
     //////Sample actions: 8 velocities whose direction is in radians (velDir) and the magnitudes are in meters per second (velMag)
 
@@ -972,6 +1031,10 @@ void mainLoop(int iterNum, float coordFactor, int numNeighbors, int lengthSimula
 	/* -------------Simulation----------------- */
 	//std::cout << "coord,iter,time" << std::endl;
 	viewCell();
+	std::ofstream traceFile;
+	if (traceConfig.enabled) {
+		traceFile.open(traceConfig.output_path.c_str());
+	}
 	for (int thisIter = 0; thisIter < iterNum; thisIter++){
 		/* 終了キーをfalseにセット */
 		bool finalize = false;
@@ -995,10 +1058,11 @@ void mainLoop(int iterNum, float coordFactor, int numNeighbors, int lengthSimula
 		prefVFile.open(prefVFilePath);
 		*/
 
-		
 		std::ofstream positionFile;
-		std::string positionFilePath = "/Users/tamurashuntarou/Downloads/CML/results/CNav_MyStyle/forPaper/position.csv";
-		positionFile.open(positionFilePath);
+		if (!traceConfig.enabled) {
+			std::string positionFilePath = "/Users/tamurashuntarou/Downloads/CML/results/CNav_MyStyle/forPaper/position.csv";
+			positionFile.open(positionFilePath);
+		}
 		
 		
 		/* シナリオをセット */
@@ -1027,6 +1091,7 @@ void mainLoop(int iterNum, float coordFactor, int numNeighbors, int lengthSimula
 		*/
 		
 		do{
+			const float traceGlobalTime = sim->getGlobalTime();
 			//std::cout << " timeStep : " << timeStep << std::endl;
 			/* 位置出力 */
 			recordPosition(sim,positionFile,1);
@@ -1040,20 +1105,66 @@ void mainLoop(int iterNum, float coordFactor, int numNeighbors, int lengthSimula
 			std::vector<RVO::Vector2> temporaryGoals = calculateTemporaryGoals(sim);
 			//std::cout << " calculateTemporaryGoals:OK" << std::endl;
 			/* C-Navの場合速度シミュレーション (目的：chosenActionを更新) */
+			std::vector<int> appliedChosenAction = chosenAction;
+			std::vector<int> nextChosenAction = chosenAction;
+			std::vector<RVO::Vector2> communicatedIntendedVelocity(sim->getNumAgents(), RVO::Vector2(0.0f, 0.0f));
+			std::vector<RVO::Vector2> nextChosenIntendedVelocity(sim->getNumAgents(), RVO::Vector2(0.0f, 0.0f));
+			std::vector<std::vector<int> > rankedNeighbors(sim->getNumAgents());
+			std::vector<std::vector<LegacyTraceCandidateAction> > candidateActions(sim->getNumAgents());
+			const bool actionUpdated = (algorithm == 2) && (timeStep > 1);
 
 			/* 希望速度セット (反映：chosenActionを使ってgoalVectorを回転) */
 			if(timeStep % 1 == 0){
 				setPreferredVelocities(sim, algorithm, isInGoal, temporaryGoals, chosenAction);
+				for (size_t agentIndex = 0; agentIndex < sim->getNumAgents(); ++agentIndex) {
+					communicatedIntendedVelocity[agentIndex] = sim->getAgentPrefVelocity(agentIndex);
+				}
 				if((algorithm == 2) && (timeStep > 1)){
 					evaluateEachAction(sim, isInGoal, coordFactor, allNeigh, contadourX,
 										numActions, ActionDirection, followNeighbors, temporaryGoals,
 										lengthSimulateTimeSteps,maxNumSimulateNeighbors,maxNumThinkNeighbors,
 										sameWeight, chosenAction); 
-					chosenAction = choiceAction(sim, isInGoal,numActions);
+					nextChosenAction = choiceAction(sim, isInGoal,numActions);
+					for (size_t agentIndex = 0; agentIndex < sim->getNumAgents(); ++agentIndex) {
+						rankedNeighbors[agentIndex] = collectRankedNeighbors(static_cast<int>(agentIndex));
+						candidateActions[agentIndex] = collectCandidateActions(
+							sim,
+							agentIndex,
+							isInGoal,
+							temporaryGoals,
+							numActions);
+						nextChosenIntendedVelocity[agentIndex] = computeTraceIntendedVelocity(
+							sim,
+							agentIndex,
+							isInGoal,
+							temporaryGoals,
+							nextChosenAction[agentIndex]);
+					}
+					chosenAction = nextChosenAction;
 				}
 			}
 			/* doStep */
 			sim->doStep();
+			if (traceConfig.enabled) {
+				for (size_t agentIndex = 0; agentIndex < sim->getNumAgents(); ++agentIndex) {
+					writeLegacyTraceRecord(
+						traceFile,
+						timeStep,
+						traceGlobalTime,
+						static_cast<int>(agentIndex),
+						"agent_" + std::to_string(agentIndex),
+						actionUpdated,
+						rankedNeighbors[agentIndex],
+						communicatedIntendedVelocity[agentIndex],
+						appliedChosenAction[agentIndex],
+						communicatedIntendedVelocity[agentIndex],
+						sim->getAgentVelocity(agentIndex),
+						candidateActions[agentIndex],
+						actionUpdated,
+						nextChosenAction[agentIndex],
+						nextChosenIntendedVelocity[agentIndex]);
+				}
+			}
 
 			/*
 			actionFile << timeStep;
@@ -1090,6 +1201,9 @@ void mainLoop(int iterNum, float coordFactor, int numNeighbors, int lengthSimula
 			//collisions = countCollisions(sim, collisions, isInGoal);
 			/* 時間を進める */
 			timeStep++;
+			if (traceConfig.enabled && traceConfig.max_steps > 0 && timeStep >= traceConfig.max_steps) {
+				finalize = true;
+			}
 	
 
 		}while(!finalize);
@@ -1106,6 +1220,10 @@ void mainLoop(int iterNum, float coordFactor, int numNeighbors, int lengthSimula
 int main()
 {
 	std::cout << "coord,simNeighbor,thinkNeighbor,step,iter,time,avgTime" << std::endl;
+	if (loadLegacyTraceConfig().enabled) {
+		mainLoop(1,0.9f,9,3,3,1,10);
+		return 0;
+	}
 	
 	/*
 	mainLoop(10,0.0f,10,3);

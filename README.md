@@ -108,6 +108,8 @@ poetry run cmis-ca visualize --algorithm cnav --scenario scenarios/cnav_queue.ya
 poetry run cmis-ca visualize --algorithm cnav --scenario scenarios/cnav_forpaper_direct_port.yaml
 poetry run python scripts/dump_cnav_trace.py scenarios/cnav_queue_validation.yaml --steps 3
 poetry run python scripts/dump_cnav_trace.py scenarios/cnav_queue_validation.yaml --steps 3 --profile legacy-forpaper-comparison
+poetry run python scripts/dump_cnav_legacy_trace.py --driver forpaper --steps 2 --output /tmp/cnav-legacy-forpaper.jsonl
+poetry run python scripts/compare_cnav_trace_jsonl.py /tmp/cnav-python-forpaper.jsonl /tmp/cnav-legacy-forpaper.jsonl
 ```
 
 `--scenario` を省略した場合の既定は、軽量な built-in `circle-demo` です。  

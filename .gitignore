@@ -12,6 +12,7 @@ __pycache__/
 
 # local artifacts under the legacy CNav reference drop
 external/CNav_MyStyle/build/
+external/CNav_MyStyle/build_trace/
 external/CNav_MyStyle/executable/
 external/CNav_MyStyle/**/*.o
 external/CNav_MyStyle/**/*.a

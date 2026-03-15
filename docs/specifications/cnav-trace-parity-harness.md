@@ -12,6 +12,8 @@
 | trace model / runner | `src/cmis_ca/algorithms/cnav/trace.py` | CNav trace の dataclass、runner、JSONL writer |
 | algorithm hook | `src/cmis_ca/algorithms/cnav/algorithm.py` | 各 step の action evaluation と出力速度を `latest_step_trace` として保持 |
 | dump script | `scripts/dump_cnav_trace.py` | scenario 実行と JSONL dump |
+| legacy dump script | `scripts/dump_cnav_legacy_trace.py` | `external/CNav_MyStyle` driver を build / run して legacy JSONL trace を出す |
+| diff script | `scripts/compare_cnav_trace_jsonl.py` | Python trace JSONL と legacy trace JSONL の共通 field を比較する |
 | tests | `tests/algorithms/test_cnav_trace.py` | validation scenario を使った trace smoke |
 
 ## 3. trace の単位
@@ -74,7 +76,52 @@ poetry run python scripts/dump_cnav_trace.py scenarios/cnav_queue_validation.yam
 poetry run python scripts/dump_cnav_trace.py scenarios/cnav_crossing_validation.yaml --output /tmp/cnav-trace.jsonl
 ```
 
-## 7. validation smoke
+## 7. legacy dump
+
+`scripts/dump_cnav_legacy_trace.py` は、legacy driver をその場で build し、環境変数
+
+- `CNAV_TRACE_OUTPUT`
+- `CNAV_TRACE_STEPS`
+- `CNAV_TRACE_SEED`
+
+を使って JSONL trace を出す。  
+現時点の対応 driver は `forpaper` と `crowd-forpaper` である。
+
+legacy trace の top-level key は Python 側と概ね揃えるが、`forPaper.cpp` では action 評価が `setPreferredVelocities()` の後に走るため、次の extra field を持つ。
+
+- `next_action_index`
+- `next_chosen_intended_velocity`
+
+`forPaper.cpp` 比較では、current step で実際に通信された action は `chosen_*`、その step 中に次 step 向けに選ばれた action は `next_*` として扱う。
+
+実行例:
+
+```bash
+poetry run python scripts/dump_cnav_legacy_trace.py --driver forpaper --steps 2 --output /tmp/cnav-legacy-forpaper.jsonl
+poetry run python scripts/dump_cnav_legacy_trace.py --driver crowd-forpaper --steps 1
+```
+
+## 8. diff workflow
+
+`scripts/compare_cnav_trace_jsonl.py` は、Python trace と legacy trace の共通 key を比較し、次を集計する。
+
+- record 数差分
+- chosen action mismatch 数
+- chosen intended velocity の最大絶対差分
+- output velocity の最大絶対差分
+- candidate action の total reward / intended velocity の最大絶対差分
+
+legacy record が `next_*` を持つ場合、diff script はそれを優先して Python 側の `chosen_*` と比較する。
+
+実行例:
+
+```bash
+poetry run python scripts/dump_cnav_trace.py scenarios/cnav_forpaper_direct_port.yaml --steps 2 --profile legacy-forpaper-comparison --output /tmp/cnav-python-forpaper.jsonl
+poetry run python scripts/dump_cnav_legacy_trace.py --driver forpaper --steps 2 --output /tmp/cnav-legacy-forpaper.jsonl
+poetry run python scripts/compare_cnav_trace_jsonl.py /tmp/cnav-python-forpaper.jsonl /tmp/cnav-legacy-forpaper.jsonl
+```
+
+## 9. validation smoke
 
 現時点の自動確認:
 
@@ -84,10 +131,10 @@ poetry run python scripts/dump_cnav_trace.py scenarios/cnav_crossing_validation.
   - carry-over step で `candidate_actions == ()` になること
   - JSONL writer が 1 record 1 行で出力すること
 
-## 8. 制約
+## 10. 制約
 
-- まだ C++ 側 trace を自動取得して直接 diff するところまでは行っていない
+- legacy `forPaper.cpp` は decision timing が Python と 1 step ずれるため、`chosen_*` と `next_*` の読み分けが必要である
 - trace は CNav Python 実装の内部評価を出すものであり、legacy と一致する保証はまだない
-- 17 action の MyStyle baseline を直接再現する trace ではなく、現行 Python 実装の 8 action trace である
+- 17 action の MyStyle baseline に対して、Python 側はまだ 8 action trace である
 
 この harness は issue `0031` の parity gap review の根拠データを作るための土台として使う。
