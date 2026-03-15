@@ -1,0 +1,671 @@
+# Validation target: direct first-leg port of external/CNav_MyStyle/simulations/crowdForPaper.cpp.
+# Fidelity: corridor obstacles, 50-agent lattice, time_step, and first destination are aligned with MyStyle.
+# Limitation: 17-action set and legacy reward pipeline are outside the scenario schema and remain algorithm-side gaps.
+name: cnav-crowd-forpaper-direct-port
+time_step: 1.0
+steps: 0
+stop_when_all_agents_reach_goals: true
+agents:
+  - name: southbound_left_0_0
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [-100.0, -200.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [-100.0, 400.0]
+    preferred_speed: 1.5
+  - name: southbound_left_0_1
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [-100.0, -250.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [-100.0, 400.0]
+    preferred_speed: 1.5
+  - name: southbound_left_0_2
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [-100.0, -300.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [-100.0, 400.0]
+    preferred_speed: 1.5
+  - name: southbound_left_0_3
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [-100.0, -350.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [-100.0, 400.0]
+    preferred_speed: 1.5
+  - name: southbound_left_0_4
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [-100.0, -400.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [-100.0, 400.0]
+    preferred_speed: 1.5
+  - name: southbound_left_1_0
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [-50.0, -200.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [-50.0, 400.0]
+    preferred_speed: 1.5
+  - name: southbound_left_1_1
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [-50.0, -250.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [-50.0, 400.0]
+    preferred_speed: 1.5
+  - name: southbound_left_1_2
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [-50.0, -300.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [-50.0, 400.0]
+    preferred_speed: 1.5
+  - name: southbound_left_1_3
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [-50.0, -350.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [-50.0, 400.0]
+    preferred_speed: 1.5
+  - name: southbound_left_1_4
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [-50.0, -400.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [-50.0, 400.0]
+    preferred_speed: 1.5
+  - name: southbound_left_2_0
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [0.0, -200.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [0.0, 400.0]
+    preferred_speed: 1.5
+  - name: southbound_left_2_1
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [0.0, -250.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [0.0, 400.0]
+    preferred_speed: 1.5
+  - name: southbound_left_2_2
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [0.0, -300.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [0.0, 400.0]
+    preferred_speed: 1.5
+  - name: southbound_left_2_3
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [0.0, -350.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [0.0, 400.0]
+    preferred_speed: 1.5
+  - name: southbound_left_2_4
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [0.0, -400.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [0.0, 400.0]
+    preferred_speed: 1.5
+  - name: southbound_left_3_0
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [50.0, -200.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [50.0, 400.0]
+    preferred_speed: 1.5
+  - name: southbound_left_3_1
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [50.0, -250.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [50.0, 400.0]
+    preferred_speed: 1.5
+  - name: southbound_left_3_2
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [50.0, -300.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [50.0, 400.0]
+    preferred_speed: 1.5
+  - name: southbound_left_3_3
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [50.0, -350.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [50.0, 400.0]
+    preferred_speed: 1.5
+  - name: southbound_left_3_4
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [50.0, -400.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [50.0, 400.0]
+    preferred_speed: 1.5
+  - name: southbound_left_4_0
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [100.0, -200.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [100.0, 400.0]
+    preferred_speed: 1.5
+  - name: southbound_left_4_1
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [100.0, -250.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [100.0, 400.0]
+    preferred_speed: 1.5
+  - name: southbound_left_4_2
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [100.0, -300.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [100.0, 400.0]
+    preferred_speed: 1.5
+  - name: southbound_left_4_3
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [100.0, -350.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [100.0, 400.0]
+    preferred_speed: 1.5
+  - name: southbound_left_4_4
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [100.0, -400.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, 1.5]
+    goal_position: [100.0, 400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_0_0
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [-100.0, 200.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [-100.0, -400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_0_1
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [-100.0, 250.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [-100.0, -400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_0_2
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [-100.0, 300.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [-100.0, -400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_0_3
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [-100.0, 350.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [-100.0, -400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_0_4
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [-100.0, 400.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [-100.0, -400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_1_0
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [-50.0, 200.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [-50.0, -400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_1_1
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [-50.0, 250.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [-50.0, -400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_1_2
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [-50.0, 300.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [-50.0, -400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_1_3
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [-50.0, 350.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [-50.0, -400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_1_4
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [-50.0, 400.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [-50.0, -400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_2_0
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [0.0, 200.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [0.0, -400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_2_1
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [0.0, 250.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [0.0, -400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_2_2
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [0.0, 300.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [0.0, -400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_2_3
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [0.0, 350.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [0.0, -400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_2_4
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [0.0, 400.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [0.0, -400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_3_0
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [50.0, 200.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [50.0, -400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_3_1
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [50.0, 250.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [50.0, -400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_3_2
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [50.0, 300.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [50.0, -400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_3_3
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [50.0, 350.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [50.0, -400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_3_4
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [50.0, 400.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [50.0, -400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_4_0
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [100.0, 200.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [100.0, -400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_4_1
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [100.0, 250.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [100.0, -400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_4_2
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [100.0, 300.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [100.0, -400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_4_3
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [100.0, 350.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [100.0, -400.0]
+    preferred_speed: 1.5
+  - name: northbound_right_4_4
+    profile:
+      radius: 5.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 10
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [100.0, 400.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.0, -1.5]
+    goal_position: [100.0, -400.0]
+    preferred_speed: 1.5
+obstacles:
+  - vertices:
+      - [-250.0, 500.0]
+      - [-250.0, -500.0]
+      - [-125.0, -500.0]
+      - [-125.0, 500.0]
+    closed: true
+  - vertices:
+      - [125.0, 500.0]
+      - [125.0, -500.0]
+      - [250.0, -500.0]
+      - [250.0, 500.0]
+    closed: true

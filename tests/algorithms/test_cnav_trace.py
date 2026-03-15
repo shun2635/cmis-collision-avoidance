@@ -84,3 +84,18 @@ def test_run_cnav_trace_accepts_legacy_forpaper_comparison_profile() -> None:
 
     assert len(trace.records) == 6
     assert all(record.action_updated for record in trace.records)
+
+
+def test_run_cnav_trace_accepts_forpaper_direct_port_scenario() -> None:
+    scenario = load_scenario(Path("scenarios/cnav_forpaper_direct_port.yaml"))
+
+    result, trace = run_cnav_trace(
+        scenario,
+        CNavAlgorithm(parameters=create_cnav_parameters("legacy-forpaper-comparison")),
+        steps=1,
+    )
+
+    assert result.algorithm == "cnav"
+    assert trace.scenario_name == "cnav-forpaper-direct-port"
+    assert len(trace.records) == 12
+    assert any(record.action_updated for record in trace.records)

@@ -12,6 +12,7 @@
 
 ## 現在の仕様書
 
+- `cnav-mystyle-direct-port-scenarios.md`
 - `cnav-my-style-baseline-audit.md`
 - `cnav-initial-implementation.md`
 - `cnav-legacy-parity-gap-review.md`

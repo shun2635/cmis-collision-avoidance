@@ -1,0 +1,381 @@
+# Validation target: direct first-leg port of external/CNav_MyStyle/simulations/forPaper.cpp.
+# Fidelity: agent positions, obstacle cells, time_step, and first destination are aligned with MyStyle.
+# Limitation: dynamic changeDest() and A* temporary goals are not represented in the YAML schema yet.
+name: cnav-forpaper-direct-port
+time_step: 1.0
+steps: 0
+stop_when_all_agents_reach_goals: true
+agents:
+  - name: southwest_to_northeast_0
+    profile:
+      radius: 10.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 9
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [25.0, 25.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [1.060660, 1.060660]
+    goal_position: [425.0, 425.0]
+    preferred_speed: 1.5
+  - name: southwest_to_northeast_1
+    profile:
+      radius: 10.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 9
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [25.0, 97.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [1.159902, 0.951119]
+    goal_position: [425.0, 425.0]
+    preferred_speed: 1.5
+  - name: southwest_to_northeast_2
+    profile:
+      radius: 10.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 9
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [25.0, 169.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [1.263407, 0.808581]
+    goal_position: [425.0, 425.0]
+    preferred_speed: 1.5
+  - name: southeast_to_northwest_0
+    profile:
+      radius: 10.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 9
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [425.0, 25.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [-1.060660, 1.060660]
+    goal_position: [25.0, 425.0]
+    preferred_speed: 1.5
+  - name: southeast_to_northwest_1
+    profile:
+      radius: 10.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 9
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [425.0, 97.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [-1.159902, 0.951119]
+    goal_position: [25.0, 425.0]
+    preferred_speed: 1.5
+  - name: southeast_to_northwest_2
+    profile:
+      radius: 10.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 9
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [425.0, 169.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [-1.263407, 0.808581]
+    goal_position: [25.0, 425.0]
+    preferred_speed: 1.5
+  - name: northwest_to_southwest_0
+    profile:
+      radius: 10.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 9
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [25.0, 425.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.000000, -1.500000]
+    goal_position: [25.0, 25.0]
+    preferred_speed: 1.5
+  - name: northwest_to_southwest_1
+    profile:
+      radius: 10.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 9
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [25.0, 397.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.000000, -1.500000]
+    goal_position: [25.0, 25.0]
+    preferred_speed: 1.5
+  - name: northwest_to_southwest_2
+    profile:
+      radius: 10.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 9
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [25.0, 369.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.000000, -1.500000]
+    goal_position: [25.0, 25.0]
+    preferred_speed: 1.5
+  - name: northeast_to_southeast_0
+    profile:
+      radius: 10.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 9
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [425.0, 425.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.000000, 0.000000]
+    goal_position: [425.0, 425.0]
+    preferred_speed: 1.5
+  - name: northeast_to_southeast_1
+    profile:
+      radius: 10.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 9
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [425.0, 397.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.000000, 1.500000]
+    goal_position: [425.0, 425.0]
+    preferred_speed: 1.5
+  - name: northeast_to_southeast_2
+    profile:
+      radius: 10.0
+      max_speed: 1.5
+      neighbor_dist: 100.0
+      max_neighbors: 9
+      time_horizon: 10.0
+      time_horizon_obst: 10.0
+    initial_position: [425.0, 369.0]
+    initial_velocity: [0.0, 0.0]
+    preferred_velocity: [0.000000, 1.500000]
+    goal_position: [425.0, 425.0]
+    preferred_speed: 1.5
+obstacles:
+  - vertices:
+      - [100.0, 100.0]
+      - [50.0, 100.0]
+      - [50.0, 50.0]
+      - [100.0, 50.0]
+    closed: true
+  - vertices:
+      - [100.0, 150.0]
+      - [50.0, 150.0]
+      - [50.0, 100.0]
+      - [100.0, 100.0]
+    closed: true
+  - vertices:
+      - [100.0, 200.0]
+      - [50.0, 200.0]
+      - [50.0, 150.0]
+      - [100.0, 150.0]
+    closed: true
+  - vertices:
+      - [100.0, 300.0]
+      - [50.0, 300.0]
+      - [50.0, 250.0]
+      - [100.0, 250.0]
+    closed: true
+  - vertices:
+      - [100.0, 350.0]
+      - [50.0, 350.0]
+      - [50.0, 300.0]
+      - [100.0, 300.0]
+    closed: true
+  - vertices:
+      - [100.0, 400.0]
+      - [50.0, 400.0]
+      - [50.0, 350.0]
+      - [100.0, 350.0]
+    closed: true
+  - vertices:
+      - [150.0, 100.0]
+      - [100.0, 100.0]
+      - [100.0, 50.0]
+      - [150.0, 50.0]
+    closed: true
+  - vertices:
+      - [150.0, 150.0]
+      - [100.0, 150.0]
+      - [100.0, 100.0]
+      - [150.0, 100.0]
+    closed: true
+  - vertices:
+      - [150.0, 200.0]
+      - [100.0, 200.0]
+      - [100.0, 150.0]
+      - [150.0, 150.0]
+    closed: true
+  - vertices:
+      - [150.0, 300.0]
+      - [100.0, 300.0]
+      - [100.0, 250.0]
+      - [150.0, 250.0]
+    closed: true
+  - vertices:
+      - [150.0, 350.0]
+      - [100.0, 350.0]
+      - [100.0, 300.0]
+      - [150.0, 300.0]
+    closed: true
+  - vertices:
+      - [150.0, 400.0]
+      - [100.0, 400.0]
+      - [100.0, 350.0]
+      - [150.0, 350.0]
+    closed: true
+  - vertices:
+      - [200.0, 100.0]
+      - [150.0, 100.0]
+      - [150.0, 50.0]
+      - [200.0, 50.0]
+    closed: true
+  - vertices:
+      - [200.0, 150.0]
+      - [150.0, 150.0]
+      - [150.0, 100.0]
+      - [200.0, 100.0]
+    closed: true
+  - vertices:
+      - [200.0, 200.0]
+      - [150.0, 200.0]
+      - [150.0, 150.0]
+      - [200.0, 150.0]
+    closed: true
+  - vertices:
+      - [200.0, 300.0]
+      - [150.0, 300.0]
+      - [150.0, 250.0]
+      - [200.0, 250.0]
+    closed: true
+  - vertices:
+      - [200.0, 350.0]
+      - [150.0, 350.0]
+      - [150.0, 300.0]
+      - [200.0, 300.0]
+    closed: true
+  - vertices:
+      - [200.0, 400.0]
+      - [150.0, 400.0]
+      - [150.0, 350.0]
+      - [200.0, 350.0]
+    closed: true
+  - vertices:
+      - [300.0, 100.0]
+      - [250.0, 100.0]
+      - [250.0, 50.0]
+      - [300.0, 50.0]
+    closed: true
+  - vertices:
+      - [300.0, 150.0]
+      - [250.0, 150.0]
+      - [250.0, 100.0]
+      - [300.0, 100.0]
+    closed: true
+  - vertices:
+      - [300.0, 200.0]
+      - [250.0, 200.0]
+      - [250.0, 150.0]
+      - [300.0, 150.0]
+    closed: true
+  - vertices:
+      - [300.0, 300.0]
+      - [250.0, 300.0]
+      - [250.0, 250.0]
+      - [300.0, 250.0]
+    closed: true
+  - vertices:
+      - [300.0, 350.0]
+      - [250.0, 350.0]
+      - [250.0, 300.0]
+      - [300.0, 300.0]
+    closed: true
+  - vertices:
+      - [300.0, 400.0]
+      - [250.0, 400.0]
+      - [250.0, 350.0]
+      - [300.0, 350.0]
+    closed: true
+  - vertices:
+      - [350.0, 100.0]
+      - [300.0, 100.0]
+      - [300.0, 50.0]
+      - [350.0, 50.0]
+    closed: true
+  - vertices:
+      - [350.0, 150.0]
+      - [300.0, 150.0]
+      - [300.0, 100.0]
+      - [350.0, 100.0]
+    closed: true
+  - vertices:
+      - [350.0, 200.0]
+      - [300.0, 200.0]
+      - [300.0, 150.0]
+      - [350.0, 150.0]
+    closed: true
+  - vertices:
+      - [350.0, 300.0]
+      - [300.0, 300.0]
+      - [300.0, 250.0]
+      - [350.0, 250.0]
+    closed: true
+  - vertices:
+      - [350.0, 350.0]
+      - [300.0, 350.0]
+      - [300.0, 300.0]
+      - [350.0, 300.0]
+    closed: true
+  - vertices:
+      - [350.0, 400.0]
+      - [300.0, 400.0]
+      - [300.0, 350.0]
+      - [350.0, 350.0]
+    closed: true
+  - vertices:
+      - [400.0, 100.0]
+      - [350.0, 100.0]
+      - [350.0, 50.0]
+      - [400.0, 50.0]
+    closed: true
+  - vertices:
+      - [400.0, 150.0]
+      - [350.0, 150.0]
+      - [350.0, 100.0]
+      - [400.0, 100.0]
+    closed: true
+  - vertices:
+      - [400.0, 200.0]
+      - [350.0, 200.0]
+      - [350.0, 150.0]
+      - [400.0, 150.0]
+    closed: true
+  - vertices:
+      - [400.0, 300.0]
+      - [350.0, 300.0]
+      - [350.0, 250.0]
+      - [400.0, 250.0]
+    closed: true
+  - vertices:
+      - [400.0, 350.0]
+      - [350.0, 350.0]
+      - [350.0, 300.0]
+      - [400.0, 300.0]
+    closed: true
+  - vertices:
+      - [400.0, 400.0]
+      - [350.0, 400.0]
+      - [350.0, 350.0]
+      - [400.0, 350.0]
+    closed: true

@@ -105,6 +105,7 @@ poetry run cmis-ca run --algorithm orca --scenario scenarios/head_on.yaml
 poetry run cmis-ca run --algorithm cnav --scenario scenarios/cnav_queue.yaml
 poetry run cmis-ca visualize --algorithm orca --scenario scenarios/head_on.yaml
 poetry run cmis-ca visualize --algorithm cnav --scenario scenarios/cnav_queue.yaml
+poetry run cmis-ca visualize --algorithm cnav --scenario scenarios/cnav_forpaper_direct_port.yaml
 poetry run python scripts/dump_cnav_trace.py scenarios/cnav_queue_validation.yaml --steps 3
 poetry run python scripts/dump_cnav_trace.py scenarios/cnav_queue_validation.yaml --steps 3 --profile legacy-forpaper-comparison
 ```
@@ -135,6 +136,8 @@ cmis-ca run --algorithm cnav --scenario scenarios/cnav_queue.yaml
 - `scenarios/cnav_head_on_validation.yaml`: head-on の CNav validation
 - `scenarios/cnav_crossing_validation.yaml`: 4-way crossing の CNav validation
 - `scenarios/cnav_obstacle_validation.yaml`: obstacle interaction の CNav validation
+- `scenarios/cnav_forpaper_direct_port.yaml`: `external/CNav_MyStyle/simulations/forPaper.cpp` の初期配置・obstacle・第1目標を直写した direct-port scenario
+- `scenarios/cnav_crowd_forpaper_direct_port.yaml`: `external/CNav_MyStyle/simulations/crowdForPaper.cpp` の corridor crowd setup を直写した direct-port scenario
 - `scenarios/obstacle_demo.yaml`: 単一障害物付きの最小ケース
 - `scenarios/upstream_circle.yaml`: `external/RVO2/examples/Circle.cc` に基づく 250 体の比較用シナリオ。`steps: 0` と `stop_when_all_agents_reach_goals: true` により、既定では goal 到達まで回す
 
@@ -174,6 +177,7 @@ Poetry の仮想環境は [poetry.toml](poetry.toml) によりプロジェクト
 - upstream Roadmap 回帰基盤: [docs/specifications/upstream-roadmap-regression.md](docs/specifications/upstream-roadmap-regression.md)
 - CNav アルゴリズム整理: [docs/algorithms/cnav.md](docs/algorithms/cnav.md)
 - CNav MyStyle baseline 監査: [docs/specifications/cnav-my-style-baseline-audit.md](docs/specifications/cnav-my-style-baseline-audit.md)
+- CNav MyStyle direct-port scenario: [docs/specifications/cnav-mystyle-direct-port-scenarios.md](docs/specifications/cnav-mystyle-direct-port-scenarios.md)
 - CNav 初期実装仕様: [docs/specifications/cnav-initial-implementation.md](docs/specifications/cnav-initial-implementation.md)
 - CNav legacy parity gap review: [docs/specifications/cnav-legacy-parity-gap-review.md](docs/specifications/cnav-legacy-parity-gap-review.md)
 - CNav trace parity harness: [docs/specifications/cnav-trace-parity-harness.md](docs/specifications/cnav-trace-parity-harness.md)

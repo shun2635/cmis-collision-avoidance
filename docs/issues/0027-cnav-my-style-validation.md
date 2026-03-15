@@ -86,6 +86,8 @@
    - 比較結果を整理し、差分を分類して採用判断を文書化する
 5. [0032-cnav-parity-fixes-and-spec-sync.md](0032-cnav-parity-fixes-and-spec-sync.md)
    - 採用した修正を Python 実装へ反映し、仕様書と README を同期する
+6. [0033-cnav-mystyle-direct-port-scenarios.md](0033-cnav-mystyle-direct-port-scenarios.md)
+   - `forPaper.cpp` / `crowdForPaper.cpp` の setup をより忠実に持つ direct-port scenario を追加する
 
 ## アルゴリズム検証方針
 
@@ -191,6 +193,11 @@ scenario ごとに固定する観点:
 - trace で見るべき agent と step
 
 YAML で冗長になりすぎる大規模ケースだけ、後段で code-generated setup を検討する。
+
+追記:
+
+- `0033` で `cnav_forpaper_direct_port.yaml` と `cnav_crowd_forpaper_direct_port.yaml` を追加し、legacy setup fidelity を 1 段上げた
+- ただし `temporary goal` と `changeDest()` は依然として後続課題である
 
 ### 5.2 scenario ごとの役割
 

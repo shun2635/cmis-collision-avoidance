@@ -141,6 +141,8 @@ def test_load_scenario_rejects_goal_stop_without_agent_goals(tmp_path) -> None:
         ("scenarios/cnav_head_on_validation.yaml", 2, 0, 16),
         ("scenarios/cnav_crossing_validation.yaml", 4, 0, 18),
         ("scenarios/cnav_obstacle_validation.yaml", 2, 4, 20),
+        ("scenarios/cnav_forpaper_direct_port.yaml", 12, 144, 0),
+        ("scenarios/cnav_crowd_forpaper_direct_port.yaml", 50, 8, 0),
     ],
 )
 def test_validation_scenarios_load_from_repo(
@@ -155,3 +157,13 @@ def test_validation_scenarios_load_from_repo(
     assert all(agent.goal_position is not None for agent in scenario.agents)
     assert scenario.steps == expected_steps
     assert len(scenario.obstacles) == expected_obstacle_vertices
+
+
+def test_direct_port_scenarios_keep_legacy_time_step_and_goal_stop() -> None:
+    forpaper = load_scenario(Path("scenarios/cnav_forpaper_direct_port.yaml"))
+    crowd = load_scenario(Path("scenarios/cnav_crowd_forpaper_direct_port.yaml"))
+
+    assert forpaper.time_step == pytest.approx(1.0)
+    assert crowd.time_step == pytest.approx(1.0)
+    assert forpaper.stop_when_all_agents_reach_goals is True
+    assert crowd.stop_when_all_agents_reach_goals is True
