@@ -43,6 +43,7 @@ class AgentConfig:
     initial_velocity: Vector2 = field(default_factory=Vector2)
     preferred_velocity: Vector2 = field(default_factory=Vector2)
     goal_position: Vector2 | None = None
+    goal_sequence: tuple[Vector2, ...] = ()
     preferred_speed: float = 1.0
     auto_update_preferred_velocity_from_goal: bool = True
     preferred_velocity_perturbation_scale: float = 0.0

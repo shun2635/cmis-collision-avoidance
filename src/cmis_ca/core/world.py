@@ -10,6 +10,27 @@ from cmis_ca.core.state import AgentState
 
 
 @dataclass(frozen=True)
+class NavigationGrid:
+    """Scenario-level cell navigation data for temporary goal guidance."""
+
+    cell_size: float
+    passability: tuple[tuple[int, ...], ...]
+
+    def __post_init__(self) -> None:
+        if self.cell_size <= 0.0:
+            raise ValueError("navigation grid cell_size must be positive")
+        if not self.passability or not self.passability[0]:
+            raise ValueError("navigation grid passability must be a non-empty matrix")
+        width = len(self.passability[0])
+        for row in self.passability:
+            if len(row) != width:
+                raise ValueError("navigation grid passability rows must have equal length")
+            for value in row:
+                if value not in (0, 1):
+                    raise ValueError("navigation grid passability values must be 0 or 1")
+
+
+@dataclass(frozen=True)
 class ObstaclePath:
     """Scenario-level obstacle path before flattening into linked vertices."""
 
@@ -145,6 +166,7 @@ class Scenario:
     steps: int = 1
     stop_when_all_agents_reach_goals: bool = False
     name: str = "unnamed"
+    navigation_grid: NavigationGrid | None = None
 
     def __post_init__(self) -> None:
         if self.time_step <= 0.0:
@@ -154,10 +176,10 @@ class Scenario:
         if not self.agents:
             raise ValueError("scenario must contain at least one agent")
         if self.stop_when_all_agents_reach_goals and any(
-            agent.goal_position is None for agent in self.agents
+            agent.goal_position is None and not agent.goal_sequence for agent in self.agents
         ):
             raise ValueError(
-                "scenario with stop_when_all_agents_reach_goals requires goal_position for every agent"
+                "scenario with stop_when_all_agents_reach_goals requires goal_position or goal_sequence for every agent"
             )
 
 

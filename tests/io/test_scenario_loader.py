@@ -30,10 +30,19 @@ def test_load_scenario_reads_yaml_with_agents_and_obstacles(tmp_path) -> None:
                 "      time_horizon_obst: 7.0",
                 "    initial_position: [0.0, 0.0]",
                 "    goal_position: [2.0, 0.0]",
+                "    goal_sequence:",
+                "      - [2.0, 0.0]",
+                "      - [0.0, 2.0]",
+                "    auto_update_preferred_velocity_from_goal: false",
                 "    preferred_speed: 0.75",
                 "    preferred_velocity:",
                 "      x: 1.0",
                 "      y: 0.0",
+                "navigation_grid:",
+                "  cell_size: 1.0",
+                "  passability:",
+                "    - [1, 1]",
+                "    - [1, 0]",
                 "obstacles:",
                 "  - closed: false",
                 "    vertices:",
@@ -59,7 +68,11 @@ def test_load_scenario_reads_yaml_with_agents_and_obstacles(tmp_path) -> None:
     assert scenario.agents[0].preferred_velocity.x == pytest.approx(1.0)
     assert scenario.agents[0].goal_position is not None
     assert scenario.agents[0].goal_position.x == pytest.approx(2.0)
+    assert len(scenario.agents[0].goal_sequence) == 2
+    assert scenario.agents[0].auto_update_preferred_velocity_from_goal is False
     assert scenario.agents[0].preferred_speed == pytest.approx(0.75)
+    assert scenario.navigation_grid is not None
+    assert scenario.navigation_grid.cell_size == pytest.approx(1.0)
     assert len(scenario.obstacles) == 2
     assert scenario.obstacles[0].point.x == pytest.approx(1.0)
     assert scenario.obstacles[0].next_index == 1
@@ -141,7 +154,7 @@ def test_load_scenario_rejects_goal_stop_without_agent_goals(tmp_path) -> None:
         ("scenarios/cnav_head_on_validation.yaml", 2, 0, 16),
         ("scenarios/cnav_crossing_validation.yaml", 4, 0, 18),
         ("scenarios/cnav_obstacle_validation.yaml", 2, 4, 20),
-        ("scenarios/cnav_forpaper_direct_port.yaml", 12, 144, 0),
+        ("scenarios/cnav_forpaper_direct_port.yaml", 12, 144, 80),
         ("scenarios/cnav_crowd_forpaper_direct_port.yaml", 50, 8, 0),
     ],
 )
@@ -165,5 +178,7 @@ def test_direct_port_scenarios_keep_legacy_time_step_and_goal_stop() -> None:
 
     assert forpaper.time_step == pytest.approx(1.0)
     assert crowd.time_step == pytest.approx(1.0)
-    assert forpaper.stop_when_all_agents_reach_goals is True
+    assert forpaper.stop_when_all_agents_reach_goals is False
     assert crowd.stop_when_all_agents_reach_goals is True
+    assert forpaper.navigation_grid is not None
+    assert len(forpaper.agents[0].goal_sequence) == 2

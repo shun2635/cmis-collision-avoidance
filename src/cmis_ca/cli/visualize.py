@@ -47,4 +47,5 @@ def _load_scenario_for_visualization(scenario_path: str, steps: int | None) -> S
         stop_when_all_agents_reach_goals=False,
         agents=scenario.agents,
         obstacles=scenario.obstacles,
+        navigation_grid=scenario.navigation_grid,
     )

@@ -13,8 +13,8 @@
 ## 2. 方針
 
 - 既存の 2-4 agent validation scenario は維持する
-- direct-port scenario は `初期配置`, `障害物形状`, `time_step`, `第1目標`, `agent profile` を legacy driver に揃える
-- 現行 YAML schema で表現できない `changeDest()` と `temporary goal` は、未再現として明示する
+- direct-port scenario は `初期配置`, `障害物形状`, `time_step`, `goal cycle`, `agent profile` を legacy driver に揃える
+- issue `0035` で `goal_sequence` と `navigation_grid` を追加し、`forPaper` の temporary goal / `changeDest()` を Python 側へ切り出す
 
 ## 3. scenario 一覧
 
@@ -24,15 +24,18 @@
 - 構成: 12 agent, 9x9 cell field 由来の 36 obstacle cell
 - 固定条件:
   - `time_step: 1.0`
-  - `stop_when_all_agents_reach_goals: true`
+  - `steps: 80`
+  - `stop_when_all_agents_reach_goals: false`
   - agent profile は `neighbor_dist=100`, `max_neighbors=9`, `time_horizon=10`, `radius=10`, `max_speed=1.5`
 - fidelity:
   - `searchCorrespondPosition()` によるセル中心座標を使用
   - 各 agent の初期位置オフセット `i * radius * 2.2` を反映
   - obstacle は `addObstaclesToSim()` と同じ 4 頂点順で定義
+  - `goal_sequence` で `dest1/dest2` の往復切替を再現
+  - `navigation_grid` で `calculateTemporaryGoals()` 相当の cell guidance を再現
 - limitation:
-  - `dest1/dest2` の往復切替は未再現
-  - `calculateTemporaryGoals()` による A* cell guidance は未再現
+  - legacy `judgeInGoal()` / finalize semantics は Python の fixed-step 実行へ単純化している
+  - C++ 側との exact timing parity は別 issue で扱う
 
 ### 3.2 `scenarios/cnav_crowd_forpaper_direct_port.yaml`
 
@@ -62,12 +65,11 @@
 
 direct-port scenario を追加しても、次の差分は残る。
 
-- temporary goal / cell guidance
-- `changeDest()` による往復目標切替
 - 17 action set
 - legacy reward / politeness pipeline
+- legacy stop / finalize timing
 
-したがって direct parity を主張するときは、「scenario setup は揃えたが guidance / action model は未一致」と明記する。
+したがって direct parity を主張するときは、「scenario setup と guidance は寄せたが action model / reward は未一致」と明記する。
 
 ## 6. 実行例
 

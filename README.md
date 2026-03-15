@@ -138,7 +138,7 @@ cmis-ca run --algorithm cnav --scenario scenarios/cnav_queue.yaml
 - `scenarios/cnav_head_on_validation.yaml`: head-on の CNav validation
 - `scenarios/cnav_crossing_validation.yaml`: 4-way crossing の CNav validation
 - `scenarios/cnav_obstacle_validation.yaml`: obstacle interaction の CNav validation
-- `scenarios/cnav_forpaper_direct_port.yaml`: `external/CNav_MyStyle/simulations/forPaper.cpp` の初期配置・obstacle・第1目標を直写した direct-port scenario
+- `scenarios/cnav_forpaper_direct_port.yaml`: `external/CNav_MyStyle/simulations/forPaper.cpp` の初期配置・obstacle・goal cycle・cell guidance を寄せた direct-port scenario
 - `scenarios/cnav_crowd_forpaper_direct_port.yaml`: `external/CNav_MyStyle/simulations/crowdForPaper.cpp` の corridor crowd setup を直写した direct-port scenario
 - `scenarios/obstacle_demo.yaml`: 単一障害物付きの最小ケース
 - `scenarios/upstream_circle.yaml`: `external/RVO2/examples/Circle.cc` に基づく 250 体の比較用シナリオ。`steps: 0` と `stop_when_all_agents_reach_goals: true` により、既定では goal 到達まで回す

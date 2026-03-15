@@ -10,7 +10,7 @@ import yaml
 
 from cmis_ca.core.agent import AgentConfig, AgentProfile
 from cmis_ca.core.geometry import Vector2
-from cmis_ca.core.world import ObstaclePath, Scenario, build_obstacle_topology
+from cmis_ca.core.world import NavigationGrid, ObstaclePath, Scenario, build_obstacle_topology
 
 
 def load_scenario(path: str | Path) -> Scenario:
@@ -61,6 +61,7 @@ def _parse_scenario(document: dict[str, Any], path: Path) -> Scenario:
         obstacles=build_obstacle_topology(
             tuple(_parse_obstacle(entry, index) for index, entry in enumerate(obstacles_raw))
         ),
+        navigation_grid=_parse_navigation_grid(document.get("navigation_grid"), path),
     )
 
 
@@ -121,9 +122,17 @@ def _parse_agent(entry: Any, index: int) -> AgentConfig:
             entry.get("goal_position"),
             f"agent[{index}].goal_position",
         ),
+        goal_sequence=_parse_vector_sequence(
+            entry.get("goal_sequence", []),
+            f"agent[{index}].goal_sequence",
+        ),
         preferred_speed=_parse_float(
             entry.get("preferred_speed", 1.0),
             f"agent[{index}].preferred_speed",
+        ),
+        auto_update_preferred_velocity_from_goal=_parse_bool(
+            entry.get("auto_update_preferred_velocity_from_goal", True),
+            f"agent[{index}].auto_update_preferred_velocity_from_goal",
         ),
     )
 
@@ -185,6 +194,48 @@ def _parse_optional_vector(value: Any, field_name: str) -> Vector2 | None:
     if value is None:
         return None
     return _parse_vector(value, field_name)
+
+
+def _parse_vector_sequence(value: Any, field_name: str) -> tuple[Vector2, ...]:
+    if not isinstance(value, list):
+        raise ValueError(f"{field_name} must be a list")
+    return tuple(
+        _parse_vector(item, f"{field_name}[{index}]")
+        for index, item in enumerate(value)
+    )
+
+
+def _parse_navigation_grid(value: Any, path: Path) -> NavigationGrid | None:
+    if value is None:
+        return None
+    if not isinstance(value, dict):
+        raise ValueError(f"scenario '{path}' field 'navigation_grid' must be a mapping")
+
+    passability_raw = value.get("passability")
+    if not isinstance(passability_raw, list) or not passability_raw:
+        raise ValueError(f"scenario '{path}' field 'navigation_grid.passability' must be a non-empty list")
+
+    passability: list[tuple[int, ...]] = []
+    for row_index, row in enumerate(passability_raw):
+        if not isinstance(row, list) or not row:
+            raise ValueError(
+                f"scenario '{path}' field 'navigation_grid.passability[{row_index}]' must be a non-empty list"
+            )
+        parsed_row: list[int] = []
+        for column_index, item in enumerate(row):
+            if isinstance(item, bool) or not isinstance(item, int):
+                raise ValueError(
+                    "scenario "
+                    f"'{path}' field 'navigation_grid.passability[{row_index}][{column_index}]' "
+                    "must be an integer"
+                )
+            parsed_row.append(item)
+        passability.append(tuple(parsed_row))
+
+    return NavigationGrid(
+        cell_size=_parse_float(value.get("cell_size"), "navigation_grid.cell_size"),
+        passability=tuple(passability),
+    )
 
 
 def _parse_float(value: Any, field_name: str) -> float:

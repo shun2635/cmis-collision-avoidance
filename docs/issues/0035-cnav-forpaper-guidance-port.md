@@ -1,6 +1,6 @@
 # Issue 0035: CNav forPaper の temporary goal / changeDest guidance を移植する
 
-- ステータス: todo
+- ステータス: completed
 - 優先度: high
 - 関連文書:
   - [0027-cnav-my-style-validation.md](0027-cnav-my-style-validation.md)
@@ -55,3 +55,11 @@
 - CNav 本体と scenario guidance の責務を混ぜない
 - 一般化が重すぎる場合は、まず `forPaper` 専用 helper として切り出す
 - 既存 YAML schema で表現が難しければ、upstream regression と同様に code-generated setup を許容する
+
+## 実施メモ
+
+- `AgentConfig.goal_sequence` と `Scenario.navigation_grid` を追加し、goal cycle と cell guidance の入力面を作った
+- `Simulator` に dynamic goal 更新を追加し、`forPaper` 用の temporary goal を preferred velocity へ反映できるようにした
+- `scenarios/cnav_forpaper_direct_port.yaml` を guidance 付き direct-port scenario へ更新した
+- `tests/core/test_simulation.py`、`tests/core/test_world.py`、`tests/io/test_scenario_loader.py` を追加 / 更新し、grid guidance と goal sequence を固定した
+- `docs/specifications/cnav-mystyle-direct-port-scenarios.md`、`docs/specifications/cnav-legacy-parity-gap-review.md`、`README.md` を実装に合わせて更新した

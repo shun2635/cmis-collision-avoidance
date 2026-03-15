@@ -8,7 +8,7 @@ from cmis_ca.algorithms.registry import create_algorithm
 from cmis_ca.core.agent import AgentConfig, AgentProfile
 from cmis_ca.core.geometry import Vector2
 from cmis_ca.core.simulation import Simulator
-from cmis_ca.core.world import Scenario
+from cmis_ca.core.world import NavigationGrid, Scenario
 
 
 def test_simulator_updates_preferred_velocity_from_goal_before_step() -> None:
@@ -121,3 +121,62 @@ def test_explicit_step_override_ignores_goal_stop_condition() -> None:
 
     assert result.num_steps == 2
     assert simulator.states[0].position.x == pytest.approx(2.0)
+
+
+def test_simulator_uses_navigation_grid_to_set_temporary_goal_velocity() -> None:
+    scenario = Scenario(
+        agents=(
+            AgentConfig(
+                profile=AgentProfile(radius=0.4, max_speed=2.0),
+                initial_position=Vector2(0.5, 0.5),
+                goal_position=Vector2(2.5, 2.5),
+                preferred_speed=1.0,
+            ),
+        ),
+        navigation_grid=NavigationGrid(
+            cell_size=1.0,
+            passability=(
+                (1, 1, 1),
+                (0, 0, 1),
+                (1, 1, 1),
+            ),
+        ),
+        time_step=1.0,
+        steps=1,
+    )
+    simulator = Simulator(scenario=scenario, algorithm=create_algorithm("orca"))
+
+    simulator.refresh_preferred_velocities_from_goals()
+
+    state = simulator.states[0]
+    assert state.preferred_velocity.x == pytest.approx(0.0)
+    assert state.preferred_velocity.y == pytest.approx(1.0)
+
+
+def test_simulator_advances_goal_sequence_when_entering_goal_cell() -> None:
+    scenario = Scenario(
+        agents=(
+            AgentConfig(
+                profile=AgentProfile(radius=0.25, max_speed=2.0),
+                initial_position=Vector2(0.5, 0.5),
+                goal_position=Vector2(0.5, 0.5),
+                goal_sequence=(Vector2(0.5, 0.5), Vector2(2.5, 0.5)),
+                preferred_speed=1.0,
+            ),
+        ),
+        navigation_grid=NavigationGrid(
+            cell_size=1.0,
+            passability=(
+                (1, 1, 1),
+            ),
+        ),
+        time_step=1.0,
+        steps=1,
+    )
+    simulator = Simulator(scenario=scenario, algorithm=create_algorithm("orca"))
+
+    simulator.refresh_preferred_velocities_from_goals()
+
+    snapshot = simulator.snapshot()
+    assert snapshot.agents[0].goal_position == Vector2(2.5, 0.5)
+    assert simulator.states[0].preferred_velocity == Vector2(1.0, 0.0)

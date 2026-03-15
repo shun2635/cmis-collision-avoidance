@@ -6,7 +6,9 @@ from dataclasses import replace
 import math
 from typing import TYPE_CHECKING
 
+from cmis_ca.core.agent import AgentConfig
 from cmis_ca.core.geometry import Vector2
+from cmis_ca.core.navigation import cell_for_position, next_waypoint_toward_goal
 from cmis_ca.core.state import AgentState, SimulationResult
 from cmis_ca.core.world import Scenario, SnapshotAgent, WorldSnapshot
 
@@ -25,6 +27,10 @@ class Simulator:
         self._algorithm = algorithm
         self._step_index = 0
         self._global_time = 0.0
+        self._goal_sequence_indices = [0 for _ in scenario.agents]
+        self._goal_positions = [
+            self._initial_goal_position(config) for config in scenario.agents
+        ]
         self._states = [
             AgentState(
                 position=config.initial_position,
@@ -53,7 +59,7 @@ class Simulator:
                 name=config.name or f"agent_{index}",
                 profile=config.profile,
                 state=state,
-                goal_position=config.goal_position,
+                goal_position=self._goal_positions[index],
             )
             for index, (config, state) in enumerate(zip(self._scenario.agents, self._states))
         )
@@ -71,12 +77,21 @@ class Simulator:
 
     def refresh_preferred_velocities_from_goals(self) -> None:
         next_states = []
-        for config, state in zip(self._scenario.agents, self._states):
-            if config.goal_position is None or not config.auto_update_preferred_velocity_from_goal:
+        for index, (config, state) in enumerate(zip(self._scenario.agents, self._states)):
+            goal_position = self._advance_goal_sequence_if_needed(index, config, state)
+            if goal_position is None or not config.auto_update_preferred_velocity_from_goal:
                 next_states.append(state)
                 continue
 
-            goal_vector = config.goal_position - state.position
+            target_position = goal_position
+            if self._scenario.navigation_grid is not None:
+                target_position = next_waypoint_toward_goal(
+                    state.position,
+                    goal_position,
+                    grid=self._scenario.navigation_grid,
+                )
+
+            goal_vector = target_position - state.position
             if goal_vector.abs_sq() <= config.preferred_speed * config.preferred_speed:
                 preferred_velocity = goal_vector
             else:
@@ -97,11 +112,12 @@ class Simulator:
         self._states = next_states
 
     def all_agents_reached_goals(self) -> bool:
-        for config, state in zip(self._scenario.agents, self._states):
-            if config.goal_position is None:
+        for index, state in enumerate(self._states):
+            goal_position = self._goal_positions[index]
+            if goal_position is None:
                 return False
-            goal_offset = state.position - config.goal_position
-            if goal_offset.abs_sq() > config.profile.radius * config.profile.radius:
+            goal_offset = state.position - goal_position
+            if goal_offset.abs_sq() > self._scenario.agents[index].profile.radius * self._scenario.agents[index].profile.radius:
                 return False
         return True
 
@@ -126,6 +142,40 @@ class Simulator:
         self._step_index += 1
         self._global_time += self._scenario.time_step
         return self.states
+
+    def _advance_goal_sequence_if_needed(
+        self,
+        agent_index: int,
+        config: AgentConfig,
+        state: AgentState,
+    ) -> Vector2 | None:
+        current_goal = self._goal_positions[agent_index]
+        if not config.goal_sequence or current_goal is None:
+            return current_goal
+
+        if self._should_advance_goal(state.position, current_goal, radius=config.profile.radius):
+            next_index = (self._goal_sequence_indices[agent_index] + 1) % len(config.goal_sequence)
+            self._goal_sequence_indices[agent_index] = next_index
+            current_goal = config.goal_sequence[next_index]
+            self._goal_positions[agent_index] = current_goal
+        return current_goal
+
+    def _should_advance_goal(self, position: Vector2, goal: Vector2, *, radius: float) -> bool:
+        if self._scenario.navigation_grid is not None:
+            return cell_for_position(
+                position,
+                cell_size=self._scenario.navigation_grid.cell_size,
+            ) == cell_for_position(
+                goal,
+                cell_size=self._scenario.navigation_grid.cell_size,
+            )
+        return (position - goal).abs_sq() <= radius * radius
+
+    @staticmethod
+    def _initial_goal_position(config: AgentConfig) -> Vector2 | None:
+        if config.goal_sequence:
+            return config.goal_sequence[0]
+        return config.goal_position
 
     def run(self, steps: int | None = None) -> SimulationResult:
         history = [self.states]

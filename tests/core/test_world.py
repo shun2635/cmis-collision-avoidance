@@ -9,6 +9,7 @@ from cmis_ca.core.constraints import LineConstraint
 from cmis_ca.core.geometry import Vector2
 from cmis_ca.core.state import AgentState
 from cmis_ca.core.world import (
+    NavigationGrid,
     ObstaclePath,
     Scenario,
     SnapshotAgent,
@@ -103,3 +104,15 @@ def test_world_snapshot_rejects_negative_global_time() -> None:
 
     with pytest.raises(ValueError):
         WorldSnapshot(step_index=0, global_time=-0.1, time_step=0.1, agents=(agent,))
+
+
+def test_navigation_grid_requires_rectangular_binary_passability() -> None:
+    grid = NavigationGrid(
+        cell_size=1.0,
+        passability=((1, 1), (1, 0)),
+    )
+
+    assert grid.passability[1][1] == 0
+
+    with pytest.raises(ValueError):
+        NavigationGrid(cell_size=1.0, passability=((1, 1), (1,)))
