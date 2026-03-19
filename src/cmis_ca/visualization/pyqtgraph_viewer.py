@@ -53,7 +53,7 @@ def launch_pyqtgraph_viewer(trace: VisualizationTrace, playback_fps: float = 30.
     initial_item = pg.ScatterPlotItem(
         pen=pg.mkPen(None),
         brush=pg.mkBrush(160, 160, 160, 90),
-        size=8,
+        pxMode=False,
     )
     trail_item = pg.PlotDataItem(
         pen=pg.mkPen(70, 110, 180, 90, width=1.5),
@@ -62,7 +62,7 @@ def launch_pyqtgraph_viewer(trace: VisualizationTrace, playback_fps: float = 30.
     current_item = pg.ScatterPlotItem(
         pen=pg.mkPen(20, 30, 60),
         brush=pg.mkBrush(70, 110, 180, 220),
-        size=10,
+        pxMode=False,
     )
     plot_widget.addItem(initial_item)
     plot_widget.addItem(trail_item)
@@ -77,8 +77,7 @@ def launch_pyqtgraph_viewer(trace: VisualizationTrace, playback_fps: float = 30.
         )
 
     initial_item.setData(
-        x=[position.x for position in trace.initial_positions],
-        y=[position.y for position in trace.initial_positions],
+        spots=_build_agent_spots(trace.initial_positions, trace.agent_radii),
     )
 
     _fit_plot(plot_widget, trace)
@@ -90,8 +89,7 @@ def launch_pyqtgraph_viewer(trace: VisualizationTrace, playback_fps: float = 30.
     def set_frame(frame_index: int) -> None:
         frame = trace.frames[frame_index]
         current_item.setData(
-            x=[position.x for position in frame.positions],
-            y=[position.y for position in frame.positions],
+            spots=_build_agent_spots(frame.positions, trace.agent_radii),
         )
         trail_x, trail_y = _build_trail_arrays(trace, frame_index)
         trail_item.setData(trail_x, trail_y)
@@ -143,6 +141,21 @@ def _build_trail_arrays(trace: VisualizationTrace, frame_index: int) -> tuple[li
     return xs, ys
 
 
+def _build_agent_spots(
+    positions: tuple[Vector2, ...],
+    radii: tuple[float, ...],
+) -> list[dict[str, object]]:
+    if len(positions) != len(radii):
+        raise ValueError("positions and radii must have the same length")
+    return [
+        {
+            "pos": (position.x, position.y),
+            "size": radius * 2.0,
+        }
+        for position, radius in zip(positions, radii, strict=True)
+    ]
+
+
 def _fit_plot(plot_widget: Any, trace: VisualizationTrace) -> None:
     all_points: list[Vector2] = list(trace.initial_positions)
     for obstacle in trace.obstacles:
@@ -153,10 +166,44 @@ def _fit_plot(plot_widget: Any, trace: VisualizationTrace) -> None:
     if not all_points:
         return
 
-    min_x = min(point.x for point in all_points)
-    max_x = max(point.x for point in all_points)
-    min_y = min(point.y for point in all_points)
-    max_y = max(point.y for point in all_points)
+    min_x = min(point.x - radius for point, radius in zip(trace.initial_positions, trace.agent_radii, strict=True))
+    max_x = max(point.x + radius for point, radius in zip(trace.initial_positions, trace.agent_radii, strict=True))
+    min_y = min(point.y - radius for point, radius in zip(trace.initial_positions, trace.agent_radii, strict=True))
+    max_y = max(point.y + radius for point, radius in zip(trace.initial_positions, trace.agent_radii, strict=True))
+    for frame in trace.frames:
+        min_x = min(
+            min_x,
+            min(
+                point.x - radius
+                for point, radius in zip(frame.positions, trace.agent_radii, strict=True)
+            ),
+        )
+        max_x = max(
+            max_x,
+            max(
+                point.x + radius
+                for point, radius in zip(frame.positions, trace.agent_radii, strict=True)
+            ),
+        )
+        min_y = min(
+            min_y,
+            min(
+                point.y - radius
+                for point, radius in zip(frame.positions, trace.agent_radii, strict=True)
+            ),
+        )
+        max_y = max(
+            max_y,
+            max(
+                point.y + radius
+                for point, radius in zip(frame.positions, trace.agent_radii, strict=True)
+            ),
+        )
+    for point in all_points:
+        min_x = min(min_x, point.x)
+        max_x = max(max_x, point.x)
+        min_y = min(min_y, point.y)
+        max_y = max(max_y, point.y)
     margin_x = max(1.0, (max_x - min_x) * 0.1)
     margin_y = max(1.0, (max_y - min_y) * 0.1)
     plot_widget.setXRange(min_x - margin_x, max_x + margin_x, padding=0.0)

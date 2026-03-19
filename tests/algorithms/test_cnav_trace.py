@@ -8,6 +8,7 @@ import pytest
 
 from cmis_ca.algorithms.cnav import (
     CNavAlgorithm,
+    CNavParameters,
     create_cnav_parameters,
     run_cnav_trace,
     write_cnav_trace_jsonl,
@@ -45,7 +46,11 @@ def test_run_cnav_trace_collects_validation_records(
 def test_cnav_trace_records_include_chosen_action_and_ranked_neighbors() -> None:
     scenario = load_scenario(Path("scenarios/cnav_queue_validation.yaml"))
 
-    _, trace = run_cnav_trace(scenario, CNavAlgorithm(), steps=3)
+    _, trace = run_cnav_trace(
+        scenario,
+        CNavAlgorithm(parameters=CNavParameters(action_update_interval=2.0)),
+        steps=3,
+    )
 
     first_record = trace.records[0]
     assert first_record.agent_index == 0

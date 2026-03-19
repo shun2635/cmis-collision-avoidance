@@ -62,6 +62,10 @@ def _parse_scenario(document: dict[str, Any], path: Path) -> Scenario:
             tuple(_parse_obstacle(entry, index) for index, entry in enumerate(obstacles_raw))
         ),
         navigation_grid=_parse_navigation_grid(document.get("navigation_grid"), path),
+        algorithm_overrides=_parse_algorithm_overrides(
+            document.get("algorithm_overrides", {}),
+            path,
+        ),
     )
 
 
@@ -236,6 +240,26 @@ def _parse_navigation_grid(value: Any, path: Path) -> NavigationGrid | None:
         cell_size=_parse_float(value.get("cell_size"), "navigation_grid.cell_size"),
         passability=tuple(passability),
     )
+
+
+def _parse_algorithm_overrides(value: Any, path: Path) -> dict[str, dict[str, object]]:
+    if value is None:
+        return {}
+    if not isinstance(value, dict):
+        raise ValueError(f"scenario '{path}' field 'algorithm_overrides' must be a mapping")
+
+    parsed: dict[str, dict[str, object]] = {}
+    for algorithm_name, overrides in value.items():
+        if not isinstance(algorithm_name, str):
+            raise ValueError(
+                f"scenario '{path}' field 'algorithm_overrides' keys must be strings"
+            )
+        if not isinstance(overrides, dict):
+            raise ValueError(
+                f"scenario '{path}' field 'algorithm_overrides.{algorithm_name}' must be a mapping"
+            )
+        parsed[algorithm_name] = dict(overrides)
+    return parsed
 
 
 def _parse_float(value: Any, field_name: str) -> float:

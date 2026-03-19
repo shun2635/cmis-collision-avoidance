@@ -131,7 +131,25 @@ class CNavAlgorithm:
         communicated_intents: dict[int, Vector2],
     ) -> tuple[Vector2, _IntentCacheEntry, ActionSelection | None, bool]:
         cache_entry = self._intent_cache.get(agent_index)
-        if cache_entry is None or self._should_update_action(snapshot.global_time, cache_entry):
+        if cache_entry is None:
+            agent = next(agent for agent in snapshot.agents if agent.index == agent_index)
+            cache_entry = _IntentCacheEntry(
+                intended_velocity=agent.state.preferred_velocity,
+                last_update_time=snapshot.global_time - self.parameters.action_update_interval,
+                action_index=None,
+            )
+        if snapshot.step_index < self.parameters.minimum_action_update_step:
+            return (
+                cache_entry.intended_velocity,
+                _IntentCacheEntry(
+                    intended_velocity=cache_entry.intended_velocity,
+                    last_update_time=cache_entry.last_update_time,
+                    action_index=cache_entry.action_index,
+                ),
+                None,
+                False,
+            )
+        if self._should_update_action(snapshot.global_time, cache_entry):
             action_selection = evaluate_action_set(
                 snapshot=snapshot,
                 agent_index=agent_index,
@@ -145,6 +163,8 @@ class CNavAlgorithm:
                 last_update_time=snapshot.global_time,
                 action_index=action_selection.best_evaluation.action_index,
             )
+            if self.parameters.apply_selected_action_next_step:
+                return cache_entry.intended_velocity, next_entry, action_selection, True
             return action_selection.best_evaluation.intended_velocity, next_entry, action_selection, True
         return cache_entry.intended_velocity, _IntentCacheEntry(
             intended_velocity=cache_entry.intended_velocity,

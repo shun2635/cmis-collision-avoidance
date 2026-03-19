@@ -38,6 +38,9 @@ def test_load_scenario_reads_yaml_with_agents_and_obstacles(tmp_path) -> None:
                 "    preferred_velocity:",
                 "      x: 1.0",
                 "      y: 0.0",
+                "algorithm_overrides:",
+                "  cnav:",
+                "    coordination_factor: 0.9",
                 "navigation_grid:",
                 "  cell_size: 1.0",
                 "  passability:",
@@ -73,6 +76,7 @@ def test_load_scenario_reads_yaml_with_agents_and_obstacles(tmp_path) -> None:
     assert scenario.agents[0].preferred_speed == pytest.approx(0.75)
     assert scenario.navigation_grid is not None
     assert scenario.navigation_grid.cell_size == pytest.approx(1.0)
+    assert scenario.algorithm_overrides["cnav"]["coordination_factor"] == pytest.approx(0.9)
     assert len(scenario.obstacles) == 2
     assert scenario.obstacles[0].point.x == pytest.approx(1.0)
     assert scenario.obstacles[0].next_index == 1
@@ -150,9 +154,9 @@ def test_load_scenario_rejects_goal_stop_without_agent_goals(tmp_path) -> None:
 @pytest.mark.parametrize(
     ("relative_path", "expected_agents", "expected_obstacle_vertices", "expected_steps"),
     [
-        ("scenarios/cnav_queue_validation.yaml", 2, 0, 1000),
-        ("scenarios/cnav_head_on_validation.yaml", 2, 0, 1000),
-        ("scenarios/cnav_crossing_validation.yaml", 4, 0, 1000),
+        ("scenarios/cnav_queue_validation.yaml", 2, 16, 1000),
+        ("scenarios/cnav_head_on_validation.yaml", 2, 16, 1000),
+        ("scenarios/cnav_crossing_validation.yaml", 4, 16, 1000),
         ("scenarios/cnav_obstacle_validation.yaml", 2, 4, 1000),
         ("scenarios/cnav_forpaper_direct_port.yaml", 12, 144, 1000),
         ("scenarios/cnav_crowd_forpaper_direct_port.yaml", 50, 8, 0),

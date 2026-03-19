@@ -25,6 +25,13 @@ def test_agent_profile_exposes_upstream_style_navigation_defaults() -> None:
     assert profile.time_horizon_obst == pytest.approx(10.0)
 
 
+def test_agent_profile_uses_short_default_time_horizons() -> None:
+    profile = AgentProfile()
+
+    assert profile.time_horizon == pytest.approx(0.3)
+    assert profile.time_horizon_obst == pytest.approx(0.3)
+
+
 def test_agent_profile_rejects_invalid_navigation_values() -> None:
     with pytest.raises(ValueError):
         AgentProfile(neighbor_dist=-1.0)

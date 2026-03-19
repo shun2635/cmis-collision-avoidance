@@ -1,24 +1,49 @@
 # Validation target: action selection and ORCA projection under two-agent counterflow.
-# Origin: simplified from legacy head-on style checks for issue 0029.
+# Origin: simplified from the head-on corridor geometry in compromise.cpp.
 name: cnav-head-on-validation
 time_step: 0.1
 steps: 1000
 agents:
-  - name: left_to_right
+  - name: north_to_south
     profile:
       radius: 0.4
       max_speed: 1.0
-    initial_position: [-2.0, 0.0]
+    initial_position: [0.0, 3.0]
     initial_velocity: [0.0, 0.0]
-    preferred_velocity: [1.0, 0.0]
-    goal_position: [2.0, 0.0]
+    preferred_velocity: [0.0, -1.0]
+    goal_position: [0.0, -3.0]
     preferred_speed: 1.0
-  - name: right_to_left
+  - name: south_to_north
     profile:
       radius: 0.4
       max_speed: 1.0
-    initial_position: [2.0, 0.0]
+    initial_position: [0.0, -3.0]
     initial_velocity: [0.0, 0.0]
-    preferred_velocity: [-1.0, 0.0]
-    goal_position: [-2.0, 0.0]
+    preferred_velocity: [0.0, 1.0]
+    goal_position: [0.0, 3.0]
     preferred_speed: 1.0
+obstacles:
+  - closed: true
+    vertices:
+      - [-8.0, 4.0]
+      - [-8.0, -4.0]
+      - [-4.0, -4.0]
+      - [-4.0, 4.0]
+  - closed: true
+    vertices:
+      - [4.0, 4.0]
+      - [4.0, -4.0]
+      - [8.0, -4.0]
+      - [8.0, 4.0]
+  - closed: true
+    vertices:
+      - [-4.0, 0.1]
+      - [-4.0, -0.1]
+      - [-2.0, -0.1]
+      - [-2.0, 0.1]
+  - closed: true
+    vertices:
+      - [2.0, 0.1]
+      - [2.0, -0.1]
+      - [4.0, -0.1]
+      - [4.0, 0.1]

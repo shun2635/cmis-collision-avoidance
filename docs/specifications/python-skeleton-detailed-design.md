@@ -115,6 +115,7 @@
 
 - `NaiveNeighborSearch`、ORCA 制約生成、共通 solver をまとめて 1 ステップへ統合している
 - `AgentProfile` の `neighbor_dist`, `max_neighbors`, `time_horizon`, `time_horizon_obst` を既定値として参照する
+  - 現在の共通既定値は `time_horizon = 0.3`, `time_horizon_obst = 0.3`
 - `ORCAParameters` は algorithm 側の optional override として扱う
 - obstacle range は `time_horizon_obst * max_speed + radius` として計算し、agent range と分離して近傍探索へ渡す
 - obstacle 制約は先頭へまとめ、solver の `protected_constraint_count` に渡す

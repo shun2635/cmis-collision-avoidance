@@ -76,5 +76,7 @@ direct-port scenario を追加しても、次の差分は残る。
 ```bash
 poetry run cmis-ca visualize --algorithm cnav --scenario scenarios/cnav_forpaper_direct_port.yaml
 poetry run cmis-ca visualize --algorithm cnav --scenario scenarios/cnav_crowd_forpaper_direct_port.yaml
+poetry run cmis-ca visualize --algorithm cnav --scenario scenarios/cnav_forpaper_direct_port.yaml --cnav-mystyle-driver forpaper
+poetry run cmis-ca visualize --algorithm cnav --scenario scenarios/cnav_crowd_forpaper_direct_port.yaml --cnav-mystyle-driver crowd-forpaper
 poetry run python scripts/dump_cnav_trace.py scenarios/cnav_forpaper_direct_port.yaml --steps 2 --profile legacy-forpaper-comparison
 ```

@@ -11,7 +11,11 @@ from cmis_ca.algorithms.cnav.coordination import (
     rank_constrained_neighbors,
     select_best_action,
 )
-from cmis_ca.algorithms.cnav.parameters import CNavParameters, create_cnav_parameters
+from cmis_ca.algorithms.cnav.parameters import (
+    CNavParameters,
+    create_cnav_parameters,
+    create_mystyle_driver_settings,
+)
 from cmis_ca.algorithms.orca.parameters import ORCAParameters
 from cmis_ca.core.agent import AgentConfig, AgentProfile
 from cmis_ca.core.geometry import Vector2
@@ -80,6 +84,46 @@ def test_create_cnav_parameters_supports_legacy_forpaper_comparison_profile() ->
     assert parameters.simulation_horizon_steps == 3
     assert parameters.action_update_interval == pytest.approx(0.2)
     assert parameters.update_every_step is True
+
+
+def test_create_cnav_parameters_supports_complete_legacy_forpaper_profile() -> None:
+    parameters = create_cnav_parameters("legacy-forpaper-decision")
+
+    assert parameters.coordination_factor == pytest.approx(0.9)
+    assert parameters.simulation_horizon_steps == 3
+    assert parameters.minimum_action_update_step == 2
+    assert parameters.apply_selected_action_next_step is True
+    assert parameters.reward_model == "legacy"
+    assert len(parameters.action_speed_tiers) == 17
+    assert parameters.simulate_neighbor_limit == 3
+    assert parameters.think_neighbor_limit == 1
+    assert parameters.same_direction_neighbor_weight == pytest.approx(10.0)
+
+
+def test_create_mystyle_driver_settings_matches_forpaper_driver() -> None:
+    settings = create_mystyle_driver_settings("forpaper")
+
+    assert settings.time_step == pytest.approx(1.0)
+    assert settings.agent_profile.radius == pytest.approx(10.0)
+    assert settings.agent_profile.max_speed == pytest.approx(1.5)
+    assert settings.agent_profile.neighbor_dist == pytest.approx(100.0)
+    assert settings.agent_profile.max_neighbors == 9
+    assert settings.agent_profile.time_horizon == pytest.approx(10.0)
+    assert settings.agent_profile.time_horizon_obst == pytest.approx(10.0)
+    assert settings.cnav_parameters.apply_selected_action_next_step is True
+
+
+def test_create_mystyle_driver_settings_matches_crowd_driver() -> None:
+    settings = create_mystyle_driver_settings("crowd-forpaper")
+
+    assert settings.time_step == pytest.approx(1.0)
+    assert settings.agent_profile.radius == pytest.approx(5.0)
+    assert settings.agent_profile.max_speed == pytest.approx(1.5)
+    assert settings.agent_profile.neighbor_dist == pytest.approx(100.0)
+    assert settings.agent_profile.max_neighbors == 10
+    assert settings.agent_profile.time_horizon == pytest.approx(10.0)
+    assert settings.agent_profile.time_horizon_obst == pytest.approx(10.0)
+    assert settings.cnav_parameters.apply_selected_action_next_step is False
 
 
 def test_cnav_algorithm_caches_goal_directed_intended_velocity_until_update_interval() -> None:
@@ -167,6 +211,38 @@ def test_cnav_algorithm_can_force_action_update_every_step() -> None:
     algorithm._intent_cache[0].intended_velocity = Vector2(-1.5, 0.0)
     simulator.step()
 
+    assert algorithm._intent_cache[0].intended_velocity == Vector2(1.5, 0.0)
+
+
+def test_cnav_algorithm_can_delay_action_application_until_next_step() -> None:
+    scenario = Scenario(
+        name="single-agent",
+        time_step=0.1,
+        steps=1,
+        agents=(
+            AgentConfig(
+                name="agent_0",
+                profile=AgentProfile(radius=0.4, max_speed=1.0),
+                initial_position=Vector2(0.0, 0.0),
+                initial_velocity=Vector2(0.0, 0.0),
+                preferred_velocity=Vector2(1.0, 0.0),
+                goal_position=Vector2(10.0, 0.0),
+            ),
+        ),
+    )
+
+    algorithm = CNavAlgorithm(
+        parameters=CNavParameters(
+            update_every_step=True,
+            apply_selected_action_next_step=True,
+            minimum_action_update_step=0,
+        )
+    )
+    simulator = Simulator(scenario=scenario, algorithm=algorithm)
+
+    commands = algorithm.step(simulator.snapshot())
+
+    assert commands[0].velocity.x == pytest.approx(1.0)
     assert algorithm._intent_cache[0].intended_velocity == Vector2(1.5, 0.0)
 
 
@@ -271,7 +347,7 @@ def test_select_best_action_prefers_polite_action_in_same_goal_queue() -> None:
         agents=(
             _snapshot_agent(
                 0,
-                position=Vector2(-1.0, 0.0),
+                position=Vector2(-0.8, 0.0),
                 velocity=Vector2(0.0, 0.0),
                 preferred_velocity=Vector2(1.0, 0.0),
                 goal_position=Vector2(10.0, 0.0),

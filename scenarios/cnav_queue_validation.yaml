@@ -1,24 +1,69 @@
-# Validation target: goal-nearer neighbor filtering and yielding in a same-goal queue.
-# Origin: simplified from the queue-like coordination cases tracked in issue 0029.
+# Validation target: yielding under two-agent counterflow through a narrow corridor gap.
+# Origin: simplified from the corridor geometry in compromise.cpp.
 name: cnav-queue-validation
-time_step: 0.1
+time_step: 1.0
 steps: 1000
+stop_when_all_agents_reach_goals: true
+algorithm_overrides:
+  cnav:
+    coordination_factor: 0.8
+    simulation_horizon_steps: 10
+    action_update_interval: 0.1
+    update_every_step: true
+    minimum_action_update_step: 2
+    apply_selected_action_next_step: false
+    top_k_constrained_neighbors: 4
+    action_speed: 5.0
+    beta_degrees: 45.0
 agents:
-  - name: rear
+  - name: north_to_south
     profile:
-      radius: 0.4
-      max_speed: 1.0
-    initial_position: [-1.2, 0.0]
+      radius: 10.0
+      max_speed: 5.0
+      neighbor_dist: 100.0
+      max_neighbors: 4
+      time_horizon: 0.3
+      time_horizon_obst: 0.3
+    initial_position: [0.0, 50.0]
     initial_velocity: [0.0, 0.0]
-    preferred_velocity: [1.0, 0.0]
-    goal_position: [8.0, 0.0]
-    preferred_speed: 1.0
-  - name: front
+    preferred_velocity: [0.0, -5.0]
+    goal_position: [0.0, -100.0]
+    preferred_speed: 5.0
+  - name: south_to_north
     profile:
-      radius: 0.4
-      max_speed: 1.0
-    initial_position: [0.0, 0.0]
+      radius: 10.0
+      max_speed: 5.0
+      neighbor_dist: 100.0
+      max_neighbors: 4
+      time_horizon: 0.3
+      time_horizon_obst: 0.3
+    initial_position: [0.0, -50.0]
     initial_velocity: [0.0, 0.0]
-    preferred_velocity: [1.0, 0.0]
-    goal_position: [8.0, 0.0]
-    preferred_speed: 1.0
+    preferred_velocity: [0.0, 5.0]
+    goal_position: [0.0, 100.0]
+    preferred_speed: 5.0
+obstacles:
+  - closed: true
+    vertices:
+      - [-200.0, 100.0]
+      - [-200.0, -100.0]
+      - [-100.0, -100.0]
+      - [-100.0, 100.0]
+  - closed: true
+    vertices:
+      - [100.0, 100.0]
+      - [100.0, -100.0]
+      - [200.0, -100.0]
+      - [200.0, 100.0]
+  - closed: true
+    vertices:
+      - [-100.0, 1.25]
+      - [-100.0, -1.25]
+      - [-15.0, -1.25]
+      - [-15.0, 1.25]
+  - closed: true
+    vertices:
+      - [15.0, 1.25]
+      - [15.0, -1.25]
+      - [100.0, -1.25]
+      - [100.0, 1.25]

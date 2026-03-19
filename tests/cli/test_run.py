@@ -40,4 +40,5 @@ def test_build_demo_scenario_breaks_symmetry_and_crosses_center() -> None:
         state.position.norm() for state in result.final_states
     ) / len(result.final_states)
 
-    assert final_average_radius > initial_average_radius - 1.0
+    assert final_average_radius < initial_average_radius - 3.0
+    assert final_average_radius < 2.0

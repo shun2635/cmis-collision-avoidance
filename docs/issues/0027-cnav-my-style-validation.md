@@ -207,7 +207,7 @@ YAML で冗長になりすぎる大規模ケースだけ、後段で code-genera
 
 ### 5.2 scenario ごとの役割
 
-- queue: `goal に近い neighbor のみを見る` 分岐と譲り行動の確認
+- queue: 狭隘 gap を通る 2 agent counterflow での譲り行動の確認
 - head-on: 対向時の action 選択と ORCA 通過後速度の確認
 - crossing: ranking と politeness の効き方の確認
 - obstacle: obstacle 制約と CNav の相互作用確認

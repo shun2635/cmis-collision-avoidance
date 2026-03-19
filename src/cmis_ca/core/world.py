@@ -167,6 +167,7 @@ class Scenario:
     stop_when_all_agents_reach_goals: bool = False
     name: str = "unnamed"
     navigation_grid: NavigationGrid | None = None
+    algorithm_overrides: dict[str, dict[str, object]] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if self.time_step <= 0.0:
@@ -175,6 +176,8 @@ class Scenario:
             raise ValueError("steps must be non-negative")
         if not self.agents:
             raise ValueError("scenario must contain at least one agent")
+        if not isinstance(self.algorithm_overrides, dict):
+            raise ValueError("algorithm_overrides must be a mapping")
         if self.stop_when_all_agents_reach_goals and any(
             agent.goal_position is None and not agent.goal_sequence for agent in self.agents
         ):

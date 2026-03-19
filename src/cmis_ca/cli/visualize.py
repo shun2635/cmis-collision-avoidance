@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
-from cmis_ca.algorithms.registry import create_algorithm
-from cmis_ca.cli.run import build_demo_scenario
+from cmis_ca.cli.run import (
+    apply_cnav_mystyle_driver_to_scenario,
+    build_algorithm_instance,
+    build_demo_scenario,
+)
 from cmis_ca.core.simulation import Simulator
 from cmis_ca.core.world import Scenario
 from cmis_ca.visualization.pyqtgraph_viewer import launch_pyqtgraph_viewer
@@ -16,17 +19,27 @@ def run_visualization(
     *,
     steps: int | None = None,
     fps: float = 30.0,
+    cnav_profile: str | None = None,
+    cnav_mystyle_driver: str | None = None,
 ):
     """Run a scenario and launch the default visualization backend."""
 
-    scenario = (
-        _load_scenario_for_visualization(scenario_path, steps)
-        if scenario_path is not None
-        else build_demo_scenario() if steps is None else build_demo_scenario(steps=steps)
+    scenario = apply_cnav_mystyle_driver_to_scenario(
+        (
+            _load_scenario_for_visualization(scenario_path, steps)
+            if scenario_path is not None
+            else build_demo_scenario() if steps is None else build_demo_scenario(steps=steps)
+        ),
+        cnav_mystyle_driver,
     )
     simulator = Simulator(
         scenario=scenario,
-        algorithm=create_algorithm(algorithm_name),
+        algorithm=build_algorithm_instance(
+            algorithm_name,
+            scenario=scenario,
+            cnav_profile=cnav_profile,
+            cnav_mystyle_driver=cnav_mystyle_driver,
+        ),
     )
     result = simulator.run()
     trace = build_visualization_trace(scenario, result)
@@ -48,4 +61,5 @@ def _load_scenario_for_visualization(scenario_path: str, steps: int | None) -> S
         agents=scenario.agents,
         obstacles=scenario.obstacles,
         navigation_grid=scenario.navigation_grid,
+        algorithm_overrides=scenario.algorithm_overrides,
     )

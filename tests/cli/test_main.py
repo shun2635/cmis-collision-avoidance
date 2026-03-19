@@ -66,6 +66,48 @@ def test_cli_run_accepts_cnav_external_scenario(capsys) -> None:
     assert "agent=1" in captured.out
 
 
+def test_cli_run_accepts_cnav_profile(capsys) -> None:
+    exit_code = main(
+        [
+            "run",
+            "--algorithm",
+            "cnav",
+            "--scenario",
+            "scenarios/cnav_queue.yaml",
+            "--steps",
+            "1",
+            "--cnav-profile",
+            "legacy-forpaper-decision",
+        ]
+    )
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "agent=0" in captured.out
+
+
+def test_cli_run_accepts_cnav_mystyle_driver(capsys) -> None:
+    exit_code = main(
+        [
+            "run",
+            "--algorithm",
+            "cnav",
+            "--scenario",
+            "scenarios/cnav_forpaper_direct_port.yaml",
+            "--steps",
+            "1",
+            "--cnav-mystyle-driver",
+            "forpaper",
+        ]
+    )
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "agent=0" in captured.out
+
+
 def test_cli_run_rejects_negative_steps() -> None:
     with pytest.raises(SystemExit) as exc_info:
         main(["run", "--algorithm", "orca", "--steps", "-1"])
@@ -73,14 +115,31 @@ def test_cli_run_rejects_negative_steps() -> None:
     assert exc_info.value.code == 2
 
 
+def test_cli_run_rejects_cnav_profile_for_orca() -> None:
+    with pytest.raises(SystemExit) as exc_info:
+        main(["run", "--algorithm", "orca", "--cnav-profile", "paper"])
+
+    assert exc_info.value.code == 2
+
+
 def test_cli_visualize_accepts_external_scenario(monkeypatch) -> None:
     called = {}
 
-    def fake_run_visualization(algorithm_name, scenario_path, *, steps, fps):
+    def fake_run_visualization(
+        algorithm_name,
+        scenario_path,
+        *,
+        steps,
+        fps,
+        cnav_profile,
+        cnav_mystyle_driver,
+    ):
         called["algorithm_name"] = algorithm_name
         called["scenario_path"] = scenario_path
         called["steps"] = steps
         called["fps"] = fps
+        called["cnav_profile"] = cnav_profile
+        called["cnav_mystyle_driver"] = cnav_mystyle_driver
 
     monkeypatch.setattr(cli_main, "run_visualization", fake_run_visualization)
 
@@ -104,6 +163,8 @@ def test_cli_visualize_accepts_external_scenario(monkeypatch) -> None:
         "scenario_path": "scenarios/head_on.yaml",
         "steps": 3,
         "fps": 24.0,
+        "cnav_profile": None,
+        "cnav_mystyle_driver": None,
     }
 
 

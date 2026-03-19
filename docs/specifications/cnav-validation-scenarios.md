@@ -16,20 +16,21 @@
 
 ### 3.1 `scenarios/cnav_queue_validation.yaml`
 
-- 目的: `goal に近い neighbor のみを見る` 分岐と queue での譲りを確認する
-- 構成: 2 agent, 同一 goal
+- 目的: 狭い通路の隙間で、逆向き 2 agent の譲り行動を確認する
+- 構成: 2 agent, 逆方向 goal, `compromise.cpp` 系の狭い通路障害物を縮小配置
+- 障害物条件: 中央の隙間幅は agent 直径の `1.5` 倍
 - 停止条件: `steps = 1000`
   - 実際の短い trace 比較は `--steps` override で切り詰める
 - 主な観測指標:
   - ranked neighbors
   - chosen action
   - intended velocity
-  - 前方 agent への接近時の減速または回避
+  - 狭隘部進入時の減速または回避
 
 ### 3.2 `scenarios/cnav_head_on_validation.yaml`
 
 - 目的: 2 agent の対向で action 選択と ORCA 投影後速度を見る
-- 構成: 2 agent, 反対 goal
+- 構成: 2 agent, 反対 goal, `compromise.cpp` 系の狭い通路障害物を縮小配置
 - 停止条件: `steps = 1000`
   - 実際の短い trace 比較は `--steps` override で切り詰める
 - 主な観測指標:
@@ -40,7 +41,7 @@
 ### 3.3 `scenarios/cnav_crossing_validation.yaml`
 
 - 目的: 4-way crossing で ranking と politeness の効き方を確認する
-- 構成: 4 agent, 中央交差
+- 構成: 4 agent, 中央交差, `intersectionLoop.cpp` 系の中央交差障害物を縮小配置
 - 停止条件: `steps = 1000`
   - 実際の短い trace 比較は `--steps` override で切り詰める
 - 主な観測指標:

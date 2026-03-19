@@ -15,8 +15,8 @@ class AgentProfile:
     max_speed: float = 1.0
     neighbor_dist: float = 5.0
     max_neighbors: int = 10
-    time_horizon: float = 5.0
-    time_horizon_obst: float = 5.0
+    time_horizon: float = 0.3
+    time_horizon_obst: float = 0.3
 
     def __post_init__(self) -> None:
         if self.radius < 0.0:
