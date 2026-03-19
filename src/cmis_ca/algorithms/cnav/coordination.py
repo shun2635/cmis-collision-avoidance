@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from cmis_ca.algorithms.cnav.actions import build_default_action_set
+from cmis_ca.algorithms.cnav.actions import build_action_set_from_offsets, build_default_action_set
 from cmis_ca.algorithms.cnav.parameters import CNavParameters
 from cmis_ca.algorithms.orca.agent_solver import compute_orca_velocity
 from cmis_ca.algorithms.orca.parameters import ORCAParameters
@@ -118,11 +118,7 @@ def evaluate_action_set(
 
     agent = _find_agent(snapshot, agent_index)
     goal_velocity = _goal_velocity(agent)
-    actions = build_default_action_set(
-        goal_velocity,
-        action_speed=parameters.action_speed,
-        beta_degrees=parameters.beta_degrees,
-    )
+    actions = _build_action_set(goal_velocity, parameters=parameters)
     ranked_neighbors = rank_constrained_neighbors(
         snapshot=snapshot,
         agent_index=agent_index,
@@ -146,7 +142,11 @@ def evaluate_action_set(
             neighbor_search=neighbor_search,
         )
         evaluations.append(evaluation)
-        if best is None or evaluation.total_reward > best.total_reward:
+        if best is None or _is_better_evaluation(
+            evaluation,
+            best,
+            prefer_last_action_on_tie=parameters.prefer_last_action_on_tie,
+        ):
             best = evaluation
 
     if best is None:
@@ -175,6 +175,17 @@ def evaluate_action(
     agent = _find_agent(snapshot, agent_index)
     if agent.goal_position is None:
         raise ValueError("CNav requires goal_position for every agent")
+    if parameters.reward_model == "legacy":
+        return _evaluate_action_legacy(
+            snapshot=snapshot,
+            agent_index=agent_index,
+            action_index=action_index,
+            intended_velocity=intended_velocity,
+            communicated_intents=communicated_intents,
+            parameters=parameters,
+            orca_parameters=orca_parameters,
+            neighbor_search=neighbor_search,
+        )
 
     simulated_agents = _initialize_simulated_agents(
         snapshot=snapshot,
@@ -260,6 +271,121 @@ def evaluate_action(
     )
 
 
+def _evaluate_action_legacy(
+    *,
+    snapshot: WorldSnapshot,
+    agent_index: int,
+    action_index: int,
+    intended_velocity: Vector2,
+    communicated_intents: dict[int, Vector2],
+    parameters: CNavParameters,
+    orca_parameters: ORCAParameters,
+    neighbor_search: NeighborSearch,
+) -> ActionEvaluation:
+    agent = _find_agent(snapshot, agent_index)
+    if agent.goal_position is None:
+        raise ValueError("CNav requires goal_position for every agent")
+
+    simulated_neighbor_indices = _collect_simulated_neighbor_indices(
+        snapshot=snapshot,
+        agent_index=agent_index,
+        orca_parameters=orca_parameters,
+        neighbor_search=neighbor_search,
+        limit=parameters.simulate_neighbor_limit,
+    )
+    simulated_agents = _initialize_simulated_agents(
+        snapshot=snapshot,
+        agent_index=agent_index,
+        ranked_neighbors=simulated_neighbor_indices,
+        communicated_intents=communicated_intents,
+    )
+
+    goal_progress_sum = 0.0
+    politeness_sum = 0.0
+    goal_reach_step: int | None = None
+
+    for step_offset in range(parameters.simulation_horizon_steps):
+        simulated_snapshot = _build_simulated_snapshot(
+            original_snapshot=snapshot,
+            simulated_agents=simulated_agents,
+            step_offset=step_offset,
+        )
+        next_velocities: dict[int, Vector2] = {}
+        for simulated_agent in simulated_agents.values():
+            optimization_velocity = (
+                intended_velocity
+                if simulated_agent.index == agent_index
+                else communicated_intents.get(
+                    simulated_agent.index,
+                    simulated_agent.preferred_velocity,
+                )
+            )
+            next_velocities[simulated_agent.index] = compute_orca_velocity(
+                snapshot=simulated_snapshot,
+                agent_index=simulated_agent.index,
+                optimization_velocity=optimization_velocity,
+                parameters=orca_parameters,
+                neighbor_search=neighbor_search,
+            )
+
+        self_simulated = simulated_agents[agent_index]
+        goal_vector = self_simulated.goal_position - self_simulated.position
+        goal_progress = 0.0
+        if goal_vector.abs_sq() > 0.0 and self_simulated.profile.max_speed > 0.0:
+            goal_progress = next_velocities[agent_index].dot(goal_vector.normalized())
+            goal_progress_sum += goal_progress
+
+        if step_offset > 0:
+            politeness = _legacy_politeness_reward(
+                agent_index=agent_index,
+                simulated_agents=simulated_agents,
+                simulated_neighbor_indices=simulated_neighbor_indices,
+                next_velocities=next_velocities,
+                communicated_intents=communicated_intents,
+                think_neighbor_limit=parameters.think_neighbor_limit,
+                same_direction_neighbor_weight=parameters.same_direction_neighbor_weight,
+            )
+            politeness_sum += politeness
+
+        for simulated_agent in simulated_agents.values():
+            next_velocity = next_velocities[simulated_agent.index]
+            simulated_agent.position = (
+                simulated_agent.position + next_velocity * snapshot.time_step
+            )
+            simulated_agent.velocity = next_velocity
+
+        if goal_reach_step is None and _reached_goal_position(
+            simulated_agents[agent_index].position,
+            simulated_agents[agent_index].goal_position,
+        ):
+            goal_reach_step = step_offset
+
+    goal_progress_reward = _normalize_goal_progress(
+        goal_progress_sum,
+        horizon_steps=parameters.simulation_horizon_steps,
+        max_speed=agent.profile.max_speed,
+    )
+    politeness_reward = _normalize_legacy_politeness(
+        politeness_sum,
+        horizon_steps=parameters.simulation_horizon_steps,
+    )
+    denominator = _legacy_reward_denominator(
+        horizon_steps=parameters.simulation_horizon_steps,
+        goal_reach_step=goal_reach_step,
+    )
+    total_reward = (
+        ((1.0 - parameters.coordination_factor) * goal_progress_sum)
+        + (parameters.coordination_factor * politeness_sum)
+    ) / denominator
+    return ActionEvaluation(
+        action_index=action_index,
+        intended_velocity=intended_velocity,
+        goal_progress_reward=goal_progress_reward,
+        constrained_reduction_reward=politeness_reward,
+        total_reward=total_reward,
+    )
+
+
 def _initialize_simulated_agents(
     *,
     snapshot: WorldSnapshot,
@@ -282,6 +408,117 @@ def _initialize_simulated_agents(
             preferred_velocity=communicated_intents.get(agent.index, agent.state.preferred_velocity),
         )
     return agents
+
+
+def _build_action_set(goal_velocity: Vector2, *, parameters: CNavParameters) -> tuple[Vector2, ...]:
+    if parameters.action_speed_tiers:
+        return build_action_set_from_offsets(
+            goal_velocity,
+            action_speeds=parameters.action_speed_tiers,
+            angle_offsets_radians=parameters.action_angle_offsets_radians,
+        )
+    return build_default_action_set(
+        goal_velocity,
+        action_speed=parameters.action_speed,
+        beta_degrees=parameters.beta_degrees,
+    )
+
+
+def _is_better_evaluation(
+    candidate: ActionEvaluation,
+    incumbent: ActionEvaluation,
+    *,
+    prefer_last_action_on_tie: bool,
+) -> bool:
+    if prefer_last_action_on_tie:
+        return candidate.total_reward >= incumbent.total_reward
+    return candidate.total_reward > incumbent.total_reward
+
+
+def _collect_simulated_neighbor_indices(
+    *,
+    snapshot: WorldSnapshot,
+    agent_index: int,
+    orca_parameters: ORCAParameters,
+    neighbor_search: NeighborSearch,
+    limit: int | None,
+) -> tuple[int, ...]:
+    agent = _find_agent(snapshot, agent_index)
+    resolved_parameters = orca_parameters.resolve(agent.profile)
+    neighbors = neighbor_search.find_neighbors(
+        snapshot=snapshot,
+        agent_index=agent.index,
+        neighbor_dist=resolved_parameters.neighbor_dist,
+        max_neighbors=resolved_parameters.max_neighbors,
+        obstacle_range=(
+            resolved_parameters.time_horizon_obst * agent.profile.max_speed + agent.profile.radius
+        ),
+    )
+    indices = tuple(neighbor.index for neighbor in neighbors.agent_neighbors)
+    if limit is None:
+        return indices
+    return indices[:limit]
+
+
+def _legacy_politeness_reward(
+    *,
+    agent_index: int,
+    simulated_agents: dict[int, _SimulatedAgent],
+    simulated_neighbor_indices: tuple[int, ...],
+    next_velocities: dict[int, Vector2],
+    communicated_intents: dict[int, Vector2],
+    think_neighbor_limit: int | None,
+    same_direction_neighbor_weight: float,
+) -> float:
+    self_simulated = simulated_agents[agent_index]
+    goal_vector = self_simulated.goal_position - self_simulated.position
+    self_goal_distance = goal_vector.norm()
+    if self_simulated.profile.max_speed <= 0.0:
+        return 0.0
+
+    politeness_terms: list[float] = []
+    for neighbor_index in simulated_neighbor_indices:
+        neighbor_simulated = simulated_agents[neighbor_index]
+        if (self_simulated.goal_position - neighbor_simulated.position).norm() >= self_goal_distance:
+            continue
+
+        neighbor_intent = communicated_intents.get(
+            neighbor_index,
+            neighbor_simulated.preferred_velocity,
+        )
+        change = (
+            neighbor_simulated.profile.max_speed
+            - (neighbor_intent - next_velocities[neighbor_index]).norm()
+        )
+        if goal_vector.dot(neighbor_intent) >= 0.5:
+            change *= same_direction_neighbor_weight
+        politeness_terms.append(change / self_simulated.profile.max_speed)
+
+    if not politeness_terms:
+        return 1.0
+
+    politeness_terms.sort()
+    limit = len(politeness_terms) if think_neighbor_limit is None else min(
+        think_neighbor_limit,
+        len(politeness_terms),
+    )
+    return sum(politeness_terms[:limit]) / limit
+
+
+def _normalize_legacy_politeness(politeness_sum: float, *, horizon_steps: int) -> float:
+    if horizon_steps <= 1:
+        return 0.0
+    return politeness_sum / (horizon_steps - 1)
+
+
+def _legacy_reward_denominator(*, horizon_steps: int, goal_reach_step: int | None) -> float:
+    if goal_reach_step is not None:
+        return float(max(1, goal_reach_step))
+    return float(max(1, horizon_steps - 1))
+
+
+def _reached_goal_position(position: Vector2, goal_position: Vector2) -> bool:
+    return (position - goal_position).norm() < 0.15
 
 
 def _build_simulated_snapshot(
