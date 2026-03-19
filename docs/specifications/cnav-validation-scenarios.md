@@ -18,7 +18,8 @@
 
 - 目的: `goal に近い neighbor のみを見る` 分岐と queue での譲りを確認する
 - 構成: 2 agent, 同一 goal
-- 停止条件: `steps = 12`
+- 停止条件: `steps = 1000`
+  - 実際の短い trace 比較は `--steps` override で切り詰める
 - 主な観測指標:
   - ranked neighbors
   - chosen action
@@ -29,7 +30,8 @@
 
 - 目的: 2 agent の対向で action 選択と ORCA 投影後速度を見る
 - 構成: 2 agent, 反対 goal
-- 停止条件: `steps = 16`
+- 停止条件: `steps = 1000`
+  - 実際の短い trace 比較は `--steps` override で切り詰める
 - 主な観測指標:
   - chosen action
   - ORCA 後 velocity
@@ -39,7 +41,8 @@
 
 - 目的: 4-way crossing で ranking と politeness の効き方を確認する
 - 構成: 4 agent, 中央交差
-- 停止条件: `steps = 18`
+- 停止条件: `steps = 1000`
+  - 実際の短い trace 比較は `--steps` override で切り詰める
 - 主な観測指標:
   - ranked neighbors
   - action ごとの reward
@@ -49,7 +52,8 @@
 
 - 目的: obstacle 制約と CNav coordination の相互作用を見る
 - 構成: 2 agent, 中央障害物 1 つ
-- 停止条件: `steps = 20`
+- 停止条件: `steps = 1000`
+  - 実際の短い trace 比較は `--steps` override で切り詰める
 - 主な観測指標:
   - intended velocity
   - ORCA obstacle constraint 後 velocity

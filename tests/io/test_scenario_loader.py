@@ -150,11 +150,11 @@ def test_load_scenario_rejects_goal_stop_without_agent_goals(tmp_path) -> None:
 @pytest.mark.parametrize(
     ("relative_path", "expected_agents", "expected_obstacle_vertices", "expected_steps"),
     [
-        ("scenarios/cnav_queue_validation.yaml", 2, 0, 12),
-        ("scenarios/cnav_head_on_validation.yaml", 2, 0, 16),
-        ("scenarios/cnav_crossing_validation.yaml", 4, 0, 18),
-        ("scenarios/cnav_obstacle_validation.yaml", 2, 4, 20),
-        ("scenarios/cnav_forpaper_direct_port.yaml", 12, 144, 80),
+        ("scenarios/cnav_queue_validation.yaml", 2, 0, 1000),
+        ("scenarios/cnav_head_on_validation.yaml", 2, 0, 1000),
+        ("scenarios/cnav_crossing_validation.yaml", 4, 0, 1000),
+        ("scenarios/cnav_obstacle_validation.yaml", 2, 4, 1000),
+        ("scenarios/cnav_forpaper_direct_port.yaml", 12, 144, 1000),
         ("scenarios/cnav_crowd_forpaper_direct_port.yaml", 50, 8, 0),
     ],
 )

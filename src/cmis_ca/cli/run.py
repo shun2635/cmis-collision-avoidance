@@ -10,7 +10,7 @@ from cmis_ca.core.geometry import Vector2
 from cmis_ca.core.simulation import Simulator
 from cmis_ca.core.world import Scenario
 
-DEFAULT_DEMO_STEPS = 100
+DEFAULT_DEMO_STEPS = 1000
 DEFAULT_DEMO_PERTURBATION_SCALE = 1.0e-3
 GOLDEN_ANGLE = 2.39996322972865332
 

@@ -3,7 +3,7 @@
 # Limitation: legacy reward pipeline and 17-action set remain algorithm-side gaps.
 name: cnav-forpaper-direct-port
 time_step: 1.0
-steps: 80
+steps: 1000
 stop_when_all_agents_reach_goals: false
 navigation_grid:
   cell_size: 50.0

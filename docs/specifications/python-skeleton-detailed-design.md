@@ -162,7 +162,7 @@
 | 引数 | 型 | 既定値 | 現在の仕様 |
 | --- | --- | --- | --- |
 | `--algorithm` | `str` | `orca` | `algorithms/registry.py` の登録名 (`orca`, `cnav`) から選択 |
-| `--steps` | `int \| None` | `None` | 指定時のみ固定 step 数を上書き。未指定時は内蔵デモは `100`、外部シナリオは file 記述の step / goal-stop 条件を使う |
+| `--steps` | `int \| None` | `None` | 指定時のみ固定 step 数を上書き。未指定時は内蔵デモは `1000`、外部シナリオは file 記述の step / goal-stop 条件を使う |
 | `--scenario` | `str \| None` | `None` | YAML / JSON シナリオを読み込む |
 | `--fps` | `float` | `30.0` | `visualize` でのみ使用。viewer の再生速度 |
 
@@ -361,7 +361,7 @@ poetry run pytest
 - goal: antipodal point
 - preferred speed: `1.0`
 - `time_step`: `0.5`
-- 既定 step 数: `100`
+- 既定 step 数: `1000`
 - goal 追従時にごく小さい deterministic perturbation を加えて、8 体の完全対称停滞を避ける
 
 このため、`run` と `visualize` の既定挙動でも複数 agent の相互作用を確認できる。

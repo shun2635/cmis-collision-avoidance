@@ -2,7 +2,7 @@
 # Origin: simplified from legacy head-on style checks for issue 0029.
 name: cnav-head-on-validation
 time_step: 0.1
-steps: 16
+steps: 1000
 agents:
   - name: left_to_right
     profile:

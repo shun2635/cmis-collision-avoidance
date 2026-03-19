@@ -2,7 +2,7 @@
 # Origin: simplified from the crossing-style layouts referenced by the MyStyle baselines.
 name: cnav-crossing-validation
 time_step: 0.1
-steps: 18
+steps: 1000
 agents:
   - name: south_to_north
     profile:

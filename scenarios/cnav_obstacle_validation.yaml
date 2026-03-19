@@ -2,7 +2,7 @@
 # Origin: simplified from the obstacle-heavy MyStyle paper-facing baselines.
 name: cnav-obstacle-validation
 time_step: 0.1
-steps: 20
+steps: 1000
 agents:
   - name: lower_lane
     profile:

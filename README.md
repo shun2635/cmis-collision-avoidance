@@ -113,7 +113,7 @@ poetry run python scripts/compare_cnav_trace_jsonl.py /tmp/cnav-python-forpaper.
 ```
 
 `--scenario` を省略した場合の既定は、軽量な built-in `circle-demo` です。  
-既定 step 数は `100` です。
+既定 step 数は `1000` です。
 この demo は 8 体の完全対称配置で中央停滞しないよう、goal 追従にごく小さい deterministic perturbation を加えています。
 
 最小スケルトンの実行確認:

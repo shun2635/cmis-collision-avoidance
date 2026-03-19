@@ -24,7 +24,7 @@ def test_build_demo_scenario_is_circle_setup() -> None:
 def test_build_demo_scenario_uses_longer_default_steps() -> None:
     scenario = build_demo_scenario()
 
-    assert scenario.steps == 100
+    assert scenario.steps == 1000
 
 
 def test_build_demo_scenario_breaks_symmetry_and_crosses_center() -> None:

@@ -2,7 +2,7 @@
 # Origin: simplified from the queue-like coordination cases tracked in issue 0029.
 name: cnav-queue-validation
 time_step: 0.1
-steps: 12
+steps: 1000
 agents:
   - name: rear
     profile:

@@ -24,7 +24,7 @@
 - 構成: 12 agent, 9x9 cell field 由来の 36 obstacle cell
 - 固定条件:
   - `time_step: 1.0`
-  - `steps: 80`
+  - `steps: 1000`
   - `stop_when_all_agents_reach_goals: false`
   - agent profile は `neighbor_dist=100`, `max_neighbors=9`, `time_horizon=10`, `radius=10`, `max_speed=1.5`
 - fidelity:
