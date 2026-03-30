@@ -9,6 +9,7 @@ __pycache__/
 .ruff_cache/
 .venv/
 *.egg-info/
+artifacts/
 
 # local artifacts under the legacy CNav reference drop
 external/CNav_MyStyle/build/

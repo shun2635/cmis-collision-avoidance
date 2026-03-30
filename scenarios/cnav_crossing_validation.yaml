@@ -1,67 +1,95 @@
 # Validation target: ranking and politeness under symmetric four-way crossing.
 # Origin: simplified from the central obstacle blocks in intersectionLoop.cpp.
 name: cnav-crossing-validation
-time_step: 0.1
+time_step: 1.0
 steps: 1000
+stop_when_all_agents_reach_goals: true
+algorithm_overrides:
+  cnav:
+    coordination_factor: 0.8
+    simulation_horizon_steps: 10
+    action_update_interval: 0.1
+    update_every_step: true
+    minimum_action_update_step: 2
+    apply_selected_action_next_step: false
+    top_k_constrained_neighbors: 4
+    action_speed: 5.0
+    beta_degrees: 45.0
 agents:
   - name: south_to_north
     profile:
-      radius: 0.4
-      max_speed: 1.0
-    initial_position: [0.0, -3.0]
+      radius: 10.0
+      max_speed: 5.0
+      neighbor_dist: 100.0
+      max_neighbors: 4
+      time_horizon: 0.3
+      time_horizon_obst: 0.3
+    initial_position: [0.0, -75.0]
     initial_velocity: [0.0, 0.0]
-    preferred_velocity: [0.0, 1.0]
-    goal_position: [0.0, 3.0]
-    preferred_speed: 1.0
+    preferred_velocity: [0.0, 5.0]
+    goal_position: [0.0, 75.0]
+    preferred_speed: 5.0
   - name: north_to_south
     profile:
-      radius: 0.4
-      max_speed: 1.0
-    initial_position: [0.0, 3.0]
+      radius: 10.0
+      max_speed: 5.0
+      neighbor_dist: 100.0
+      max_neighbors: 4
+      time_horizon: 0.3
+      time_horizon_obst: 0.3
+    initial_position: [0.0, 75.0]
     initial_velocity: [0.0, 0.0]
-    preferred_velocity: [0.0, -1.0]
-    goal_position: [0.0, -3.0]
-    preferred_speed: 1.0
+    preferred_velocity: [0.0, -5.0]
+    goal_position: [0.0, -75.0]
+    preferred_speed: 5.0
   - name: west_to_east
     profile:
-      radius: 0.4
-      max_speed: 1.0
-    initial_position: [-3.0, 0.0]
+      radius: 10.0
+      max_speed: 5.0
+      neighbor_dist: 100.0
+      max_neighbors: 4
+      time_horizon: 0.3
+      time_horizon_obst: 0.3
+    initial_position: [-75.0, 0.0]
     initial_velocity: [0.0, 0.0]
-    preferred_velocity: [1.0, 0.0]
-    goal_position: [3.0, 0.0]
-    preferred_speed: 1.0
+    preferred_velocity: [5.0, 0.0]
+    goal_position: [75.0, 0.0]
+    preferred_speed: 5.0
   - name: east_to_west
     profile:
-      radius: 0.4
-      max_speed: 1.0
-    initial_position: [3.0, 0.0]
+      radius: 10.0
+      max_speed: 5.0
+      neighbor_dist: 100.0
+      max_neighbors: 4
+      time_horizon: 0.3
+      time_horizon_obst: 0.3
+    initial_position: [75.0, 0.0]
     initial_velocity: [0.0, 0.0]
-    preferred_velocity: [-1.0, 0.0]
-    goal_position: [-3.0, 0.0]
-    preferred_speed: 1.0
+    preferred_velocity: [-5.0, 0.0]
+    goal_position: [-75.0, 0.0]
+    preferred_speed: 5.0
 obstacles:
   - closed: true
     vertices:
-      - [-6.0, 6.0]
-      - [-6.0, 0.8]
-      - [-0.8, 0.8]
-      - [-0.8, 6.0]
+      - [-150.0, 150.0]
+      - [-150.0, 20.0]
+      - [-20.0, 20.0]
+      - [-20.0, 150.0]
   - closed: true
     vertices:
-      - [0.8, 6.0]
-      - [0.8, 0.8]
-      - [6.0, 0.8]
-      - [6.0, 6.0]
+      - [20.0, 150.0]
+      - [20.0, 20.0]
+      - [150.0, 20.0]
+      - [150.0, 150.0]
   - closed: true
     vertices:
-      - [-6.0, -0.8]
-      - [-6.0, -6.0]
-      - [-0.8, -6.0]
-      - [-0.8, -0.8]
+      - [-150.0, -20.0]
+      - [-150.0, -150.0]
+      - [-20.0, -150.0]
+      - [-20.0, -20.0]
   - closed: true
     vertices:
-      - [0.8, -0.8]
-      - [0.8, -6.0]
-      - [6.0, -6.0]
-      - [6.0, -0.8]
+      - [20.0, -20.0]
+      - [20.0, -150.0]
+      - [150.0, -150.0]
+      - [150.0, -20.0]

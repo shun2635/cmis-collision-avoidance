@@ -131,6 +131,7 @@ def test_cli_visualize_accepts_external_scenario(monkeypatch) -> None:
         *,
         steps,
         fps,
+        save_animation,
         cnav_profile,
         cnav_mystyle_driver,
     ):
@@ -138,6 +139,7 @@ def test_cli_visualize_accepts_external_scenario(monkeypatch) -> None:
         called["scenario_path"] = scenario_path
         called["steps"] = steps
         called["fps"] = fps
+        called["save_animation"] = save_animation
         called["cnav_profile"] = cnav_profile
         called["cnav_mystyle_driver"] = cnav_mystyle_driver
 
@@ -163,6 +165,54 @@ def test_cli_visualize_accepts_external_scenario(monkeypatch) -> None:
         "scenario_path": "scenarios/head_on.yaml",
         "steps": 3,
         "fps": 24.0,
+        "save_animation": None,
+        "cnav_profile": None,
+        "cnav_mystyle_driver": None,
+    }
+
+
+def test_cli_visualize_accepts_save_animation(monkeypatch) -> None:
+    called = {}
+
+    def fake_run_visualization(
+        algorithm_name,
+        scenario_path,
+        *,
+        steps,
+        fps,
+        save_animation,
+        cnav_profile,
+        cnav_mystyle_driver,
+    ):
+        called["algorithm_name"] = algorithm_name
+        called["scenario_path"] = scenario_path
+        called["steps"] = steps
+        called["fps"] = fps
+        called["save_animation"] = save_animation
+        called["cnav_profile"] = cnav_profile
+        called["cnav_mystyle_driver"] = cnav_mystyle_driver
+
+    monkeypatch.setattr(cli_main, "run_visualization", fake_run_visualization)
+
+    exit_code = main(
+        [
+            "visualize",
+            "--algorithm",
+            "cnav",
+            "--scenario",
+            "scenarios/cnav_queue_validation.yaml",
+            "--save-animation",
+            "artifacts/cnav_queue_validation.mp4",
+        ]
+    )
+
+    assert exit_code == 0
+    assert called == {
+        "algorithm_name": "cnav",
+        "scenario_path": "scenarios/cnav_queue_validation.yaml",
+        "steps": None,
+        "fps": 30.0,
+        "save_animation": "artifacts/cnav_queue_validation.mp4",
         "cnav_profile": None,
         "cnav_mystyle_driver": None,
     }

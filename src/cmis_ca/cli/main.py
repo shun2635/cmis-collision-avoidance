@@ -99,6 +99,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=30.0,
         help="Playback speed used by the viewer.",
     )
+    visualize_parser.add_argument(
+        "--save-animation",
+        default=None,
+        help="Save the generated animation to .mp4 or .gif.",
+    )
 
     return parser
 
@@ -127,6 +132,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             args.scenario,
             steps=args.steps,
             fps=args.fps,
+            save_animation=args.save_animation,
             cnav_profile=args.cnav_profile,
             cnav_mystyle_driver=args.cnav_mystyle_driver,
         )

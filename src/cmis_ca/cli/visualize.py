@@ -9,7 +9,10 @@ from cmis_ca.cli.run import (
 )
 from cmis_ca.core.simulation import Simulator
 from cmis_ca.core.world import Scenario
-from cmis_ca.visualization.pyqtgraph_viewer import launch_pyqtgraph_viewer
+from cmis_ca.visualization.pyqtgraph_viewer import (
+    launch_pyqtgraph_viewer,
+    save_trace_animation,
+)
 from cmis_ca.visualization.trace_builder import build_visualization_trace
 
 
@@ -19,6 +22,7 @@ def run_visualization(
     *,
     steps: int | None = None,
     fps: float = 30.0,
+    save_animation: str | None = None,
     cnav_profile: str | None = None,
     cnav_mystyle_driver: str | None = None,
 ):
@@ -43,6 +47,8 @@ def run_visualization(
     )
     result = simulator.run()
     trace = build_visualization_trace(scenario, result)
+    if save_animation is not None:
+        save_trace_animation(trace, save_animation, playback_fps=fps)
     launch_pyqtgraph_viewer(trace, playback_fps=fps)
     return trace
 
